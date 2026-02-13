@@ -20,12 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install json-schema-for-humans
-        run: pip install json-schema-for-humans
+      - uses: astral-sh/setup-uv@v7
 
       - name: Generate HTML docs for each schema
         run: |
@@ -33,59 +28,11 @@ jobs:
             dir=$(dirname "$schema")
             base=$(basename "$schema" .schema.json)
             echo "Generating docs for $schema -> ${dir}/${base}.html"
-            generate-schema-doc --config template_name=js "$schema" "${dir}/${base}.html"
+            uv run generate-schema-doc --config template_name=js "$schema" "${dir}/${base}.html"
           done
 
       - name: Generate index page
-        run: |
-          cat > index.html << 'HTMLEOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <title>SYNQ JSON Schemas</title>
-            <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; }
-              h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
-              .schema-list { list-style: none; padding: 0; }
-              .schema-list li { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-              .schema-list a { text-decoration: none; color: #0366d6; font-weight: 500; }
-              .schema-list a:hover { text-decoration: underline; }
-              .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
-              .badge-draft { background: #fff3cd; color: #856404; }
-              .badge-stable { background: #d4edda; color: #155724; }
-              .schema-desc { color: #666; font-size: 14px; margin-top: 4px; }
-            </style>
-          </head>
-          <body>
-            <h1>SYNQ JSON Schemas</h1>
-            <p>Public JSON Schema definitions for SYNQ tools and services.</p>
-          HTMLEOF
-
-          echo "<h2>Available Schemas</h2>" >> index.html
-          echo "<ul class='schema-list'>" >> index.html
-
-          for schema in $(find . -name '*.schema.json' -not -path './.github/*' | sort); do
-            rel_path="${schema#./}"
-            base=$(basename "$schema" .schema.json)
-            dir=$(dirname "$rel_path")
-            title=$(python3 -c "import json; print(json.load(open('$schema')).get('title', '$base'))")
-            status=$(python3 -c "import json; print(json.load(open('$schema')).get('x-status', 'stable'))")
-            desc=$(python3 -c "import json; print(json.load(open('$schema')).get('description', ''))")
-            badge_class="badge-stable"
-            if [ "$status" = "draft" ]; then badge_class="badge-draft"; fi
-
-            echo "<li>" >> index.html
-            echo "  <a href=\"${dir}/${base}.html\">${title}</a> <span class=\"badge ${badge_class}\">${status}</span>" >> index.html
-            echo "  <br><a href=\"${rel_path}\" style=\"font-size:13px;color:#666;\">${rel_path}</a>" >> index.html
-            if [ -n "$desc" ]; then
-              echo "  <div class=\"schema-desc\">${desc}</div>" >> index.html
-            fi
-            echo "</li>" >> index.html
-          done
-
-          echo "</ul>" >> index.html
-          echo "</body></html>" >> index.html
+        run: uv run scripts/generate_index.py
 
       - uses: actions/upload-pages-artifact@v3
         with:
