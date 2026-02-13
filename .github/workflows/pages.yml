@@ -22,13 +22,21 @@ jobs:
 
       - uses: astral-sh/setup-uv@v7
 
+      - name: Prepare custom template
+        run: |
+          # Copy default JS template files, then overlay our custom base.html
+          js_templates=$(uv run python -c "import json_schema_for_humans; from pathlib import Path; print(Path(json_schema_for_humans.__file__).parent / 'templates' / 'js')")
+          cp templates/schema/base.html /tmp/base_override.html
+          cp "$js_templates"/* templates/schema/
+          cp /tmp/base_override.html templates/schema/base.html
+
       - name: Generate HTML docs for each schema
         run: |
           for schema in $(find . -name '*.schema.json' -not -path './.github/*'); do
             dir=$(dirname "$schema")
             base=$(basename "$schema" .schema.json)
             echo "Generating docs for $schema -> ${dir}/${base}.html"
-            uv run generate-schema-doc --config template_name=js "$schema" "${dir}/${base}.html"
+            uv run generate-schema-doc --config template_name=js --config with_footer=false --config custom_template_path=templates/schema/base.html "$schema" "${dir}/${base}.html"
           done
 
       - name: Generate index page
