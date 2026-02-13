@@ -12,18 +12,18 @@ TEMPLATE = Template("""\
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SYNQ JSON Schemas</title>
+  <title>SYNQ - JSON Schemas</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
-      color: #0f172a;
+      color: #261F3B;
       background: #f8fafc;
       min-height: 100vh;
     }
     .header {
-      background: #0f172a;
+      background: #261F3B;
       color: #fff;
       padding: 3rem 1.5rem 2.5rem;
     }
@@ -31,6 +31,7 @@ TEMPLATE = Template("""\
       max-width: 800px;
       margin: 0 auto;
     }
+    .logo { margin-bottom: 1.25rem; }
     .header h1 {
       font-size: 1.75rem;
       font-weight: 700;
@@ -38,11 +39,11 @@ TEMPLATE = Template("""\
     }
     .header p {
       margin-top: 0.5rem;
-      color: #94a3b8;
+      color: #a89bbe;
       font-size: 1rem;
     }
     .header a {
-      color: #e2e8f0;
+      color: #d4cbea;
       text-decoration: underline;
       text-underline-offset: 2px;
     }
@@ -70,7 +71,7 @@ TEMPLATE = Template("""\
     }
     .schema-card:hover {
       border-color: #94a3b8;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 1px 3px rgba(38, 31, 59, 0.06);
     }
     .schema-card-header {
       display: flex;
@@ -81,7 +82,7 @@ TEMPLATE = Template("""\
     .schema-card-title {
       font-size: 1rem;
       font-weight: 600;
-      color: #0f172a;
+      color: #261F3B;
       text-decoration: none;
     }
     .schema-card-title:hover { text-decoration: underline; }
@@ -104,7 +105,7 @@ TEMPLATE = Template("""\
       color: #64748b;
       text-decoration: none;
     }
-    .schema-path:hover { color: #0f172a; }
+    .schema-path:hover { color: #261F3B; }
     .schema-desc {
       margin-top: 0.375rem;
       font-size: 0.875rem;
@@ -117,8 +118,10 @@ TEMPLATE = Template("""\
 <body>
   <div class="header">
     <div class="header-inner">
-      <h1>SYNQ JSON Schemas</h1>
-      <p>Public JSON Schema definitions for SYNQ tools and services. See <a href="https://docs.synq.io/">docs.synq.io</a> for full documentation.</p>
+      <div class="logo"><img src="synq-logo.svg" width="92" height="24" alt="SYNQ"></div>
+      <h1>JSON Schemas</h1>
+      <p>Public JSON Schema definitions for SYNQ tools and services.</p>
+      <p>See <a href="https://docs.synq.io/">docs.synq.io</a> for full documentation.</p>
     </div>
   </div>
   <div class="content">
