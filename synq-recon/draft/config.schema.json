@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.synq.io/synq-recon/draft/config.schema.json",
+  "title": "SYNQ Recon Configuration",
+  "x-status": "draft",
+  "description": "Configuration file format for synq-recon database reconciliation tool",
+  "type": "object",
+  "required": ["connections", "reconciliations"],
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the configuration suite"
+    },
+    "connections": {
+      "type": "object",
+      "description": "Database connection definitions",
+      "additionalProperties": { "$ref": "#/$defs/connection" },
+      "minProperties": 1
+    },
+    "reconciliations": {
+      "type": "object",
+      "description": "Reconciliation scenario definitions",
+      "additionalProperties": { "$ref": "#/$defs/reconciliation" },
+      "minProperties": 1
+    }
+  },
+  "$defs": {
+    "connection": {
+      "type": "object",
+      "description": "A database connection. Exactly one database type key must be present.",
+      "properties": {
+        "name": { "type": "string", "description": "Optional display name" },
+        "parallelism": { "type": "integer", "minimum": 1, "default": 8, "description": "Max parallel queries" },
+        "disabled": { "type": "boolean", "default": false },
+        "postgres": { "$ref": "#/$defs/postgres_config" },
+        "snowflake": { "$ref": "#/$defs/snowflake_config" },
+        "bigquery": { "$ref": "#/$defs/bigquery_config" },
+        "mysql": { "$ref": "#/$defs/mysql_config" },
+        "clickhouse": { "$ref": "#/$defs/clickhouse_config" },
+        "duckdb": { "$ref": "#/$defs/duckdb_config" },
+        "databricks": { "$ref": "#/$defs/databricks_config" },
+        "redshift": { "$ref": "#/$defs/redshift_config" },
+        "trino": { "$ref": "#/$defs/trino_config" }
+      }
+    },
+    "postgres_config": {
+      "type": "object",
+      "required": ["host", "database", "username"],
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "default": 5432 },
+        "database": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "allow_insecure": { "type": "boolean", "default": false }
+      }
+    },
+    "snowflake_config": {
+      "type": "object",
+      "required": ["account", "username"],
+      "properties": {
+        "account": { "type": "string" },
+        "warehouse": { "type": "string" },
+        "role": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "databases": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "bigquery_config": {
+      "type": "object",
+      "properties": {
+        "project_id": { "type": "string" },
+        "credentials": { "type": "string", "description": "JSON credentials content" },
+        "credentials_file": { "type": "string", "description": "Path to credentials file" }
+      }
+    },
+    "mysql_config": {
+      "type": "object",
+      "required": ["host", "database", "username"],
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "default": 3306 },
+        "database": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "clickhouse_config": {
+      "type": "object",
+      "required": ["host"],
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "default": 9000 },
+        "database": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "secure": { "type": "boolean", "default": false }
+      }
+    },
+    "duckdb_config": {
+      "type": "object",
+      "required": ["database"],
+      "properties": {
+        "database": {
+          "type": "string",
+          "description": "File path, ':memory:' for in-memory, or MotherDuck account name"
+        },
+        "motherduck_token": {
+          "type": "string",
+          "description": "MotherDuck authentication token (required for cloud MotherDuck)"
+        }
+      }
+    },
+    "databricks_config": {
+      "type": "object",
+      "required": ["host", "http_path"],
+      "properties": {
+        "host": { "type": "string" },
+        "http_path": { "type": "string" },
+        "token": { "type": "string" },
+        "catalog": { "type": "string" },
+        "schema": { "type": "string" }
+      }
+    },
+    "redshift_config": {
+      "type": "object",
+      "required": ["host", "database", "username"],
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "default": 5439 },
+        "database": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "trino_config": {
+      "type": "object",
+      "required": ["host"],
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "default": 8080 },
+        "catalog": { "type": "string" },
+        "schema": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "required": ["source", "target", "key_column"],
+      "properties": {
+        "description": { "type": "string" },
+        "source": { "$ref": "#/$defs/dataset" },
+        "target": { "$ref": "#/$defs/dataset" },
+        "key_column": {
+          "type": "string",
+          "description": "Column used for bisection split points and aggregate grouping"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["row_count", "full", "aggregate"],
+          "default": "full",
+          "description": "Reconciliation mode"
+        },
+        "hash_algorithm": {
+          "type": "string",
+          "enum": ["auto", "md5", "farm_fingerprint", "xxhash64"],
+          "default": "auto",
+          "description": "Hash algorithm for row checksums"
+        },
+        "column_mapping": {
+          "oneOf": [
+            {
+              "type": "object",
+              "description": "Map source column names to target column names (object format)",
+              "additionalProperties": { "type": "string" }
+            },
+            {
+              "type": "array",
+              "description": "Map source column names to target column names (array format)",
+              "items": { "$ref": "#/$defs/column_mapping_entry" }
+            }
+          ],
+          "description": "Column name mapping between source and target datasets"
+        },
+        "case_insensitive": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically match columns case-insensitively (e.g., user_id matches USER_ID)"
+        },
+        "bisection": { "$ref": "#/$defs/bisection_config" },
+        "reporting": { "$ref": "#/$defs/reporting_config" },
+        "aggregate": { "$ref": "#/$defs/aggregate_config" }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "required": ["connection", "query"],
+      "properties": {
+        "connection": {
+          "type": "string",
+          "description": "Connection name (must exist in connections map)"
+        },
+        "query": {
+          "type": "string",
+          "description": "Base SQL query for this dataset"
+        }
+      }
+    },
+    "bisection_config": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "factor": {
+          "type": "integer",
+          "minimum": 2,
+          "default": 32,
+          "description": "Number of segments to split into per bisection level"
+        },
+        "threshold": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 16384,
+          "description": "Stop drilling when segment row count falls below this"
+        }
+      }
+    },
+    "reporting_config": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["count_only", "with_keys", "detailed"],
+          "default": "count_only"
+        },
+        "sample_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of sample rows to report"
+        },
+        "consent_acknowledged": {
+          "type": "boolean",
+          "default": false,
+          "description": "Required for detailed reporting level"
+        }
+      }
+    },
+    "aggregate_config": {
+      "type": "object",
+      "required": ["measures"],
+      "properties": {
+        "measures": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/measure_config" }
+        },
+        "thresholds": { "$ref": "#/$defs/threshold_config" }
+      }
+    },
+    "measure_config": {
+      "type": "object",
+      "required": ["column", "function"],
+      "properties": {
+        "column": { "type": "string" },
+        "function": {
+          "type": "string",
+          "enum": ["SUM", "COUNT", "AVG", "MIN", "MAX"]
+        }
+      }
+    },
+    "column_mapping_entry": {
+      "type": "object",
+      "required": ["source", "target"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source column name"
+        },
+        "target": {
+          "type": "string",
+          "description": "Target column name"
+        }
+      }
+    },
+    "threshold_config": {
+      "type": "object",
+      "properties": {
+        "absolute": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum absolute difference per measure"
+        },
+        "percentage": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum percentage difference (0.1 = 10%)"
+        }
+      }
+    }
+  }
+}

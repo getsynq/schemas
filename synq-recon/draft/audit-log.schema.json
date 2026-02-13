@@ -1,0 +1,539 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.synq.io/synq-recon/draft/audit-log.schema.json",
+  "title": "SYNQ Recon Audit Log",
+  "x-status": "draft",
+  "description": "Audit log capturing all operations performed during a synq-recon reconciliation run",
+  "type": "object",
+  "required": ["version", "started_at", "completed_at", "duration_ms", "reconciliations"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1",
+      "description": "Schema version"
+    },
+    "tool_version": {
+      "type": "string",
+      "description": "synq-recon binary version"
+    },
+    "config_file": {
+      "type": "string",
+      "description": "Path to the configuration file used"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the configuration suite"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp when the run started"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp when the run completed"
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total run duration in milliseconds"
+    },
+    "reconciliations": {
+      "type": "array",
+      "description": "Audit records for each reconciliation executed",
+      "items": { "$ref": "#/$defs/reconciliation_audit" }
+    }
+  },
+  "$defs": {
+    "reconciliation_audit": {
+      "type": "object",
+      "required": ["name", "mode", "source", "target", "key_column", "stages", "overall_match"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Reconciliation name from config"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["row_count", "full", "aggregate"],
+          "description": "Reconciliation mode"
+        },
+        "config": {
+          "$ref": "#/$defs/reconciliation_config",
+          "description": "Full reconciliation configuration after defaults are applied"
+        },
+        "raw_config": {
+          "type": "object",
+          "description": "Original reconciliation configuration as written in the YAML file, before defaults are applied"
+        },
+        "source": { "$ref": "#/$defs/dataset_info" },
+        "target": { "$ref": "#/$defs/dataset_info" },
+        "key_column": {
+          "type": "string",
+          "description": "Column used for bisection key ranges"
+        },
+        "hash_algorithm": {
+          "type": "string",
+          "description": "Hash algorithm negotiated or configured"
+        },
+        "columns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Columns extracted from source query"
+        },
+        "normalization": {
+          "type": "object",
+          "properties": {
+            "source_columns": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Normalized column expressions for source"
+            },
+            "target_columns": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Normalized column expressions for target"
+            }
+          }
+        },
+        "column_mapping": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Column name mapping from source to target (e.g., {user_id: USER_ID})"
+        },
+        "stages": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stage_audit" },
+          "description": "Ordered list of stages executed"
+        },
+        "overall_match": {
+          "type": "boolean",
+          "description": "Whether the reconciliation passed overall"
+        },
+        "error": {
+          "type": ["string", "null"],
+          "description": "Error message if reconciliation failed"
+        }
+      }
+    },
+    "reconciliation_config": {
+      "type": "object",
+      "description": "Full reconciliation configuration snapshot from the YAML config file",
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the reconciliation"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "connection": { "type": "string" },
+            "query": { "type": "string" },
+            "as_of": { "type": "string", "description": "Time-travel timestamp for snapshot comparison" }
+          }
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "connection": { "type": "string" },
+            "query": { "type": "string" },
+            "as_of": { "type": "string", "description": "Time-travel timestamp for snapshot comparison" }
+          }
+        },
+        "key_column": { "type": "string" },
+        "mode": { "type": "string" },
+        "hash_algorithm": { "type": "string" },
+        "column_mapping": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "case_insensitive": { "type": "boolean" },
+        "bisection": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "factor": { "type": "integer" },
+            "threshold": { "type": "integer" }
+          }
+        },
+        "reporting": {
+          "type": "object",
+          "properties": {
+            "level": { "type": "string" },
+            "sample_limit": { "type": "integer" },
+            "consent_acknowledged": { "type": "boolean" }
+          }
+        },
+        "aggregate": {
+          "type": "object",
+          "properties": {
+            "measures": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "column": { "type": "string" },
+                  "function": { "type": "string" }
+                }
+              }
+            },
+            "thresholds": {
+              "type": "object",
+              "properties": {
+                "absolute": { "type": "number" },
+                "percentage": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "dataset_info": {
+      "type": "object",
+      "required": ["connection", "query"],
+      "properties": {
+        "connection": {
+          "type": "string",
+          "description": "Connection name from config"
+        },
+        "dialect": {
+          "type": "string",
+          "description": "Database dialect (postgres, snowflake, bigquery, etc.)"
+        },
+        "query": {
+          "type": "string",
+          "description": "Base SQL query for this dataset"
+        }
+      }
+    },
+    "stage_audit": {
+      "type": "object",
+      "required": ["stage", "started_at", "completed_at", "duration_ms", "queries"],
+      "properties": {
+        "stage": {
+          "type": "string",
+          "enum": ["quick_check", "bisection_drill", "aggregate_check"],
+          "description": "Stage type"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "config": {
+          "type": "object",
+          "description": "Stage-specific configuration (e.g., bisection factor/threshold)",
+          "properties": {
+            "factor": { "type": "integer" },
+            "threshold": { "type": "integer" },
+            "max_depth": { "type": "integer" }
+          }
+        },
+        "queries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/query_record" },
+          "description": "All queries executed during this stage"
+        },
+        "segment_tree": {
+          "$ref": "#/$defs/segment_audit_node",
+          "description": "Segment tree for bisection drill-down stages"
+        },
+        "result": {
+          "$ref": "#/$defs/stage_result",
+          "description": "Stage result summary"
+        }
+      }
+    },
+    "query_record": {
+      "type": "object",
+      "required": ["id", "role", "connection", "sql", "started_at", "duration_ms"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique query identifier for cross-referencing"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["source", "target"],
+          "description": "Whether this query ran against source or target"
+        },
+        "connection": {
+          "type": "string",
+          "description": "Connection name used"
+        },
+        "dialect": {
+          "type": "string",
+          "description": "Database dialect"
+        },
+        "sql": {
+          "type": "string",
+          "description": "The SQL query executed"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rows_returned": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of rows returned by the query"
+        },
+        "error": {
+          "type": ["string", "null"],
+          "description": "Error message if query failed"
+        }
+      }
+    },
+    "segment_audit_node": {
+      "type": "object",
+      "required": ["segment", "match", "is_leaf"],
+      "properties": {
+        "segment": {
+          "type": "object",
+          "properties": {
+            "min_key": { "description": "Inclusive lower bound (null = unbounded)" },
+            "max_key": { "description": "Exclusive upper bound (null = unbounded)" },
+            "depth": { "type": "integer", "minimum": 0 },
+            "index": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "source_count": { "type": "integer" },
+        "target_count": { "type": "integer" },
+        "source_checksum": { "type": "integer" },
+        "target_checksum": { "type": "integer" },
+        "match": { "type": "boolean" },
+        "is_leaf": { "type": "boolean" },
+        "termination_reason": {
+          "type": "string",
+          "enum": ["threshold_reached", "max_depth_reached", "empty_segment", "cannot_split", "matched", "error"],
+          "description": "Why the segment became a leaf node"
+        },
+        "mismatch_rows_in_subtree": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total source rows in mismatched leaves beneath this node"
+        },
+        "total_rows_in_subtree": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total source rows across all leaves beneath this node"
+        },
+        "query_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of queries that produced this segment's data"
+        },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/segment_audit_node" }
+        },
+        "row_mismatches": {
+          "type": "array",
+          "description": "Per-row hash comparison results at leaf segments",
+          "items": { "$ref": "#/$defs/row_mismatch_audit" }
+        }
+      }
+    },
+    "row_mismatch_audit": {
+      "type": "object",
+      "required": ["pk", "type"],
+      "description": "A single row-level mismatch identified by per-row hash comparison",
+      "properties": {
+        "pk": {
+          "description": "Primary key value of the mismatched row"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["missing_in_target", "missing_in_source", "modified"],
+          "description": "Type of row mismatch"
+        },
+        "source_row_hash": {
+          "type": "integer",
+          "description": "Row hash from source (absent for missing_in_source)"
+        },
+        "target_row_hash": {
+          "type": "integer",
+          "description": "Row hash from target (absent for missing_in_target)"
+        },
+        "source_values": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Actual column values from source row (only present at 'detailed' reporting level)"
+        },
+        "target_values": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Actual column values from target row (only present at 'detailed' reporting level)"
+        }
+      }
+    },
+    "investigation_query": {
+      "type": "object",
+      "required": ["min_key", "max_key", "leaves_covered", "source_query", "target_query"],
+      "description": "A merged investigation query covering one or more adjacent mismatch leaf segments",
+      "properties": {
+        "min_key": {
+          "description": "Inclusive lower bound of the merged key range (null = unbounded)"
+        },
+        "max_key": {
+          "description": "Exclusive upper bound of the merged key range (null = unbounded)"
+        },
+        "leaves_covered": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of mismatch leaf segments covered by this query"
+        },
+        "source_query": {
+          "type": "string",
+          "description": "SQL query to retrieve source rows in the merged key range"
+        },
+        "target_query": {
+          "type": "string",
+          "description": "SQL query to retrieve target rows in the merged key range"
+        }
+      }
+    },
+    "depth_stats": {
+      "type": "object",
+      "description": "Per-depth-level statistics for the bisection tree",
+      "properties": {
+        "total_rows": { "type": "integer", "description": "Total source rows at this depth level" },
+        "mismatched_rows": { "type": "integer", "description": "Source rows in mismatched segments at this depth level" },
+        "segments": { "type": "integer", "description": "Total segments at this depth level" },
+        "mismatched_segments": { "type": "integer", "description": "Mismatched segments at this depth level" }
+      }
+    },
+    "stage_result": {
+      "type": "object",
+      "description": "Stage-specific result data",
+      "properties": {
+        "source_count": { "type": "integer" },
+        "target_count": { "type": "integer" },
+        "source_checksum": { "type": "integer" },
+        "target_checksum": { "type": "integer" },
+        "match": { "type": "boolean" },
+        "count_difference": { "type": "integer" },
+        "total_segments": { "type": "integer" },
+        "mismatch_count": { "type": "integer" },
+        "max_depth": { "type": "integer" },
+        "total_groups": { "type": "integer" },
+        "matched_groups": { "type": "integer" },
+        "mismatch_groups": { "type": "integer" },
+        "missing_source": { "type": "integer" },
+        "missing_target": { "type": "integer" },
+        "statistics": {
+          "type": "object",
+          "description": "Bisection tree statistics",
+          "properties": {
+            "total_nodes": { "type": "integer", "description": "Total nodes in bisection tree" },
+            "matched_nodes": { "type": "integer", "description": "Nodes where source and target match" },
+            "mismatched_nodes": { "type": "integer", "description": "Nodes where source and target differ" },
+            "leaf_nodes": { "type": "integer", "description": "Total leaf nodes" },
+            "intermediate_nodes": { "type": "integer", "description": "Total intermediate (non-leaf) nodes" },
+            "matched_leaves": { "type": "integer", "description": "Leaf nodes that match" },
+            "mismatched_leaves": { "type": "integer", "description": "Leaf nodes that differ" },
+            "depth_distribution": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" },
+              "description": "Count of nodes at each depth level (e.g., {\"0\": 1, \"1\": 4, \"2\": 16})"
+            },
+            "mismatch_by_depth": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" },
+              "description": "Count of mismatched nodes at each depth level"
+            },
+            "per_depth": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/depth_stats" },
+              "description": "Per-depth-level breakdown of rows and segments (e.g., {\"0\": {total_rows: 500, mismatched_rows: 16, ...}})"
+            },
+            "total_source_rows": { "type": "integer", "description": "Total rows in source across all segments" },
+            "total_target_rows": { "type": "integer", "description": "Total rows in target across all segments" },
+            "mismatch_source_rows": { "type": "integer", "description": "Total rows in source that are in mismatched segments" },
+            "mismatch_target_rows": { "type": "integer", "description": "Total rows in target that are in mismatched segments" }
+          }
+        },
+        "mismatch_leaves": {
+          "type": "array",
+          "description": "Details of leaf segments that have mismatches",
+          "items": {
+            "type": "object",
+            "properties": {
+              "segment": {
+                "type": "object",
+                "properties": {
+                  "min_key": { "description": "Inclusive lower bound (null = unbounded)" },
+                  "max_key": { "description": "Exclusive upper bound (null = unbounded)" },
+                  "depth": { "type": "integer", "minimum": 0 },
+                  "index": { "type": "integer", "minimum": 0 }
+                }
+              },
+              "source_count": { "type": "integer", "description": "Row count in source" },
+              "target_count": { "type": "integer", "description": "Row count in target" },
+              "source_checksum": { "type": "integer", "description": "Checksum in source" },
+              "target_checksum": { "type": "integer", "description": "Checksum in target" },
+              "count_difference": { "type": "integer", "description": "Absolute difference in row counts" },
+              "mismatch_types": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["missing_in_source", "missing_in_target", "count_mismatch", "data_mismatch", "unknown"]
+                },
+                "description": "Types of mismatch detected (can be multiple, e.g., both count and data)"
+              },
+              "termination_reason": {
+                "type": "string",
+                "enum": ["threshold_reached", "max_depth_reached", "empty_segment", "cannot_split", "matched", "error"],
+                "description": "Why the drill-down stopped at this leaf"
+              },
+              "diff_queries": {
+                "type": "object",
+                "description": "Ready-to-execute SQL queries for investigating this mismatch",
+                "properties": {
+                  "source_rows": {
+                    "type": "string",
+                    "description": "SQL query to retrieve all source rows in the mismatched segment"
+                  },
+                  "target_rows": {
+                    "type": "string",
+                    "description": "SQL query to retrieve all target rows in the mismatched segment"
+                  }
+                }
+              },
+              "row_mismatches": {
+                "type": "array",
+                "description": "Per-row hash comparison results for this leaf",
+                "items": { "$ref": "#/$defs/row_mismatch_audit" }
+              },
+              "row_mismatch_count": {
+                "type": "integer",
+                "description": "Number of individual row mismatches found"
+              }
+            }
+          }
+        },
+        "investigation_queries": {
+          "type": "array",
+          "description": "Merged investigation queries covering adjacent mismatch leaf segments",
+          "items": { "$ref": "#/$defs/investigation_query" }
+        }
+      }
+    }
+  }
+}
