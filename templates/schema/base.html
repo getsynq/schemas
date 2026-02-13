@@ -3,11 +3,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Overpass:300,400,600,800">
     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-	<link rel="stylesheet" type="text/css" href="schema_doc.css">
+    <link rel="stylesheet" type="text/css" href="schema_doc.css">
     <script src="https://use.fontawesome.com/facf9fa52c.js"></script>
     <script src="schema_doc.min.js"></script>
     <meta charset="utf-8"/>
@@ -17,11 +16,20 @@
     {% endif %}
     <title>{%- if title -%}{{ title }} - SYNQ{%- else -%}Schema Docs - SYNQ{%- endif -%}</title>
     <style>
+        /* Match index page styling */
+        *, *::before, *::after { box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
             -webkit-font-smoothing: antialiased;
-            color: #261F3B;
+            color: #261F3B !important;
+            background: #f8fafc !important;
+            padding: 0 !important;
+            font-weight: 400 !important;
+            font-size: 15px !important;
+            line-height: 1.6 !important;
         }
+
+        /* Nav bar */
         .synq-nav {
             background: #261F3B;
             padding: 0.75rem 1.5rem;
@@ -42,6 +50,85 @@
         .synq-nav .back-link::before {
             content: "\2190\00a0";
         }
+
+        /* Content area */
+        .schema-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* Override Bootstrap card styling */
+        .card {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+            margin-bottom: 0.5rem !important;
+        }
+        .card-header {
+            background: #fff !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        .card-body {
+            background: #fff;
+        }
+
+        /* Override accordion borders */
+        .accordion .card:not(:first-of-type):not(:last-of-type),
+        .accordion .card:first-of-type,
+        .accordion .card:last-of-type {
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+
+        /* Override Bootstrap link colors to match SYNQ brand */
+        a { color: #261F3B; }
+        a:hover { color: #261F3B; text-decoration: underline; }
+        .btn-link { color: #261F3B !important; font-weight: 500 !important; }
+        .btn-link:hover { color: #261F3B !important; }
+
+        /* Badge overrides */
+        .badge {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.02em;
+        }
+        .badge-primary {
+            background-color: #261F3B !important;
+        }
+        .badge-secondary {
+            background-color: #64748b !important;
+        }
+        .badge-info {
+            background-color: #261F3B !important;
+        }
+
+        /* Jumbotron / highlight overrides */
+        .jumbotron {
+            background: #f1f5f9 !important;
+            border-radius: 8px !important;
+        }
+
+        /* Code / pre styling */
+        code {
+            color: #261F3B !important;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8125rem;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        /* Schema title */
+        #root > .schema-content > span:first-child > .btn-link {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.02em;
+        }
     </style>
 </head>
 <body onload="anchorOnLoad();" id="root">
@@ -50,6 +137,7 @@
         <a class="back-link" href="/">All schemas</a>
     </nav>
 
+    <div class="schema-content">
     {%- if config.expand_buttons -%}
         <div class="text-right">
             <button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".collapse:not(.show)" aria-expanded="false">Expand all</button>
@@ -58,5 +146,6 @@
     {%- endif -%}
 
     {{ content(schema) }}
+    </div>
 </body>
 </html>
