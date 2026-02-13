@@ -16,7 +16,7 @@
     {% endif %}
     <title>{%- if title -%}{{ title }} - SYNQ{%- else -%}Schema Docs - SYNQ{%- endif -%}</title>
     <style>
-        /* Match index page styling */
+        /* ── Base reset ── */
         *, *::before, *::after { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -25,11 +25,60 @@
             background: #f8fafc !important;
             padding: 0 !important;
             font-weight: 400 !important;
-            font-size: 15px !important;
+            font-size: 0.875rem !important;
             line-height: 1.6 !important;
         }
 
-        /* Nav bar */
+        /* ── Typography — unified scale ── */
+        h1, h2, h3, h4, h5, h6,
+        .h1, .h2, .h3, .h4, .h5, .h6 {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            color: #261F3B !important;
+            font-weight: 600 !important;
+            line-height: 1.3 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        /* Page title */
+        h1 {
+            font-size: 1.5rem !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem !important;
+        }
+        /* Accordion headers & section labels (e.g. "Pattern Property") */
+        h2 {
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            margin-bottom: 0.25rem !important;
+        }
+        h2.handle {
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+        }
+        h2.handle label {
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            margin-bottom: 0 !important;
+        }
+        /* Sub-titles for named properties (e.g. "Agent", "Connection") */
+        h3 { font-size: 0.875rem !important; }
+        h4 {
+            font-size: 0.8125rem !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            margin-bottom: 0.25rem !important;
+        }
+        p {
+            font-size: 0.875rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        label {
+            font-size: inherit !important;
+        }
+
+        /* ── Nav bar ── */
         .synq-nav {
             background: #261F3B;
             padding: 0.75rem 1.5rem;
@@ -43,22 +92,17 @@
             font-size: 0.875rem;
             transition: color 0.15s;
         }
-        .synq-nav a:hover {
-            color: #fff;
-            text-decoration: none;
-        }
-        .synq-nav .back-link::before {
-            content: "\2190\00a0";
-        }
+        .synq-nav a:hover { color: #fff; text-decoration: none; }
+        .synq-nav .back-link::before { content: "\2190\00a0"; }
 
-        /* Content area */
+        /* ── Content area ── */
         .schema-content {
             max-width: 900px;
             margin: 0 auto;
             padding: 2rem 1.5rem 4rem;
         }
 
-        /* Override Bootstrap card styling */
+        /* ── Cards & accordions ── */
         .card {
             border: 1px solid #e2e8f0 !important;
             border-radius: 8px !important;
@@ -69,12 +113,12 @@
             background: #fff !important;
             border-bottom: 1px solid #e2e8f0 !important;
             border-radius: 8px 8px 0 0 !important;
+            padding: 0.5rem 0.75rem !important;
         }
         .card-body {
             background: #fff;
+            padding: 0.75rem 1rem !important;
         }
-
-        /* Override accordion borders */
         .accordion .card:not(:first-of-type):not(:last-of-type),
         .accordion .card:first-of-type,
         .accordion .card:last-of-type {
@@ -82,54 +126,56 @@
             border: 1px solid #e2e8f0 !important;
         }
 
-        /* Override Bootstrap link colors to match SYNQ brand */
+        /* ── Links & buttons ── */
         a { color: #261F3B; }
         a:hover { color: #261F3B; text-decoration: underline; }
-        .btn-link { color: #261F3B !important; font-weight: 500 !important; }
+        .btn-link {
+            color: #261F3B !important;
+            font-weight: 500 !important;
+            font-size: 0.875rem !important;
+            padding: 0.25rem 0 !important;
+        }
         .btn-link:hover { color: #261F3B !important; }
+        .property-name {
+            font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace !important;
+            font-size: 0.8125rem !important;
+        }
 
-        /* Badge overrides */
+        /* ── Badges ── */
         .badge {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
             font-weight: 500 !important;
             letter-spacing: 0.02em;
-            font-size: 0.75rem !important;
-            padding: 3px 8px !important;
+            font-size: 0.6875rem !important;
+            padding: 2px 7px !important;
             vertical-align: middle !important;
         }
-        .badge.value-type {
-            font-size: 0.75rem !important;
-            font-weight: 500 !important;
-        }
+        .badge.value-type,
         .badge.default-value {
-            font-size: 0.75rem !important;
+            font-size: 0.6875rem !important;
             font-weight: 500 !important;
         }
         .badge.required-property,
         .badge.deprecated-property,
         .badge.pattern-property,
         .badge.no-additional {
-            font-size: 0.6875rem !important;
+            font-size: 0.625rem !important;
             font-weight: 600 !important;
         }
-        .badge-primary {
-            background-color: #261F3B !important;
-        }
-        .badge-secondary {
-            background-color: #64748b !important;
-        }
-        .badge-info {
-            background-color: #261F3B !important;
-        }
+        .badge-primary { background-color: #261F3B !important; }
+        .badge-secondary { background-color: #64748b !important; }
+        .badge-info { background-color: #261F3B !important; }
 
-        /* Jumbotron / highlight overrides */
+        /* ── Jumbotron / highlights ── */
         .jumbotron {
             background: #f1f5f9 !important;
             border-radius: 8px !important;
+            padding: 0.75rem !important;
         }
 
-        /* Code / pre styling */
+        /* ── Code ── */
         code {
+            font-family: "SF Mono", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace !important;
             color: #261F3B !important;
             background: #f1f5f9;
             padding: 2px 6px;
@@ -141,11 +187,32 @@
             padding: 0;
         }
 
-        /* Schema title */
-        #root > .schema-content > span:first-child > .btn-link {
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            letter-spacing: -0.02em;
+        /* ── Breadcrumbs ── */
+        .breadcrumbs {
+            font-size: 0.75rem !important;
+            color: #94a3b8 !important;
+        }
+        .breadcrumbs a {
+            color: #64748b !important;
+            font-size: 0.75rem !important;
+        }
+
+        /* ── List groups (enum values etc.) ── */
+        .list-group-item {
+            font-size: 0.8125rem !important;
+            padding: 0.4rem 0.75rem !important;
+        }
+
+        /* ── Description text ── */
+        .description {
+            font-size: 0.875rem !important;
+            color: #475569 !important;
+            line-height: 1.5 !important;
+        }
+
+        /* ── Pattern / const values ── */
+        .pattern-value, .const-value {
+            font-size: 0.8125rem !important;
         }
     </style>
 </head>
