@@ -196,7 +196,7 @@
     },
     "dataset": {
       "type": "object",
-      "required": ["connection", "query"],
+      "required": ["connection"],
       "properties": {
         "connection": {
           "type": "string",
@@ -204,9 +204,31 @@
         },
         "query": {
           "type": "string",
-          "description": "Base SQL query for this dataset"
+          "description": "Base SQL query for this dataset (mutually exclusive with 'table')"
+        },
+        "table": {
+          "type": "string",
+          "description": "Table name or fully-qualified name (e.g., 'schema.table'). Alternative to 'query'."
+        },
+        "columns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Explicit column list (only with 'table'). Mutually exclusive with 'exclude_columns'."
+        },
+        "exclude_columns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Columns to exclude (only with 'table', resolved at runtime). Mutually exclusive with 'columns'."
+        },
+        "as_of": {
+          "type": "string",
+          "description": "Time-travel timestamp (e.g., '2026-02-01 00:00:00')"
         }
-      }
+      },
+      "oneOf": [
+        { "required": ["query"] },
+        { "required": ["table"] }
+      ]
     },
     "bisection_config": {
       "type": "object",
