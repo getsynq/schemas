@@ -76,8 +76,8 @@ jobs:
             if [ "$status" = "draft" ]; then badge_class="badge-draft"; fi
 
             echo "<li>" >> index.html
-            echo "  <a href=\"${rel_path}\">${rel_path}</a> <span class=\"badge ${badge_class}\">${status}</span>" >> index.html
-            echo "  <br><a href=\"${dir}/${base}.html\" style=\"font-size:13px;color:#666;\">View documentation</a>" >> index.html
+            echo "  <a href=\"${dir}/${base}.html\">${title}</a> <span class=\"badge ${badge_class}\">${status}</span>" >> index.html
+            echo "  <br><a href=\"${rel_path}\" style=\"font-size:13px;color:#666;\">${rel_path}</a>" >> index.html
             if [ -n "$desc" ]; then
               echo "  <div class=\"schema-desc\">${desc}</div>" >> index.html
             fi
