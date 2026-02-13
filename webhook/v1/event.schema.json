@@ -1,0 +1,1523 @@
+{
+  "$defs": {
+    "google.protobuf.Timestamp": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "synq.entities.v1.AirflowDagIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(dagId)$": {
+          "description": "Airflow dag_id that identifies the DAG",
+          "type": "string"
+        },
+        "^(integrationId)$": {
+          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "dag_id": {
+          "description": "Airflow dag_id that identifies the DAG",
+          "type": "string"
+        },
+        "integration_id": {
+          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "integration_id",
+        "dag_id"
+      ],
+      "title": "Airflow Dag Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.AirflowTaskIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(dagId)$": {
+          "description": "Airflow dag_id that identifies the DAG",
+          "type": "string"
+        },
+        "^(integrationId)$": {
+          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "type": "string"
+        },
+        "^(taskId)$": {
+          "description": "Airflow task_id that identifies the task within the DAG",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "dag_id": {
+          "description": "Airflow dag_id that identifies the DAG",
+          "type": "string"
+        },
+        "integration_id": {
+          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "type": "string"
+        },
+        "task_id": {
+          "description": "Airflow task_id that identifies the task within the DAG",
+          "type": "string"
+        }
+      },
+      "required": [
+        "integration_id",
+        "dag_id",
+        "task_id"
+      ],
+      "title": "Airflow Task Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.BigqueryTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "dataset": {
+          "description": "BigQuery dataset id",
+          "type": "string"
+        },
+        "project": {
+          "description": "BigQuery project",
+          "type": "string"
+        },
+        "table": {
+          "description": "BigQuery table name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project",
+        "dataset",
+        "table"
+      ],
+      "title": "Bigquery Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.ClickhouseTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "host": {
+          "description": "Clickhouse hostname without port",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Clickhouse database",
+          "type": "string"
+        },
+        "table": {
+          "description": "Clickhouse table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "schema",
+        "table"
+      ],
+      "title": "Clickhouse Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.CustomIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "description": "Id that identifies the custom entity\n The Id should be unique within the custom entity Identifier.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Custom Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.DatabricksTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "catalog": {
+          "description": "Databricks catalog",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Databricks schema",
+          "type": "string"
+        },
+        "table": {
+          "description": "Databricks table or view",
+          "type": "string"
+        },
+        "workspace": {
+          "description": "URL of Databricks workspace",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace",
+        "catalog",
+        "schema",
+        "table"
+      ],
+      "title": "Databricks Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.DataproductIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "description": "Dataproduct id that identifies the Dataproduct",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Dataproduct Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.DbtCloudNodeIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(accountId)$": {
+          "default": "",
+          "description": "Your dbt Cloud account id",
+          "type": "string"
+        },
+        "^(nodeId)$": {
+          "description": "Dbt node_id that identifies one of dbt DAG nodes (model, test, etc)",
+          "type": "string"
+        },
+        "^(projectId)$": {
+          "description": "Your dbt Cloud project id",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "account_id": {
+          "default": "",
+          "description": "Your dbt Cloud account id",
+          "type": "string"
+        },
+        "node_id": {
+          "description": "Dbt node_id that identifies one of dbt DAG nodes (model, test, etc)",
+          "type": "string"
+        },
+        "project_id": {
+          "description": "Your dbt Cloud project id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id",
+        "node_id"
+      ],
+      "title": "Dbt Cloud Node Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.DbtCoreNodeIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(integrationId)$": {
+          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "^(nodeId)$": {
+          "description": "Dbt node_id that identifies one of dbt DAG nodes (model, test, etc)",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "integration_id": {
+          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "node_id": {
+          "description": "Dbt node_id that identifies one of dbt DAG nodes (model, test, etc)",
+          "type": "string"
+        }
+      },
+      "required": [
+        "integration_id",
+        "node_id"
+      ],
+      "title": "Dbt Core Node Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.Identifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Identifier is a unique reference to an entity in SYNQ system. Entity identifiers\n are designed to closely mimic identifiers used by data platforms and tools. To construct\n an identifier, you need to know the kind of the entity and the ids that you would normally\n use to identify it in the data platform or tool. For example, to identify a table in BigQuery,\n you would need to know the project, dataset, and table names.",
+      "patternProperties": {
+        "^(airflowDag)$": {
+          "$ref": "#/$defs/synq.entities.v1.AirflowDagIdentifier",
+          "description": "Airflow DAG identifier"
+        },
+        "^(airflowTask)$": {
+          "$ref": "#/$defs/synq.entities.v1.AirflowTaskIdentifier",
+          "description": "Airflow task identifier within a given DAG"
+        },
+        "^(bigqueryTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.BigqueryTableIdentifier",
+          "description": "BigQuery table identifier"
+        },
+        "^(clickhouseTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.ClickhouseTableIdentifier",
+          "description": "Clickhouse table identifier"
+        },
+        "^(databricksTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.DatabricksTableIdentifier",
+          "description": "Databricks table identifier"
+        },
+        "^(dbtCloudNode)$": {
+          "$ref": "#/$defs/synq.entities.v1.DbtCloudNodeIdentifier",
+          "description": "Dbt node that identifies one of dbt DAG nodes (model, test, etc) in dbt Cloud project"
+        },
+        "^(dbtCoreNode)$": {
+          "$ref": "#/$defs/synq.entities.v1.DbtCoreNodeIdentifier",
+          "description": "Dbt node that identifies one of dbt DAG nodes (model, test, etc) in dbt Core project"
+        },
+        "^(mysqlTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.MysqlTableIdentifier",
+          "description": "Mysql table identifier"
+        },
+        "^(postgresTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.PostgresTableIdentifier",
+          "description": "Postgres table identifier"
+        },
+        "^(redshiftTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.RedshiftTableIdentifier",
+          "description": "Redshift table identifier"
+        },
+        "^(snowflakeTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.SnowflakeTableIdentifier",
+          "description": "Snowflake table identifier"
+        },
+        "^(sqlMeshAudit)$": {
+          "$ref": "#/$defs/synq.entities.v1.SqlMeshAuditIdentifier",
+          "description": "SQLMesh Audit identifier"
+        },
+        "^(sqlMeshModel)$": {
+          "$ref": "#/$defs/synq.entities.v1.SqlMeshModelIdentifier",
+          "description": "SQLMesh Model identifier"
+        },
+        "^(synqPath)$": {
+          "$ref": "#/$defs/synq.entities.v1.SynqPathIdentifier",
+          "description": "SynqPath identifier"
+        },
+        "^(trinoTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.TrinoTableIdentifier",
+          "description": "Trino table identifier"
+        }
+      },
+      "properties": {
+        "airflow_dag": {
+          "$ref": "#/$defs/synq.entities.v1.AirflowDagIdentifier",
+          "description": "Airflow DAG identifier"
+        },
+        "airflow_task": {
+          "$ref": "#/$defs/synq.entities.v1.AirflowTaskIdentifier",
+          "description": "Airflow task identifier within a given DAG"
+        },
+        "bigquery_table": {
+          "$ref": "#/$defs/synq.entities.v1.BigqueryTableIdentifier",
+          "description": "BigQuery table identifier"
+        },
+        "clickhouse_table": {
+          "$ref": "#/$defs/synq.entities.v1.ClickhouseTableIdentifier",
+          "description": "Clickhouse table identifier"
+        },
+        "custom": {
+          "$ref": "#/$defs/synq.entities.v1.CustomIdentifier",
+          "description": "Custom identifier to be used with all custom created entities"
+        },
+        "databricks_table": {
+          "$ref": "#/$defs/synq.entities.v1.DatabricksTableIdentifier",
+          "description": "Databricks table identifier"
+        },
+        "dataproduct": {
+          "$ref": "#/$defs/synq.entities.v1.DataproductIdentifier",
+          "description": "Dataproduct identifier"
+        },
+        "dbt_cloud_node": {
+          "$ref": "#/$defs/synq.entities.v1.DbtCloudNodeIdentifier",
+          "description": "Dbt node that identifies one of dbt DAG nodes (model, test, etc) in dbt Cloud project"
+        },
+        "dbt_core_node": {
+          "$ref": "#/$defs/synq.entities.v1.DbtCoreNodeIdentifier",
+          "description": "Dbt node that identifies one of dbt DAG nodes (model, test, etc) in dbt Core project"
+        },
+        "monitor": {
+          "$ref": "#/$defs/synq.entities.v1.MonitorIdentifier",
+          "description": "Monitor identifier"
+        },
+        "mysql_table": {
+          "$ref": "#/$defs/synq.entities.v1.MysqlTableIdentifier",
+          "description": "Mysql table identifier"
+        },
+        "postgres_table": {
+          "$ref": "#/$defs/synq.entities.v1.PostgresTableIdentifier",
+          "description": "Postgres table identifier"
+        },
+        "redshift_table": {
+          "$ref": "#/$defs/synq.entities.v1.RedshiftTableIdentifier",
+          "description": "Redshift table identifier"
+        },
+        "snowflake_table": {
+          "$ref": "#/$defs/synq.entities.v1.SnowflakeTableIdentifier",
+          "description": "Snowflake table identifier"
+        },
+        "sql_mesh_audit": {
+          "$ref": "#/$defs/synq.entities.v1.SqlMeshAuditIdentifier",
+          "description": "SQLMesh Audit identifier"
+        },
+        "sql_mesh_model": {
+          "$ref": "#/$defs/synq.entities.v1.SqlMeshModelIdentifier",
+          "description": "SQLMesh Model identifier"
+        },
+        "synq_path": {
+          "$ref": "#/$defs/synq.entities.v1.SynqPathIdentifier",
+          "description": "SynqPath identifier"
+        },
+        "trino_table": {
+          "$ref": "#/$defs/synq.entities.v1.TrinoTableIdentifier",
+          "description": "Trino table identifier"
+        }
+      },
+      "title": "Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.MonitorIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(integrationId)$": {
+          "description": "SYNQ integration_id of the monitored identifier",
+          "type": "string"
+        },
+        "^(monitorId)$": {
+          "description": "Identifier of the monitor",
+          "type": "string"
+        },
+        "^(monitoredId)$": {
+          "$ref": "#/$defs/synq.entities.v1.Identifier",
+          "description": "Identifier of the monitored entity"
+        }
+      },
+      "properties": {
+        "integration_id": {
+          "description": "SYNQ integration_id of the monitored identifier",
+          "type": "string"
+        },
+        "monitor_id": {
+          "description": "Identifier of the monitor",
+          "type": "string"
+        },
+        "monitored_id": {
+          "$ref": "#/$defs/synq.entities.v1.Identifier",
+          "description": "Identifier of the monitored entity"
+        },
+        "segment": {
+          "description": "Optional monitor segmentation identifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "monitored_id",
+        "monitor_id"
+      ],
+      "title": "Monitor Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.MysqlTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "host": {
+          "description": "Mysql hostname without port",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Mysql database",
+          "type": "string"
+        },
+        "table": {
+          "description": "Mysql table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "schema",
+        "table"
+      ],
+      "title": "Mysql Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.PostgresTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "database": {
+          "description": "Postgres database",
+          "type": "string"
+        },
+        "host": {
+          "description": "Postgres hostname without port",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Postgres schema",
+          "type": "string"
+        },
+        "table": {
+          "description": "Postgres table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "database",
+        "schema",
+        "table"
+      ],
+      "title": "Postgres Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.RedshiftTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "cluster": {
+          "default": "",
+          "description": "Redshift cluster",
+          "type": "string"
+        },
+        "database": {
+          "description": "Redshift database",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Redshift schema",
+          "type": "string"
+        },
+        "table": {
+          "description": "Redshift table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "database",
+        "schema",
+        "table"
+      ],
+      "title": "Redshift Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.SnowflakeTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "account": {
+          "description": "Snowflake account",
+          "type": "string"
+        },
+        "database": {
+          "description": "Snowflake database",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Snowflake schema",
+          "type": "string"
+        },
+        "table": {
+          "description": "Snowflake table",
+          "type": "string"
+        }
+      },
+      "required": [
+        "account",
+        "database",
+        "schema",
+        "table"
+      ],
+      "title": "Snowflake Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.SqlMeshAuditIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(auditId)$": {
+          "description": "Identifier of the audit",
+          "type": "string"
+        },
+        "^(integrationId)$": {
+          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "audit_id": {
+          "description": "Identifier of the audit",
+          "type": "string"
+        },
+        "fqn": {
+          "description": "SQLMesh model fully qualified name",
+          "type": "string"
+        },
+        "integration_id": {
+          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "integration_id",
+        "fqn",
+        "audit_id"
+      ],
+      "title": "Sql Mesh Audit Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.SqlMeshModelIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(integrationId)$": {
+          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "fqn": {
+          "description": "SQLMesh model fully qualified name",
+          "type": "string"
+        },
+        "integration_id": {
+          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "integration_id",
+        "fqn"
+      ],
+      "title": "Sql Mesh Model Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.SynqPathIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "path": {
+          "description": "SYNQ path that identifies the SYNQ entity, needs to be one of supported paths",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "Synq Path Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.TrinoTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "catalog": {
+          "description": "Trino catalog",
+          "type": "string"
+        },
+        "host": {
+          "description": "Hostname of the Trino instance",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Trino schema",
+          "type": "string"
+        },
+        "table": {
+          "description": "Trino table or view",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "catalog",
+        "schema",
+        "table"
+      ],
+      "title": "Trino Table Identifier",
+      "type": "object"
+    },
+    "synq.issues.actor.v1.Actor": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "email": {
+          "$ref": "#/$defs/synq.issues.actor.v1.EmailUser"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "pagerduty": {
+          "$ref": "#/$defs/synq.issues.actor.v1.PagerdutyUser"
+        },
+        "slack": {
+          "$ref": "#/$defs/synq.issues.actor.v1.SlackUser"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Actor",
+      "type": "object"
+    },
+    "synq.issues.actor.v1.EmailUser": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(userEmail)$": {
+          "format": "email",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "properties": {
+        "user_email": {
+          "format": "email",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_email"
+      ],
+      "title": "Email User",
+      "type": "object"
+    },
+    "synq.issues.actor.v1.PagerdutyUser": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(userId)$": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "properties": {
+        "user_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "Pagerduty User",
+      "type": "object"
+    },
+    "synq.issues.actor.v1.SlackUser": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(userId)$": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "properties": {
+        "user_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "Slack User",
+      "type": "object"
+    },
+    "synq.issues.commands.v1.IssuesCommand": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Not to be used directly. Use the IssuesService instead when calling via API.",
+      "patternProperties": {
+        "^(markExpected)$": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkExpectedRequest"
+        },
+        "^(markFixed)$": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkFixedRequest"
+        },
+        "^(markInvestigating)$": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkInvestigatingRequest"
+        },
+        "^(markNoActionNeeded)$": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkNoActionNeededRequest"
+        },
+        "^(postComment)$": {
+          "$ref": "#/$defs/synq.issues.issues.v1.PostCommentRequest"
+        }
+      },
+      "properties": {
+        "mark_expected": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkExpectedRequest"
+        },
+        "mark_fixed": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkFixedRequest"
+        },
+        "mark_investigating": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkInvestigatingRequest"
+        },
+        "mark_no_action_needed": {
+          "$ref": "#/$defs/synq.issues.issues.v1.MarkNoActionNeededRequest"
+        },
+        "post_comment": {
+          "$ref": "#/$defs/synq.issues.issues.v1.PostCommentRequest"
+        },
+        "workspace": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "workspace"
+      ],
+      "title": "Issues Command",
+      "type": "object"
+    },
+    "synq.issues.issues.v1.MarkExpectedRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(issueId)$": {
+          "description": "ID of the issue to mark as expected.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "^(requireNoExistingStatus)$": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        }
+      },
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/synq.issues.actor.v1.Actor",
+          "description": "Actor marking the issue as expected."
+        },
+        "issue_id": {
+          "description": "ID of the issue to mark as expected.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "require_no_existing_status": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        },
+        "time": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time at which the issue was marked as expected. Defaults to the current time."
+        }
+      },
+      "required": [
+        "issue_id",
+        "actor",
+        "time"
+      ],
+      "title": "Mark Expected Request",
+      "type": "object"
+    },
+    "synq.issues.issues.v1.MarkFixedRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(issueId)$": {
+          "description": "ID of the issue to mark as fixed.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "^(requireNoExistingStatus)$": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        }
+      },
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/synq.issues.actor.v1.Actor",
+          "description": "Actor marking the issue as fixed."
+        },
+        "issue_id": {
+          "description": "ID of the issue to mark as fixed.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "require_no_existing_status": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        },
+        "time": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time at which the issue was marked as fixed. Defaults to the current time."
+        }
+      },
+      "required": [
+        "issue_id",
+        "actor",
+        "time"
+      ],
+      "title": "Mark Fixed Request",
+      "type": "object"
+    },
+    "synq.issues.issues.v1.MarkInvestigatingRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(issueId)$": {
+          "description": "ID of the issue to mark as investigating.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "^(requireNoExistingStatus)$": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        }
+      },
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/synq.issues.actor.v1.Actor",
+          "description": "Actor marking the issue as investigating."
+        },
+        "issue_id": {
+          "description": "ID of the issue to mark as investigating.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "require_no_existing_status": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        },
+        "time": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time at which the issue was marked as investigating. Defaults to the current time."
+        }
+      },
+      "required": [
+        "issue_id",
+        "actor",
+        "time"
+      ],
+      "title": "Mark Investigating Request",
+      "type": "object"
+    },
+    "synq.issues.issues.v1.MarkNoActionNeededRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(issueId)$": {
+          "description": "ID of the issue to mark as no action needed.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "^(requireNoExistingStatus)$": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        }
+      },
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/synq.issues.actor.v1.Actor",
+          "description": "Actor marking the issue as no action needed."
+        },
+        "issue_id": {
+          "description": "ID of the issue to mark as no action needed.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "require_no_existing_status": {
+          "default": false,
+          "description": "Ignore status change if the issue already has a status.",
+          "type": "boolean"
+        },
+        "time": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time at which the issue was marked as no action needed. Defaults to the current time."
+        }
+      },
+      "required": [
+        "issue_id",
+        "actor",
+        "time"
+      ],
+      "title": "Mark No Action Needed Request",
+      "type": "object"
+    },
+    "synq.issues.issues.v1.PostCommentRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(issueId)$": {
+          "description": "ID of the issue to post a comment on.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/synq.issues.actor.v1.Actor",
+          "description": "Actor posting the comment."
+        },
+        "comment": {
+          "description": "Comment to post.",
+          "type": "string"
+        },
+        "issue_id": {
+          "description": "ID of the issue to post a comment on.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "time": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time at which the comment was posted. Defaults to the current time."
+        }
+      },
+      "required": [
+        "issue_id",
+        "actor",
+        "comment",
+        "time"
+      ],
+      "title": "Post Comment Request",
+      "type": "object"
+    },
+    "synq.webhooks.v1.Callback": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(actionName)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(issuesCommand)$": {
+          "$ref": "#/$defs/synq.issues.commands.v1.IssuesCommand"
+        }
+      },
+      "properties": {
+        "action_name": {
+          "default": "",
+          "type": "string"
+        },
+        "issues_command": {
+          "$ref": "#/$defs/synq.issues.commands.v1.IssuesCommand"
+        },
+        "url": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "Callback",
+      "type": "object"
+    },
+    "synq.webhooks.v1.Event": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(eventId)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(eventTime)$": {
+          "$ref": "#/$defs/google.protobuf.Timestamp"
+        },
+        "^(eventType)$": {
+          "anyOf": [
+            {
+              "pattern": "^EVENT_TYPE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "EVENT_TYPE_PING",
+                "EVENT_TYPE_ISSUE_CREATED",
+                "EVENT_TYPE_ISSUE_UPDATED",
+                "EVENT_TYPE_ISSUE_STATUS_UPDATED",
+                "EVENT_TYPE_ISSUE_CLOSED",
+                "EVENT_TYPE_INCIDENT_OPEN",
+                "EVENT_TYPE_INCIDENT_CLOSED",
+                "EVENT_TYPE_INCIDENT_CANCELLED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "title": "Event Type"
+        },
+        "^(incidentCancelled)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentCancelled"
+        },
+        "^(incidentClosed)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentClosed"
+        },
+        "^(incidentOpen)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentOpen"
+        },
+        "^(issueClosed)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueClosed"
+        },
+        "^(issueCreated)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueCreated"
+        },
+        "^(issueStatusUpdated)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueStatusUpdated"
+        },
+        "^(issueUpdated)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueUpdated"
+        }
+      },
+      "properties": {
+        "callbacks": {
+          "items": {
+            "$ref": "#/$defs/synq.webhooks.v1.Callback"
+          },
+          "type": "array"
+        },
+        "event_id": {
+          "default": "",
+          "type": "string"
+        },
+        "event_time": {
+          "$ref": "#/$defs/google.protobuf.Timestamp"
+        },
+        "event_type": {
+          "anyOf": [
+            {
+              "pattern": "^EVENT_TYPE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "EVENT_TYPE_PING",
+                "EVENT_TYPE_ISSUE_CREATED",
+                "EVENT_TYPE_ISSUE_UPDATED",
+                "EVENT_TYPE_ISSUE_STATUS_UPDATED",
+                "EVENT_TYPE_ISSUE_CLOSED",
+                "EVENT_TYPE_INCIDENT_OPEN",
+                "EVENT_TYPE_INCIDENT_CLOSED",
+                "EVENT_TYPE_INCIDENT_CANCELLED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "title": "Event Type"
+        },
+        "incident_cancelled": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentCancelled"
+        },
+        "incident_closed": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentClosed"
+        },
+        "incident_open": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentOpen"
+        },
+        "issue_closed": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueClosed"
+        },
+        "issue_created": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueCreated"
+        },
+        "issue_status_updated": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueStatusUpdated"
+        },
+        "issue_updated": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueUpdated"
+        },
+        "ping": {
+          "$ref": "#/$defs/synq.webhooks.v1.Ping"
+        },
+        "workspace": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "Event",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IncidentCancelled": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "incident": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentSummary"
+        }
+      },
+      "title": "Incident Cancelled",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IncidentClosed": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "incident": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentSummary"
+        }
+      },
+      "title": "Incident Closed",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IncidentOpen": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "incident": {
+          "$ref": "#/$defs/synq.webhooks.v1.IncidentSummary"
+        }
+      },
+      "title": "Incident Open",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IncidentSummary": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(descriptionHtml)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(endedAt)$": {
+          "$ref": "#/$defs/google.protobuf.Timestamp"
+        },
+        "^(incidentId)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(incidentUrl)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(startedAt)$": {
+          "$ref": "#/$defs/google.protobuf.Timestamp"
+        }
+      },
+      "properties": {
+        "description": {
+          "default": "",
+          "type": "string"
+        },
+        "description_html": {
+          "default": "",
+          "type": "string"
+        },
+        "ended_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp"
+        },
+        "incident_id": {
+          "default": "",
+          "type": "string"
+        },
+        "incident_url": {
+          "default": "",
+          "type": "string"
+        },
+        "started_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp"
+        },
+        "title": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "Incident Summary",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IssueClosed": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "issue": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueSummary"
+        }
+      },
+      "title": "Issue Closed",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IssueCreated": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "issue": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueSummary"
+        }
+      },
+      "title": "Issue Created",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IssueStatusUpdated": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "issue": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueSummary"
+        }
+      },
+      "title": "Issue Status Updated",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IssueSummary.IssueEntity": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(entityUrl)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(typeName)$": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "entity_url": {
+          "default": "",
+          "type": "string"
+        },
+        "folder": {
+          "type": "string"
+        },
+        "identifier": {
+          "$ref": "#/$defs/synq.entities.v1.Identifier"
+        },
+        "name": {
+          "default": "",
+          "type": "string"
+        },
+        "type_name": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "Issue Entity",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IssueSummary": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(descriptionHtml)$": {
+          "default": "",
+          "description": "Detailed description of the issue. In the HTML format.",
+          "type": "string"
+        },
+        "^(directlyAffectedEntities)$": {
+          "description": "Entities directly affected by the issue, not considering downstream ones.",
+          "items": {
+            "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.IssueEntity"
+          },
+          "type": "array"
+        },
+        "^(endedAt)$": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time when the issue was closed."
+        },
+        "^(issueGroupId)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(issueId)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(issueUrl)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(startedAt)$": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time when the issue was triggered."
+        },
+        "^(triggerEntity)$": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.IssueEntity",
+          "description": "Entity which triggered the issue."
+        },
+        "^(triggerMessage)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(triggerName)$": {
+          "default": "",
+          "type": "string"
+        },
+        "^(triggerRunId)$": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "description": {
+          "default": "",
+          "description": "Detailed description of the issue. In the Markdown format.",
+          "type": "string"
+        },
+        "description_html": {
+          "default": "",
+          "description": "Detailed description of the issue. In the HTML format.",
+          "type": "string"
+        },
+        "directly_affected_entities": {
+          "description": "Entities directly affected by the issue, not considering downstream ones.",
+          "items": {
+            "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.IssueEntity"
+          },
+          "type": "array"
+        },
+        "ended_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time when the issue was closed."
+        },
+        "issue_group_id": {
+          "default": "",
+          "type": "string"
+        },
+        "issue_id": {
+          "default": "",
+          "type": "string"
+        },
+        "issue_url": {
+          "default": "",
+          "type": "string"
+        },
+        "started_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "Time when the issue was triggered."
+        },
+        "status": {
+          "anyOf": [
+            {
+              "pattern": "^ISSUE_STATUS_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "ISSUE_STATUS_INVESTIGATING",
+                "ISSUE_STATUS_EXPECTED",
+                "ISSUE_STATUS_FIXED",
+                "ISSUE_STATUS_NO_ACTION_NEEDED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "title": "Issue Status"
+        },
+        "title": {
+          "default": "",
+          "description": "Summary of the issue, what happened and where.",
+          "type": "string"
+        },
+        "trigger_entity": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.IssueEntity",
+          "description": "Entity which triggered the issue."
+        },
+        "trigger_message": {
+          "default": "",
+          "type": "string"
+        },
+        "trigger_name": {
+          "default": "",
+          "type": "string"
+        },
+        "trigger_run_id": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "Issue Summary",
+      "type": "object"
+    },
+    "synq.webhooks.v1.IssueUpdated": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "issue": {
+          "$ref": "#/$defs/synq.webhooks.v1.IssueSummary"
+        }
+      },
+      "title": "Issue Updated",
+      "type": "object"
+    },
+    "synq.webhooks.v1.Ping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Test event sent during a webhook setup.",
+      "properties": {
+        "message": {
+          "default": "",
+          "type": "string"
+        }
+      },
+      "title": "Ping",
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.synq.io/webhook/v1/event.schema.json",
+  "$ref": "#/$defs/synq.webhooks.v1.Event",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SYNQ Webhook Event",
+  "description": "Webhook event payload sent by SYNQ"
+}
