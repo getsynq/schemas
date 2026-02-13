@@ -59,43 +59,51 @@
       "type": "object",
       "required": ["account", "username"],
       "properties": {
-        "account": { "type": "string" },
-        "warehouse": { "type": "string" },
-        "role": { "type": "string" },
-        "username": { "type": "string" },
-        "password": { "type": "string" },
-        "databases": { "type": "array", "items": { "type": "string" } }
+        "account": { "type": "string", "description": "Snowflake account identifier" },
+        "warehouse": { "type": "string", "description": "Virtual warehouse to use" },
+        "role": { "type": "string", "description": "Role to assume" },
+        "username": { "type": "string", "description": "Username for authentication" },
+        "password": { "type": "string", "description": "Password for authentication" },
+        "private_key": { "type": "string", "description": "Private key content for Snowflake authentication" },
+        "private_key_file": { "type": "string", "description": "Path to private key file" },
+        "private_key_passphrase": { "type": "string", "description": "Passphrase to decode private key" },
+        "auth_type": { "type": "string", "description": "Authentication type (e.g., 'externalbrowser' for SSO)" },
+        "databases": { "type": "array", "items": { "type": "string" }, "description": "Databases to connect to" }
       }
     },
     "bigquery_config": {
       "type": "object",
+      "required": ["project_id"],
       "properties": {
-        "project_id": { "type": "string" },
-        "credentials": { "type": "string", "description": "JSON credentials content" },
-        "credentials_file": { "type": "string", "description": "Path to credentials file" }
+        "project_id": { "type": "string", "description": "GCP project ID" },
+        "region": { "type": "string", "description": "Region for BigQuery resources" },
+        "service_account_key": { "type": "string", "description": "Service account key JSON content" },
+        "service_account_key_file": { "type": "string", "description": "Path to service account key file" }
       }
     },
     "mysql_config": {
       "type": "object",
       "required": ["host", "database", "username"],
       "properties": {
-        "host": { "type": "string" },
-        "port": { "type": "integer", "default": 3306 },
-        "database": { "type": "string" },
-        "username": { "type": "string" },
-        "password": { "type": "string" }
+        "host": { "type": "string", "description": "Host address" },
+        "port": { "type": "integer", "default": 3306, "description": "Port number" },
+        "database": { "type": "string", "description": "Database name" },
+        "username": { "type": "string", "description": "Username for authentication" },
+        "password": { "type": "string", "description": "Password for authentication" },
+        "allow_insecure": { "type": "boolean", "default": false, "description": "Whether to allow insecure connections" },
+        "params": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Additional connection parameters" }
       }
     },
     "clickhouse_config": {
       "type": "object",
       "required": ["host"],
       "properties": {
-        "host": { "type": "string" },
-        "port": { "type": "integer", "default": 9000 },
-        "database": { "type": "string" },
-        "username": { "type": "string" },
-        "password": { "type": "string" },
-        "secure": { "type": "boolean", "default": false }
+        "host": { "type": "string", "description": "Host address" },
+        "port": { "type": "integer", "default": 9000, "description": "Port number" },
+        "database": { "type": "string", "description": "Database name" },
+        "username": { "type": "string", "description": "Username for authentication" },
+        "password": { "type": "string", "description": "Password for authentication" },
+        "allow_insecure": { "type": "boolean", "default": false, "description": "Whether to disable SSL for connection" }
       }
     },
     "duckdb_config": {
@@ -114,13 +122,13 @@
     },
     "databricks_config": {
       "type": "object",
-      "required": ["host", "http_path"],
+      "required": ["workspace_url"],
       "properties": {
-        "host": { "type": "string" },
-        "http_path": { "type": "string" },
-        "token": { "type": "string" },
-        "catalog": { "type": "string" },
-        "schema": { "type": "string" }
+        "workspace_url": { "type": "string", "description": "Databricks workspace URL" },
+        "auth_token": { "type": "string", "description": "Authentication token" },
+        "auth_client": { "type": "string", "description": "OAuth client ID" },
+        "auth_secret": { "type": "string", "description": "OAuth client secret" },
+        "warehouse": { "type": "string", "description": "SQL warehouse ID" }
       }
     },
     "redshift_config": {
@@ -138,12 +146,12 @@
       "type": "object",
       "required": ["host"],
       "properties": {
-        "host": { "type": "string" },
-        "port": { "type": "integer", "default": 8080 },
-        "catalog": { "type": "string" },
-        "schema": { "type": "string" },
-        "username": { "type": "string" },
-        "password": { "type": "string" }
+        "host": { "type": "string", "description": "Host address" },
+        "port": { "type": "integer", "default": 8080, "description": "Port number" },
+        "catalogs": { "type": "array", "items": { "type": "string" }, "description": "Catalogs to connect to" },
+        "username": { "type": "string", "description": "Username for authentication" },
+        "password": { "type": "string", "description": "Password for authentication" },
+        "use_plaintext": { "type": "boolean", "default": false, "description": "Use non-SSL connection" }
       }
     },
     "reconciliation": {
