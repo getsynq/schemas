@@ -1,0 +1,57 @@
+name: Validate Schemas
+
+on:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate schema $id matches file path
+        run: |
+          base_url="https://schemas.synq.io"
+          errors=0
+
+          for schema in $(find . -name '*.schema.json' -not -path './.github/*'); do
+            rel_path="${schema#./}"
+            expected_id="${base_url}/${rel_path}"
+            actual_id=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('\$id',''))" "$schema")
+
+            if [ -z "$actual_id" ]; then
+              echo "::error file=${rel_path}::Missing \$id field"
+              errors=$((errors + 1))
+            elif [ "$actual_id" != "$expected_id" ]; then
+              echo "::error file=${rel_path}::\$id mismatch: got '${actual_id}', expected '${expected_id}'"
+              errors=$((errors + 1))
+            else
+              echo "OK: ${rel_path}"
+            fi
+          done
+
+          if [ "$errors" -gt 0 ]; then
+            echo ""
+            echo "${errors} schema(s) have invalid \$id fields"
+            exit 1
+          fi
+
+          echo ""
+          echo "All schemas have valid \$id fields"
+
+      - name: Validate JSON is well-formed
+        run: |
+          errors=0
+          for schema in $(find . -name '*.schema.json' -not -path './.github/*'); do
+            rel_path="${schema#./}"
+            if ! python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$schema" 2>&1; then
+              echo "::error file=${rel_path}::Invalid JSON"
+              errors=$((errors + 1))
+            fi
+          done
+
+          if [ "$errors" -gt 0 ]; then
+            exit 1
+          fi
+
+          echo "All schemas are valid JSON"
