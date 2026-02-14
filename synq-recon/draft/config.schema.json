@@ -285,6 +285,13 @@
           "minItems": 1,
           "items": { "$ref": "#/$defs/measure_config" }
         },
+        "group_columns": {
+          "oneOf": [
+            { "type": "string", "description": "Single group column" },
+            { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Hierarchical group columns for drill-down" }
+          ],
+          "description": "Column(s) defining the drill-down hierarchy; falls back to key_column if not set"
+        },
         "thresholds": { "$ref": "#/$defs/threshold_config" }
       }
     },
@@ -294,8 +301,23 @@
       "properties": {
         "column": { "type": "string" },
         "function": {
-          "type": "string",
-          "enum": ["SUM", "COUNT", "AVG", "MIN", "MAX"]
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["SUM", "COUNT", "AVG", "MIN", "MAX"],
+              "description": "Single aggregation function"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["SUM", "COUNT", "AVG", "MIN", "MAX"]
+              },
+              "minItems": 1,
+              "description": "Multiple aggregation functions per column"
+            }
+          ],
+          "description": "Aggregation function(s) to apply to the column"
         }
       }
     },
@@ -325,6 +347,11 @@
           "type": "number",
           "minimum": 0,
           "description": "Maximum percentage difference (0.1 = 10%)"
+        },
+        "per_column": {
+          "type": "object",
+          "description": "Per group_column threshold overrides",
+          "additionalProperties": { "$ref": "#/$defs/threshold_config" }
         }
       }
     }
