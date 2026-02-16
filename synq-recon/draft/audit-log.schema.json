@@ -24,6 +24,11 @@
       "type": "string",
       "description": "Human-readable description of the configuration suite"
     },
+    "variables": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Resolved template variable values used for query interpolation"
+    },
     "started_at": {
       "type": "string",
       "format": "date-time",
@@ -73,6 +78,14 @@
         },
         "source": { "$ref": "#/$defs/dataset_info" },
         "target": { "$ref": "#/$defs/dataset_info" },
+        "original_source_query": {
+          "type": "string",
+          "description": "Source query template before variable interpolation (present only when variables were used)"
+        },
+        "original_target_query": {
+          "type": "string",
+          "description": "Target query template before variable interpolation (present only when variables were used)"
+        },
         "key_column": {
           "type": "string",
           "description": "Column used for bisection key ranges"

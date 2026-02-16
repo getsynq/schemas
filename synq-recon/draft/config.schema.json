@@ -253,6 +253,22 @@
           "minimum": 1,
           "default": 16384,
           "description": "Stop drilling when segment row count falls below this"
+        },
+        "strategy": {
+          "type": "string",
+          "enum": ["auto", "quantile", "hash", "time"],
+          "default": "auto",
+          "description": "Segmentation strategy for bisection drill-down"
+        },
+        "time_column": {
+          "type": "string",
+          "description": "Column containing timestamps for time-based partitioning (required when strategy is 'time')"
+        },
+        "time_granularity": {
+          "type": "string",
+          "enum": ["hour", "day", "week", "month", "quarter", "year"],
+          "default": "day",
+          "description": "Time truncation granularity for time-based partitioning"
         }
       }
     },
