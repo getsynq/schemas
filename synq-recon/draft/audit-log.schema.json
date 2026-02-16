@@ -44,6 +44,11 @@
       "minimum": 0,
       "description": "Total run duration in milliseconds"
     },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Suite-level warnings detected during config validation (e.g., time reference usage)"
+    },
     "reconciliations": {
       "type": "array",
       "description": "Audit records for each reconciliation executed",
@@ -123,6 +128,11 @@
           "type": "array",
           "items": { "$ref": "#/$defs/stage_audit" },
           "description": "Ordered list of stages executed"
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Warnings detected for this reconciliation (e.g., time reference in query)"
         },
         "overall_match": {
           "type": "boolean",
@@ -310,6 +320,11 @@
         "error": {
           "type": ["string", "null"],
           "description": "Error message if query failed"
+        },
+        "retry_attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Retry attempt number (0 for first attempt, >0 for retries)"
         }
       }
     },
