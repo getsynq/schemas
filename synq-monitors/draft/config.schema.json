@@ -102,6 +102,43 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "MetricOption": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "ROW_COUNT",
+            "DELAY",
+            "VOLUME_CHANGE_DELAY"
+          ]
+        },
+        {
+          "properties": {
+            "metric": {
+              "type": "string",
+              "enum": [
+                "ROW_COUNT",
+                "DELAY",
+                "VOLUME_CHANGE_DELAY"
+              ]
+            },
+            "sensitivity": {
+              "type": "string",
+              "enum": [
+                "PRECISE",
+                "BALANCED",
+                "RELAXED"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "metric"
+          ]
+        }
+      ]
+    },
     "Mode": {
       "properties": {
         "anomaly_engine": {
@@ -300,12 +337,7 @@
             },
             "metrics": {
               "items": {
-                "type": "string",
-                "enum": [
-                  "ROW_COUNT",
-                  "DELAY",
-                  "VOLUME_CHANGE_DELAY"
-                ]
+                "$ref": "#/$defs/MetricOption"
               },
               "type": "array",
               "minItems": 1
