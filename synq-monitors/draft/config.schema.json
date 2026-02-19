@@ -213,6 +213,44 @@
               "type": "string"
             },
             "type": {
+              "const": "custom_table_stats"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "mode": {
+              "$ref": "#/$defs/Mode"
+            },
+            "schedule": {
+              "$ref": "#/$defs/Schedule"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
               "const": "field_stats"
             },
             "name": {
