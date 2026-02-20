@@ -101,6 +101,10 @@
         "retry_attempt": {
           "type": "integer",
           "minimum": 0
+        },
+        "stats": {
+          "$ref": "#/$defs/QueryStats",
+          "description": "Execution statistics collected from the database driver"
         }
       },
       "type": "object",
@@ -112,6 +116,44 @@
         "started_at",
         "duration_ms"
       ]
+    },
+    "QueryStats": {
+      "properties": {
+        "query_id": {
+          "type": "string"
+        },
+        "rows_read": {
+          "type": "integer"
+        },
+        "bytes_read": {
+          "type": "integer"
+        },
+        "rows_produced": {
+          "type": "integer"
+        },
+        "cache_hit": {
+          "type": "boolean"
+        },
+        "bytes_billed": {
+          "type": "integer"
+        },
+        "slot_millis": {
+          "type": "integer"
+        },
+        "blocks": {
+          "type": "integer"
+        },
+        "completed_splits": {
+          "type": "integer"
+        },
+        "cpu_time_millis": {
+          "type": "integer"
+        },
+        "wall_time_millis": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
     },
     "ReconciliationAudit": {
       "properties": {
@@ -417,6 +459,10 @@
       },
       "type": "array",
       "description": "Audit records for each reconciliation executed"
+    },
+    "total_stats": {
+      "$ref": "#/$defs/QueryStats",
+      "description": "Aggregated query execution statistics across all queries in this run"
     }
   },
   "type": "object",
