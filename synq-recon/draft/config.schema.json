@@ -40,7 +40,9 @@
         "duckdb": { "$ref": "#/$defs/duckdb_config" },
         "databricks": { "$ref": "#/$defs/databricks_config" },
         "redshift": { "$ref": "#/$defs/redshift_config" },
-        "trino": { "$ref": "#/$defs/trino_config" }
+        "trino": { "$ref": "#/$defs/trino_config" },
+        "mssql": { "$ref": "#/$defs/mssql_config" },
+        "oracle": { "$ref": "#/$defs/oracle_config" }
       }
     },
     "postgres_config": {
@@ -152,6 +154,30 @@
         "username": { "type": "string", "description": "Username for authentication" },
         "password": { "type": "string", "description": "Password for authentication" },
         "use_plaintext": { "type": "boolean", "default": false, "description": "Use non-SSL connection" }
+      }
+    },
+    "mssql_config": {
+      "type": "object",
+      "required": ["server", "database", "username"],
+      "properties": {
+        "server": { "type": "string", "description": "Server hostname or IP address" },
+        "port": { "type": "integer", "default": 1433, "description": "Port number" },
+        "database": { "type": "string", "description": "Database name" },
+        "username": { "type": "string", "description": "Database username" },
+        "password": { "type": "string", "description": "Database password" },
+        "instance": { "type": "string", "description": "Named instance (optional)" }
+      }
+    },
+    "oracle_config": {
+      "type": "object",
+      "required": ["host", "username"],
+      "properties": {
+        "host": { "type": "string", "description": "Server hostname or IP address" },
+        "port": { "type": "integer", "default": 1521, "description": "Port number" },
+        "service_name": { "type": "string", "description": "Oracle service name" },
+        "sid": { "type": "string", "description": "Oracle SID (alternative to service_name)" },
+        "username": { "type": "string", "description": "Login user" },
+        "password": { "type": "string", "description": "Login password" }
       }
     },
     "reconciliation": {
