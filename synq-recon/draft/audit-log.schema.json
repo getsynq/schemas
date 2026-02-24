@@ -2,6 +2,111 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.synq.io/synq-recon/draft/audit-log.schema.json",
   "$defs": {
+    "AggregateDrillChild": {
+      "properties": {
+        "key": {
+          "type": "object"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "mismatch",
+            "missing_source",
+            "missing_target",
+            "value_mismatch"
+          ]
+        },
+        "source_values": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        },
+        "target_values": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        },
+        "differences": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        },
+        "pct_differences": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        },
+        "source_query": {
+          "type": "string"
+        },
+        "target_query": {
+          "type": "string"
+        },
+        "drill_down": {
+          "$ref": "#/$defs/AggregateDrillNode"
+        }
+      },
+      "type": "object",
+      "description": "AggregateDrillChild represents a single divergent group within a drill-down level."
+    },
+    "AggregateDrillNode": {
+      "properties": {
+        "level": {
+          "type": "integer"
+        },
+        "group_column": {
+          "type": "string"
+        },
+        "total_groups": {
+          "type": "integer"
+        },
+        "matched_groups": {
+          "type": "integer"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/AggregateDrillChild"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "description": "AggregateDrillNode represents a node in the hierarchical aggregate drill-down tree."
+    },
+    "AggregateStageResult": {
+      "properties": {
+        "total_groups": {
+          "type": "integer"
+        },
+        "matched_groups": {
+          "type": "integer"
+        },
+        "mismatch_groups": {
+          "type": "integer"
+        },
+        "missing_source": {
+          "type": "integer"
+        },
+        "missing_target": {
+          "type": "integer"
+        },
+        "match": {
+          "type": "boolean"
+        },
+        "early_termination_reason": {
+          "type": "string"
+        },
+        "drill_down": {
+          "$ref": "#/$defs/AggregateDrillNode"
+        }
+      },
+      "type": "object",
+      "description": "AggregateStageResult is the typed result for an aggregate_check stage."
+    },
     "AuditMeta": {
       "properties": {
         "version": {
@@ -25,7 +130,125 @@
           "description": "Go toolchain version used to build the binary"
         }
       },
-      "type": "object"
+      "type": "object",
+      "description": "AuditMeta holds build and environment metadata for the synq-recon binary."
+    },
+    "BisectionStageConfig": {
+      "properties": {
+        "factor": {
+          "type": "integer"
+        },
+        "threshold": {
+          "type": "integer"
+        },
+        "max_depth": {
+          "type": "integer"
+        },
+        "strategy": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "description": "BisectionStageConfig is the typed config for a bisection_drill stage."
+    },
+    "BisectionStageResult": {
+      "properties": {
+        "total_segments": {
+          "type": "integer"
+        },
+        "mismatch_count": {
+          "type": "integer"
+        },
+        "error_count": {
+          "type": "integer"
+        },
+        "max_depth": {
+          "type": "integer"
+        },
+        "early_termination_reason": {
+          "type": "string"
+        },
+        "statistics": {
+          "$ref": "#/$defs/BisectionStatistics"
+        },
+        "mismatch_leaves": {
+          "items": {
+            "$ref": "#/$defs/MismatchLeafDetail"
+          },
+          "type": "array"
+        },
+        "investigation_queries": {
+          "items": {
+            "$ref": "#/$defs/InvestigationQuery"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object",
+      "description": "BisectionStageResult is the typed result for a bisection_drill stage."
+    },
+    "BisectionStatistics": {
+      "properties": {
+        "total_nodes": {
+          "type": "integer"
+        },
+        "matched_nodes": {
+          "type": "integer"
+        },
+        "mismatched_nodes": {
+          "type": "integer"
+        },
+        "leaf_nodes": {
+          "type": "integer"
+        },
+        "intermediate_nodes": {
+          "type": "integer"
+        },
+        "matched_leaves": {
+          "type": "integer"
+        },
+        "mismatched_leaves": {
+          "type": "integer"
+        },
+        "depth_distribution": {
+          "patternProperties": {
+            "^[0-9]+$": {
+              "type": "integer"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "mismatch_by_depth": {
+          "patternProperties": {
+            "^[0-9]+$": {
+              "type": "integer"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "per_depth": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DepthStats"
+          },
+          "type": "object"
+        },
+        "total_source_rows": {
+          "type": "integer"
+        },
+        "total_target_rows": {
+          "type": "integer"
+        },
+        "mismatch_source_rows": {
+          "type": "integer"
+        },
+        "mismatch_target_rows": {
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "description": "BisectionStatistics holds statistics about the bisection segment tree."
     },
     "DatasetInfo": {
       "properties": {
@@ -43,7 +266,190 @@
       "required": [
         "connection",
         "query"
-      ]
+      ],
+      "description": "DatasetInfo identifies a source or target dataset."
+    },
+    "DepthStats": {
+      "properties": {
+        "total_rows": {
+          "type": "integer"
+        },
+        "mismatched_rows": {
+          "type": "integer"
+        },
+        "segments": {
+          "type": "integer"
+        },
+        "mismatched_segments": {
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "description": "DepthStats holds per-depth-level statistics for the bisection tree."
+    },
+    "DiffQueriesAudit": {
+      "properties": {
+        "source_rows": {
+          "type": "string"
+        },
+        "target_rows": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "description": "DiffQueriesAudit holds investigation queries for a mismatch leaf."
+    },
+    "InvestigationQuery": {
+      "properties": {
+        "min_key": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_key": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time_bucket": {
+          "type": "string"
+        },
+        "leaves_covered": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_query": {
+          "type": "string"
+        },
+        "target_query": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "required": [
+        "min_key",
+        "max_key",
+        "leaves_covered",
+        "source_query",
+        "target_query"
+      ],
+      "description": "InvestigationQuery represents a merged diff query covering one or more adjacent mismatch leaves."
+    },
+    "MismatchLeafDetail": {
+      "properties": {
+        "segment": {
+          "$ref": "#/$defs/MismatchLeafSegment"
+        },
+        "source_count": {
+          "type": "integer"
+        },
+        "target_count": {
+          "type": "integer"
+        },
+        "source_checksum": {
+          "type": "integer"
+        },
+        "target_checksum": {
+          "type": "integer"
+        },
+        "count_difference": {
+          "type": "integer"
+        },
+        "mismatch_types": {
+          "items": {
+            "type": "string",
+            "enum": [
+              "missing_in_source",
+              "missing_in_target",
+              "count_mismatch",
+              "data_mismatch",
+              "unknown"
+            ]
+          },
+          "type": "array"
+        },
+        "termination_reason": {
+          "type": "string",
+          "enum": [
+            "threshold_reached",
+            "max_depth_reached",
+            "empty_segment",
+            "cannot_split",
+            "matched",
+            "error"
+          ]
+        },
+        "diff_queries": {
+          "$ref": "#/$defs/DiffQueriesAudit"
+        },
+        "row_mismatches": {
+          "items": {
+            "$ref": "#/$defs/RowMismatchDetail"
+          },
+          "type": "array"
+        },
+        "row_mismatch_count": {
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "description": "MismatchLeafDetail holds detailed information about a single mismatch leaf."
+    },
+    "MismatchLeafSegment": {
+      "properties": {
+        "min_key": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_key": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "type": "object",
+      "description": "MismatchLeafSegment identifies the segment of a mismatch leaf."
     },
     "Normalization": {
       "properties": {
@@ -60,7 +466,8 @@
           "type": "array"
         }
       },
-      "type": "object"
+      "type": "object",
+      "description": "Normalization records the column expressions used after cross-DB type alignment."
     },
     "QueryRecord": {
       "properties": {
@@ -101,6 +508,10 @@
         "retry_attempt": {
           "type": "integer",
           "minimum": 0
+        },
+        "stats": {
+          "$ref": "#/$defs/QueryStats",
+          "description": "Execution statistics collected from the database driver"
         }
       },
       "type": "object",
@@ -111,7 +522,85 @@
         "sql",
         "started_at",
         "duration_ms"
-      ]
+      ],
+      "description": "QueryRecord captures a single SQL query execution."
+    },
+    "QueryStats": {
+      "properties": {
+        "query_id": {
+          "type": "string",
+          "description": "QueryID is the database-assigned query identifier for auditing.\nAvailable for BigQuery (job ID), Snowflake, ClickHouse (client-generated)."
+        },
+        "rows_read": {
+          "type": "integer",
+          "description": "RowsRead is the number of rows read/scanned by the query engine."
+        },
+        "bytes_read": {
+          "type": "integer",
+          "description": "BytesRead is the number of bytes read/scanned by the query engine."
+        },
+        "rows_produced": {
+          "type": "integer",
+          "description": "RowsProduced is the number of result rows returned to the caller."
+        },
+        "cache_hit": {
+          "type": "boolean",
+          "description": "CacheHit indicates whether the query result was served from cache."
+        },
+        "bytes_billed": {
+          "type": "integer",
+          "description": "BytesBilled is the number of bytes billed (BigQuery)."
+        },
+        "slot_millis": {
+          "type": "integer",
+          "description": "SlotMillis is the slot time consumed (BigQuery)."
+        },
+        "blocks": {
+          "type": "integer",
+          "description": "Blocks is the number of data blocks read (ClickHouse)."
+        },
+        "completed_splits": {
+          "type": "integer",
+          "description": "CompletedSplits is the number of completed splits (Trino)."
+        },
+        "cpu_time_millis": {
+          "type": "integer",
+          "description": "CPUTimeMillis is the CPU time consumed (Trino)."
+        },
+        "wall_time_millis": {
+          "type": "integer",
+          "description": "WallTimeMillis is the wall time reported by the engine (Trino)."
+        }
+      },
+      "type": "object",
+      "description": "QueryStats holds execution statistics collected from the database driver."
+    },
+    "QuickCheckStageResult": {
+      "properties": {
+        "source_count": {
+          "type": "integer"
+        },
+        "target_count": {
+          "type": "integer"
+        },
+        "source_checksum": {
+          "type": "integer"
+        },
+        "target_checksum": {
+          "type": "integer"
+        },
+        "match": {
+          "type": "boolean"
+        },
+        "count_difference": {
+          "type": "integer"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "description": "QuickCheckStageResult is the typed result for a quick_check stage."
     },
     "ReconciliationAudit": {
       "properties": {
@@ -129,8 +618,12 @@
             "aggregate"
           ]
         },
-        "config": true,
-        "raw_config": true,
+        "config": {
+          "type": "object"
+        },
+        "raw_config": {
+          "type": "object"
+        },
         "source": {
           "$ref": "#/$defs/DatasetInfo"
         },
@@ -192,11 +685,24 @@
         "key_column",
         "stages",
         "overall_match"
-      ]
+      ],
+      "description": "ReconciliationAudit captures everything about a single reconciliation execution."
     },
     "RowMismatchAudit": {
       "properties": {
-        "pk": true,
+        "pk": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "type": {
           "type": "string",
           "enum": [
@@ -228,7 +734,41 @@
       "required": [
         "pk",
         "type"
-      ]
+      ],
+      "description": "RowMismatchAudit captures a single row-level mismatch in the audit log."
+    },
+    "RowMismatchDetail": {
+      "properties": {
+        "pk": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "missing_in_target",
+            "missing_in_source",
+            "modified"
+          ]
+        },
+        "source_row_hash": {
+          "type": "integer"
+        },
+        "target_row_hash": {
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "description": "RowMismatchDetail holds per-row mismatch detail in the stage result."
     },
     "SegmentAuditNode": {
       "properties": {
@@ -295,12 +835,37 @@
       "required": [
         "match",
         "is_leaf"
-      ]
+      ],
+      "description": "SegmentAuditNode represents a node in the bisection segment tree with query references."
     },
     "SegmentInfo": {
       "properties": {
-        "min_key": true,
-        "max_key": true,
+        "min_key": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_key": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "depth": {
           "type": "integer",
           "minimum": 0
@@ -313,7 +878,8 @@
           "type": "string"
         }
       },
-      "type": "object"
+      "type": "object",
+      "description": "SegmentInfo identifies a key range segment."
     },
     "StageAudit": {
       "properties": {
@@ -337,7 +903,13 @@
           "type": "integer",
           "minimum": 0
         },
-        "config": true,
+        "config": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BisectionStageConfig"
+            }
+          ]
+        },
         "queries": {
           "items": {
             "$ref": "#/$defs/QueryRecord"
@@ -347,7 +919,19 @@
         "segment_tree": {
           "$ref": "#/$defs/SegmentAuditNode"
         },
-        "result": true
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QuickCheckStageResult"
+            },
+            {
+              "$ref": "#/$defs/BisectionStageResult"
+            },
+            {
+              "$ref": "#/$defs/AggregateStageResult"
+            }
+          ]
+        }
       },
       "type": "object",
       "required": [
@@ -356,7 +940,8 @@
         "completed_at",
         "duration_ms",
         "queries"
-      ]
+      ],
+      "description": "StageAudit captures one reconciliation stage (quick_check, bisection_drill, aggregate_check)."
     }
   },
   "properties": {
@@ -417,6 +1002,10 @@
       },
       "type": "array",
       "description": "Audit records for each reconciliation executed"
+    },
+    "total_stats": {
+      "$ref": "#/$defs/QueryStats",
+      "description": "Aggregated query execution statistics across all queries in this run"
     }
   },
   "type": "object",
