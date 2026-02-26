@@ -29,16 +29,10 @@
           "type": "object"
         },
         "differences": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "type": "object"
+          "$ref": "#/$defs/MeasureDifferences"
         },
-        "pct_differences": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "type": "object"
+        "threshold_evaluation": {
+          "$ref": "#/$defs/ThresholdEvaluation"
         },
         "source_query": {
           "type": "string"
@@ -351,6 +345,68 @@
       ],
       "description": "InvestigationQuery represents a merged diff query covering one or more adjacent mismatch leaves."
     },
+    "MeasureDifferences": {
+      "properties": {
+        "relative": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object",
+          "description": "Relative difference per measure (target - source). Positive means target is larger."
+        },
+        "absolute": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object",
+          "description": "Absolute difference per measure: |target - source|. Always non-negative."
+        },
+        "pct_vs_source": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object",
+          "description": "Percentage difference relative to source: |diff| / |source|."
+        },
+        "pct_vs_target": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object",
+          "description": "Percentage difference relative to target: |diff| / |target|."
+        },
+        "pct_symmetric": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object",
+          "description": "Symmetric percentage difference: 2*|diff| / (|source| + |target|)."
+        }
+      },
+      "type": "object",
+      "description": "MeasureDifferences holds all difference variants for measure comparisons."
+    },
+    "MeasureVerdict": {
+      "properties": {
+        "exceeded": {
+          "type": "boolean",
+          "description": "Exceeded is true when the measure difference exceeds all configured thresholds."
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "exact_match",
+            "within_absolute_threshold",
+            "within_percentage_threshold",
+            "exceeded_all_thresholds",
+            "no_thresholds_configured"
+          ],
+          "description": "Reason explains why the measure was considered within or outside thresholds."
+        }
+      },
+      "type": "object",
+      "description": "MeasureVerdict captures the threshold evaluation result for a single measure."
+    },
     "MismatchLeafDetail": {
       "properties": {
         "segment": {
@@ -510,8 +566,7 @@
           "minimum": 0
         },
         "stats": {
-          "$ref": "#/$defs/QueryStats",
-          "description": "Execution statistics collected from the database driver"
+          "$ref": "#/$defs/QueryStats"
         }
       },
       "type": "object",
@@ -605,7 +660,12 @@
     "ReconciliationAudit": {
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Machine identifier (YAML key)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable title (from YAML title field or falls back to name)"
         },
         "description": {
           "type": "string"
@@ -942,6 +1002,31 @@
         "queries"
       ],
       "description": "StageAudit captures one reconciliation stage (quick_check, bisection_drill, aggregate_check)."
+    },
+    "ThresholdEvaluation": {
+      "properties": {
+        "absolute_threshold": {
+          "type": "number",
+          "description": "AbsoluteThreshold is the configured maximum absolute difference, or 0 if not set."
+        },
+        "percentage_threshold": {
+          "type": "number",
+          "description": "PercentageThreshold is the configured maximum percentage difference, or 0 if not set."
+        },
+        "percentage_mode": {
+          "type": "string",
+          "description": "PercentageMode is which percentage formula was used: source, target, or symmetric."
+        },
+        "measures": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MeasureVerdict"
+          },
+          "type": "object",
+          "description": "Measures holds per-measure threshold evaluation results."
+        }
+      },
+      "type": "object",
+      "description": "ThresholdEvaluation captures the effective thresholds applied and per-measure verdicts."
     }
   },
   "properties": {
@@ -956,16 +1041,23 @@
       "description": "Unique identifier for this invocation/run"
     },
     "meta": {
-      "$ref": "#/$defs/AuditMeta",
-      "description": "Build and environment metadata for the synq-recon binary"
+      "$ref": "#/$defs/AuditMeta"
     },
     "config_file": {
       "type": "string",
       "description": "Path to the configuration file used"
     },
+    "suite": {
+      "type": "string",
+      "description": "Machine identifier for the config suite (from YAML name field or filename)"
+    },
+    "suite_title": {
+      "type": "string",
+      "description": "Human-readable title of the config suite (from YAML title field or falls back to suite id)"
+    },
     "description": {
       "type": "string",
-      "description": "Human-readable description of the configuration suite"
+      "description": "Longer description of the configuration suite"
     },
     "variables": {
       "additionalProperties": {
@@ -1004,8 +1096,7 @@
       "description": "Audit records for each reconciliation executed"
     },
     "total_stats": {
-      "$ref": "#/$defs/QueryStats",
-      "description": "Aggregated query execution statistics across all queries in this run"
+      "$ref": "#/$defs/QueryStats"
     }
   },
   "type": "object",

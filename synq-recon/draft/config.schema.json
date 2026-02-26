@@ -390,6 +390,12 @@
           "minimum": 0,
           "description": "Maximum percentage difference (0.1 = 10%)"
         },
+        "percentage_mode": {
+          "type": "string",
+          "enum": ["source", "target", "symmetric"],
+          "default": "source",
+          "description": "Which percentage formula to use for threshold comparison: source (|diff|/|source|, default), target (|diff|/|target|), symmetric (2*|diff|/(|source|+|target|))"
+        },
         "per_column": {
           "type": "object",
           "description": "Per group_column threshold overrides",
