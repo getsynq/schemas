@@ -127,6 +127,45 @@
       "type": "object",
       "description": "AuditMeta holds build and environment metadata for the synq-recon binary."
     },
+    "AuditSummary": {
+      "properties": {
+        "overall_match": {
+          "type": "boolean",
+          "description": "True when every reconciliation matched (exactly or within threshold)"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of reconciliations executed"
+        },
+        "matched": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of reconciliations that completed and matched exactly"
+        },
+        "matched_within_threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of reconciliations that had differences within configured thresholds"
+        },
+        "mismatched": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of reconciliations that completed but found data differences exceeding thresholds"
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of reconciliations that encountered an infrastructure error"
+        }
+      },
+      "type": "object",
+      "required": [
+        "overall_match",
+        "total"
+      ],
+      "description": "AuditSummary holds aggregated counts derived from individual reconciliation results."
+    },
     "BisectionStageConfig": {
       "properties": {
         "factor": {
@@ -402,6 +441,18 @@
             "no_thresholds_configured"
           ],
           "description": "Reason explains why the measure was considered within or outside thresholds."
+        },
+        "effective_absolute": {
+          "type": "number",
+          "description": "EffectiveAbsolute is the absolute threshold that was applied to this measure (may differ per measure via per_measure config)."
+        },
+        "effective_percentage": {
+          "type": "number",
+          "description": "EffectivePercentage is the percentage threshold that was applied to this measure."
+        },
+        "effective_percentage_mode": {
+          "type": "string",
+          "description": "EffectivePercentageMode is the percentage mode that was applied to this measure."
         }
       },
       "type": "object",
@@ -729,6 +780,16 @@
           },
           "type": "array"
         },
+        "status": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed",
+            "mismatched",
+            "mismatched_within_threshold"
+          ],
+          "description": "Outcome of this reconciliation"
+        },
         "overall_match": {
           "type": "boolean"
         },
@@ -744,6 +805,7 @@
         "target",
         "key_column",
         "stages",
+        "status",
         "overall_match"
       ],
       "description": "ReconciliationAudit captures everything about a single reconciliation execution."
@@ -1097,6 +1159,19 @@
     },
     "total_stats": {
       "$ref": "#/$defs/QueryStats"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "mismatched",
+        "mismatched_within_threshold"
+      ],
+      "description": "Overall execution status derived from individual reconciliation outcomes"
+    },
+    "summary": {
+      "$ref": "#/$defs/AuditSummary"
     }
   },
   "type": "object",
@@ -1105,7 +1180,8 @@
     "started_at",
     "completed_at",
     "duration_ms",
-    "reconciliations"
+    "reconciliations",
+    "status"
   ],
   "title": "SYNQ Recon Audit Log",
   "description": "Audit log capturing all operations performed during a synq-recon reconciliation run",
