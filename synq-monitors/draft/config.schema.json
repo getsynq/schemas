@@ -32,9 +32,6 @@
         "time_partitioning_column": {
           "type": "string"
         },
-        "time_partitioning_interval": {
-          "$ref": "#/$defs/Duration"
-        },
         "schedule": {
           "$ref": "#/$defs/Schedule"
         },
@@ -67,9 +64,6 @@
         },
         "time_partitioning_column": {
           "type": "string"
-        },
-        "time_partitioning_interval": {
-          "$ref": "#/$defs/Duration"
         },
         "tests": {
           "items": {
@@ -193,9 +187,6 @@
             "time_partitioning_column": {
               "type": "string"
             },
-            "time_partitioning_interval": {
-              "$ref": "#/$defs/Duration"
-            },
             "metric_aggregation": {
               "type": "string"
             }
@@ -285,9 +276,6 @@
             "time_partitioning_column": {
               "type": "string"
             },
-            "time_partitioning_interval": {
-              "$ref": "#/$defs/Duration"
-            },
             "columns": {
               "items": {
                 "type": "string"
@@ -342,9 +330,6 @@
             },
             "time_partitioning_column": {
               "type": "string"
-            },
-            "time_partitioning_interval": {
-              "$ref": "#/$defs/Duration"
             },
             "expression": {
               "type": "string"
@@ -435,9 +420,6 @@
             },
             "time_partitioning_column": {
               "type": "string"
-            },
-            "time_partitioning_interval": {
-              "$ref": "#/$defs/Duration"
             }
           },
           "additionalProperties": false,
@@ -449,6 +431,48 @@
       ],
       "required": [
         "type"
+      ]
+    },
+    "PartitioningInterval": {
+      "type": "string",
+      "enum": [
+        "1h",
+        "24h"
+      ]
+    },
+    "RelationshipColumn": {
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "source",
+        "reference"
+      ]
+    },
+    "RelationshipReference": {
+      "properties": {
+        "entity": {
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/RelationshipColumn"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "entity",
+        "columns"
       ]
     },
     "Schedule": {
@@ -478,6 +502,24 @@
             },
             "ignore_last": {
               "type": "integer"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "ondemand"
+              ]
+            },
+            "time_partitioning_interval": {
+              "$ref": "#/$defs/PartitioningInterval"
             }
           },
           "additionalProperties": false,
@@ -946,6 +988,54 @@
             "type",
             "column",
             "values"
+          ]
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "relationships"
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "schedule": {
+              "$ref": "#/$defs/SimpleSchedule"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR"
+              ]
+            },
+            "time_partition_column": {
+              "type": "string"
+            },
+            "time_window_seconds": {
+              "type": "integer"
+            },
+            "references": {
+              "items": {
+                "$ref": "#/$defs/RelationshipReference"
+              },
+              "type": "array"
+            },
+            "ignore_nulls": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "type",
+            "references"
           ]
         },
         {
