@@ -1,0 +1,21 @@
+.idea
+.venv
+
+# Generated HTML docs (built by CI)
+**/*.html
+!templates/schema/base.html
+
+# Copied from json-schema-for-humans during build
+templates/schema/schema_doc.css
+templates/schema/schema_doc.js
+templates/schema/schema_doc.min.js
+templates/schema/badge_type.html
+templates/schema/breadcrumbs.html
+templates/schema/content.html
+templates/schema/macro_restriction.html
+templates/schema/section_*.html
+templates/schema/tabbed_section.html
+
+# Generated CSS/JS copied alongside schema HTML
+**/schema_doc.css
+**/schema_doc.min.js
