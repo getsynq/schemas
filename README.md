@@ -1,6 +1,6 @@
-# SYNQ JSON Schemas
+# Coalesce Quality JSON Schemas
 
-Public JSON Schema definitions for SYNQ tools and services.
+Public JSON Schema definitions for Coalesce Quality tools and services.
 
 **Live site:** https://schemas.synq.io
 

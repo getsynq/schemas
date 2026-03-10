@@ -14,7 +14,7 @@
     {% if title %}
         {% set title = title.literal %}
     {% endif %}
-    <title>{%- if title -%}{{ title }} - SYNQ{%- else -%}Schema Docs - SYNQ{%- endif -%}</title>
+    <title>{%- if title -%}{{ title }} - Coalesce Quality{%- else -%}Schema Docs - Coalesce Quality{%- endif -%}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -83,21 +83,21 @@
         }
 
         /* ── Nav bar ── */
-        .synq-nav {
+        .cq-nav {
             background: #135594;
             padding: 0.75rem 1.5rem;
             display: flex;
             align-items: center;
             gap: 1.5rem;
         }
-        .synq-nav a {
+        .cq-nav a {
             color: hsl(209 60% 82%);
             text-decoration: none;
             font-size: 0.875rem;
             transition: color 0.15s;
         }
-        .synq-nav a:hover { color: #fff; text-decoration: none; }
-        .synq-nav .back-link::before { content: "\2190\00a0"; }
+        .cq-nav a:hover { color: #fff; text-decoration: none; }
+        .cq-nav .back-link::before { content: "\2190\00a0"; }
 
         /* ── Content area ── */
         .schema-content {
@@ -221,8 +221,8 @@
     </style>
 </head>
 <body onload="anchorOnLoad();" id="root">
-    <nav class="synq-nav">
-        <a href="/"><img src="/synq-logo-white.svg" width="72" height="19" alt="SYNQ"></a>
+    <nav class="cq-nav">
+        <a href="/"><img src="/coalesce-quality-logo-white.svg" width="72" height="19" alt="Coalesce Quality"></a>
         <a class="back-link" href="/">All schemas</a>
     </nav>
 
