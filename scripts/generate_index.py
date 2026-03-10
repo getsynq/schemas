@@ -1,4 +1,4 @@
-"""Generate index.html for Coalesce quality JSON Schema documentation site."""
+"""Generate index.html for Coalesce Quality JSON Schema documentation site."""
 
 import json
 import sys
@@ -12,7 +12,7 @@ TEMPLATE = Template("""\
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Coalesce quality - JSON Schemas</title>
+  <title>Coalesce Quality - JSON Schemas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -122,9 +122,9 @@ TEMPLATE = Template("""\
 <body>
   <div class="header">
     <div class="header-inner">
-      <div class="logo"><img src="coalesce-quality-logo-white.svg" width="92" height="24" alt="Coalesce quality"></div>
+      <div class="logo"><img src="coalesce-quality-logo-white.svg" width="92" height="24" alt="Coalesce Quality"></div>
       <h1>JSON Schemas</h1>
-      <p>Public JSON Schema definitions for Coalesce quality tools and services.</p>
+      <p>Public JSON Schema definitions for Coalesce Quality tools and services.</p>
       <p>See <a href="https://docs.synq.io/">docs.synq.io</a> for full documentation.</p>
     </div>
   </div>
@@ -166,7 +166,7 @@ def collect_schemas(root: Path) -> list[dict]:
             {
                 "rel_path": str(rel),
                 "html_path": html_path,
-                "title": data.get("title", base).removeprefix("SYNQ ").removeprefix("Coalesce quality "),
+                "title": data.get("title", base).removeprefix("SYNQ ").removeprefix("Coalesce Quality "),
                 "status": data.get("x-status", "stable"),
                 "description": data.get("description", ""),
             }
