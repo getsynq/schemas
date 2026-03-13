@@ -228,6 +228,20 @@
             },
             "schedule": {
               "$ref": "#/$defs/Schedule"
+            },
+            "metrics": {
+              "items": {
+                "$ref": "#/$defs/MetricOption"
+              },
+              "type": "array"
+            },
+            "sensitivity": {
+              "type": "string",
+              "enum": [
+                "PRECISE",
+                "BALANCED",
+                "RELAXED"
+              ]
             }
           },
           "additionalProperties": false,
