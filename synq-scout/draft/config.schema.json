@@ -1,0 +1,581 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.synq.io/synq-scout/draft/config.schema.json",
+  "$defs": {
+    "BigQueryConf": {
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "description": "GCP project ID."
+        },
+        "region": {
+          "type": "string",
+          "description": "Region for BigQuery resources."
+        },
+        "service_account_key": {
+          "type": "string",
+          "description": "Inline JSON content of the service account key."
+        },
+        "service_account_key_file": {
+          "type": "string",
+          "description": "Path to the service account key JSON file."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "project_id",
+        "region"
+      ],
+      "description": "BigQueryConf contains BigQuery connection parameters."
+    },
+    "ClickhouseConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string",
+          "description": "Database to connect to. If empty, all databases are scraped."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "username",
+        "password"
+      ],
+      "description": "ClickhouseConf contains ClickHouse connection parameters."
+    },
+    "Connection": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for this connection. Defaults to the connection ID (map key)."
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "When true, the connection is skipped during execution."
+        },
+        "parallelism": {
+          "type": "integer",
+          "maximum": 256,
+          "minimum": 1,
+          "description": "Maximum number of parallel queries. Range: 1-256. Defaults to 8."
+        },
+        "postgres": {
+          "$ref": "#/$defs/PostgresConf"
+        },
+        "snowflake": {
+          "$ref": "#/$defs/SnowflakeConf"
+        },
+        "bigquery": {
+          "$ref": "#/$defs/BigQueryConf"
+        },
+        "redshift": {
+          "$ref": "#/$defs/RedshiftConf"
+        },
+        "mysql": {
+          "$ref": "#/$defs/MySQLConf"
+        },
+        "clickhouse": {
+          "$ref": "#/$defs/ClickhouseConf"
+        },
+        "trino": {
+          "$ref": "#/$defs/TrinoConf"
+        },
+        "databricks": {
+          "$ref": "#/$defs/DatabricksConf"
+        },
+        "mssql": {
+          "$ref": "#/$defs/MSSQLConf"
+        },
+        "oracle": {
+          "$ref": "#/$defs/OracleConf"
+        },
+        "duckdb": {
+          "$ref": "#/$defs/DuckDBConf"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Connection is a single database connection entry in a connections map."
+    },
+    "DatabricksConf": {
+      "properties": {
+        "workspace_url": {
+          "type": "string",
+          "description": "Databricks workspace URL."
+        },
+        "auth_token": {
+          "type": "string",
+          "description": "Personal access token for authentication."
+        },
+        "auth_client": {
+          "type": "string",
+          "description": "OAuth client ID (M2M authentication)."
+        },
+        "auth_secret": {
+          "type": "string",
+          "description": "OAuth client secret (M2M authentication)."
+        },
+        "warehouse": {
+          "type": "string",
+          "description": "SQL warehouse ID to use for queries."
+        },
+        "refresh_table_metrics": {
+          "type": "boolean"
+        },
+        "refresh_table_metrics_use_scan": {
+          "type": "boolean"
+        },
+        "fetch_table_tags": {
+          "type": "boolean"
+        },
+        "use_show_create_table": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "workspace_url"
+      ],
+      "description": "DatabricksConf contains Databricks connection parameters."
+    },
+    "DuckDBConf": {
+      "properties": {
+        "database": {
+          "type": "string",
+          "description": "File path, ':memory:' for in-memory, or MotherDuck database name."
+        },
+        "motherduck_account": {
+          "type": "string",
+          "description": "MotherDuck organization/account name (for cloud mode)."
+        },
+        "motherduck_token": {
+          "type": "string",
+          "description": "MotherDuck authentication token (required for cloud MotherDuck)."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "DuckDBConf contains DuckDB / MotherDuck connection parameters."
+    },
+    "MSSQLConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "trust_cert": {
+          "type": "boolean",
+          "description": "Trust the server certificate without validation."
+        },
+        "encrypt": {
+          "type": "string",
+          "description": "Encryption mode (e.g. \"true\", \"false\", \"strict\")."
+        },
+        "fed_auth": {
+          "type": "string",
+          "description": "Federated authentication method (e.g. \"ActiveDirectoryDefault\")."
+        },
+        "access_token": {
+          "type": "string",
+          "description": "Pre-acquired access token for Azure AD authentication."
+        },
+        "application_client_id": {
+          "type": "string",
+          "description": "Azure AD application client ID for service principal auth."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "database"
+      ],
+      "description": "MSSQLConf contains Microsoft SQL Server / Azure SQL Database connection parameters."
+    },
+    "MySQLConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
+        },
+        "params": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Additional DSN parameters passed to the driver."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "port",
+        "username",
+        "password"
+      ],
+      "description": "MySQLConf contains MySQL connection parameters."
+    },
+    "OracleConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "service_name": {
+          "type": "string",
+          "description": "Oracle service name."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "ssl": {
+          "type": "boolean",
+          "description": "Enable SSL/TLS for the connection."
+        },
+        "ssl_verify": {
+          "type": "boolean",
+          "description": "Verify the server's SSL certificate."
+        },
+        "wallet_path": {
+          "type": "string",
+          "description": "Path to Oracle Wallet directory for authentication."
+        },
+        "use_diagnostics_pack": {
+          "type": "boolean",
+          "description": "Enable Oracle Diagnostics Pack features (AWR, ASH)."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "service_name"
+      ],
+      "description": "OracleConf contains Oracle Database connection parameters."
+    },
+    "PostgresConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "database",
+        "username",
+        "password"
+      ],
+      "description": "PostgresConf contains PostgreSQL connection parameters."
+    },
+    "RedshiftConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "freshness_from_query_logs": {
+          "type": "boolean",
+          "description": "Estimate table freshness from Redshift query logs instead of metadata."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "port",
+        "database",
+        "username",
+        "password"
+      ],
+      "description": "RedshiftConf contains Amazon Redshift connection parameters."
+    },
+    "SYNQConfig": {
+      "properties": {
+        "client_id": {
+          "type": "string",
+          "description": "OAuth client ID for authenticating with the SYNQ platform."
+        },
+        "client_secret": {
+          "type": "string",
+          "description": "OAuth client secret for authenticating with the SYNQ platform."
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "gRPC endpoint for the SYNQ API (e.g. \"developer.synq.io:443\")."
+        },
+        "ingest_endpoint": {
+          "type": "string",
+          "description": "gRPC endpoint for the SYNQ ingest API. Defaults to Endpoint if empty."
+        },
+        "oauth_url": {
+          "type": "string",
+          "description": "OAuth token URL. Derived from Endpoint if empty."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "SYNQConfig holds SYNQ platform connection settings."
+    },
+    "SnowflakeConf": {
+      "properties": {
+        "account": {
+          "type": "string",
+          "description": "Snowflake account identifier."
+        },
+        "warehouse": {
+          "type": "string",
+          "description": "Virtual warehouse to use for queries."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role to assume after connecting."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "private_key": {
+          "type": "string",
+          "description": "PEM-encoded private key content for key-pair authentication."
+        },
+        "private_key_file": {
+          "type": "string",
+          "description": "Path to a PEM-encoded private key file."
+        },
+        "private_key_passphrase": {
+          "type": "string",
+          "description": "Passphrase to decrypt the private key."
+        },
+        "databases": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Databases to include. If empty, all accessible databases are scraped."
+        },
+        "use_get_ddl": {
+          "type": "boolean",
+          "description": "Use GET_DDL() to retrieve DDL for tables and views."
+        },
+        "account_usage_db": {
+          "type": "string",
+          "description": "Database containing the ACCOUNT_USAGE schema. Defaults to SNOWFLAKE."
+        },
+        "auth_type": {
+          "type": "string",
+          "description": "Set to \"externalbrowser\" to use SSO browser-based authentication."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "account",
+        "warehouse",
+        "role",
+        "username"
+      ],
+      "description": "SnowflakeConf contains Snowflake connection parameters."
+    },
+    "TrinoConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "use_plaintext": {
+          "type": "boolean",
+          "description": "Use a plain HTTP connection instead of HTTPS."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "catalogs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Catalogs to include. Required for most Trino deployments."
+        },
+        "no_show_create_view": {
+          "type": "boolean"
+        },
+        "no_show_create_table": {
+          "type": "boolean"
+        },
+        "no_materialized_views": {
+          "type": "boolean"
+        },
+        "fetch_table_comments": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host"
+      ],
+      "description": "TrinoConf contains Trino / Starburst connection parameters."
+    },
+    "YAMLLLMConfig": {
+      "properties": {
+        "openai": {
+          "$ref": "#/$defs/YAMLOpenAIConfig",
+          "description": "OpenAI-compatible API configuration (also used for LiteLLM proxy)."
+        },
+        "triage_parallelism": {
+          "type": "integer",
+          "description": "Number of parallel triage operations."
+        },
+        "test_suggestions_parallelism": {
+          "type": "integer",
+          "description": "Number of parallel test suggestion operations."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "YAMLLLMConfig contains LLM provider settings."
+    },
+    "YAMLOpenAIConfig": {
+      "properties": {
+        "api_key": {
+          "type": "string",
+          "description": "API key for the LLM provider."
+        },
+        "base_url": {
+          "type": "string",
+          "description": "Base URL for the API (e.g. LiteLLM proxy URL)."
+        },
+        "thinking_model": {
+          "type": "string",
+          "description": "Model used for deep thinking/analysis tasks."
+        },
+        "summary_model": {
+          "type": "string",
+          "description": "Model used for summarization tasks."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "YAMLOpenAIConfig contains OpenAI-compatible API settings."
+    }
+  },
+  "properties": {
+    "synq": {
+      "$ref": "#/$defs/SYNQConfig"
+    },
+    "connections": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Connection"
+      },
+      "type": "object"
+    },
+    "llm": {
+      "$ref": "#/$defs/YAMLLLMConfig"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "title": "SYNQ Scout Agent Configuration",
+  "description": "Configuration file format for the synq-scout SRE agent"
+}
