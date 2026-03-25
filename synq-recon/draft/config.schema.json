@@ -1,407 +1,1103 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.synq.io/synq-recon/draft/config.schema.json",
-  "title": "SYNQ Recon Configuration",
-  "x-status": "draft",
-  "description": "Configuration file format for synq-recon database reconciliation tool",
-  "type": "object",
-  "required": ["connections", "reconciliations"],
-  "properties": {
-    "description": {
-      "type": "string",
-      "description": "Human-readable description of the configuration suite"
-    },
-    "connections": {
-      "type": "object",
-      "description": "Database connection definitions",
-      "additionalProperties": { "$ref": "#/$defs/connection" },
-      "minProperties": 1
-    },
-    "reconciliations": {
-      "type": "object",
-      "description": "Reconciliation scenario definitions",
-      "additionalProperties": { "$ref": "#/$defs/reconciliation" },
-      "minProperties": 1
-    }
-  },
   "$defs": {
-    "connection": {
-      "type": "object",
-      "description": "A database connection. Exactly one database type key must be present.",
+    "AggregateConfig": {
       "properties": {
-        "name": { "type": "string", "description": "Optional display name" },
-        "parallelism": { "type": "integer", "minimum": 1, "default": 8, "description": "Max parallel queries" },
-        "disabled": { "type": "boolean", "default": false },
-        "postgres": { "$ref": "#/$defs/postgres_config" },
-        "snowflake": { "$ref": "#/$defs/snowflake_config" },
-        "bigquery": { "$ref": "#/$defs/bigquery_config" },
-        "mysql": { "$ref": "#/$defs/mysql_config" },
-        "clickhouse": { "$ref": "#/$defs/clickhouse_config" },
-        "duckdb": { "$ref": "#/$defs/duckdb_config" },
-        "databricks": { "$ref": "#/$defs/databricks_config" },
-        "redshift": { "$ref": "#/$defs/redshift_config" },
-        "trino": { "$ref": "#/$defs/trino_config" },
-        "mssql": { "$ref": "#/$defs/mssql_config" },
-        "oracle": { "$ref": "#/$defs/oracle_config" }
-      }
-    },
-    "postgres_config": {
-      "type": "object",
-      "required": ["host", "database", "username"],
-      "properties": {
-        "host": { "type": "string" },
-        "port": { "type": "integer", "default": 5432 },
-        "database": { "type": "string" },
-        "username": { "type": "string" },
-        "password": { "type": "string" },
-        "allow_insecure": { "type": "boolean", "default": false }
-      }
-    },
-    "snowflake_config": {
-      "type": "object",
-      "required": ["account", "username"],
-      "properties": {
-        "account": { "type": "string", "description": "Snowflake account identifier" },
-        "warehouse": { "type": "string", "description": "Virtual warehouse to use" },
-        "role": { "type": "string", "description": "Role to assume" },
-        "username": { "type": "string", "description": "Username for authentication" },
-        "password": { "type": "string", "description": "Password for authentication" },
-        "private_key": { "type": "string", "description": "Private key content for Snowflake authentication" },
-        "private_key_file": { "type": "string", "description": "Path to private key file" },
-        "private_key_passphrase": { "type": "string", "description": "Passphrase to decode private key" },
-        "auth_type": { "type": "string", "description": "Authentication type (e.g., 'externalbrowser' for SSO)" },
-        "databases": { "type": "array", "items": { "type": "string" }, "description": "Databases to connect to" }
-      }
-    },
-    "bigquery_config": {
-      "type": "object",
-      "required": ["project_id"],
-      "properties": {
-        "project_id": { "type": "string", "description": "GCP project ID" },
-        "region": { "type": "string", "description": "Region for BigQuery resources" },
-        "service_account_key": { "type": "string", "description": "Service account key JSON content" },
-        "service_account_key_file": { "type": "string", "description": "Path to service account key file" }
-      }
-    },
-    "mysql_config": {
-      "type": "object",
-      "required": ["host", "database", "username"],
-      "properties": {
-        "host": { "type": "string", "description": "Host address" },
-        "port": { "type": "integer", "default": 3306, "description": "Port number" },
-        "database": { "type": "string", "description": "Database name" },
-        "username": { "type": "string", "description": "Username for authentication" },
-        "password": { "type": "string", "description": "Password for authentication" },
-        "allow_insecure": { "type": "boolean", "default": false, "description": "Whether to allow insecure connections" },
-        "params": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Additional connection parameters" }
-      }
-    },
-    "clickhouse_config": {
-      "type": "object",
-      "required": ["host"],
-      "properties": {
-        "host": { "type": "string", "description": "Host address" },
-        "port": { "type": "integer", "default": 9000, "description": "Port number" },
-        "database": { "type": "string", "description": "Database name" },
-        "username": { "type": "string", "description": "Username for authentication" },
-        "password": { "type": "string", "description": "Password for authentication" },
-        "allow_insecure": { "type": "boolean", "default": false, "description": "Whether to disable SSL for connection" }
-      }
-    },
-    "duckdb_config": {
-      "type": "object",
-      "required": ["database"],
-      "properties": {
-        "database": {
-          "type": "string",
-          "description": "File path, ':memory:' for in-memory, or MotherDuck account name"
-        },
-        "motherduck_token": {
-          "type": "string",
-          "description": "MotherDuck authentication token (required for cloud MotherDuck)"
-        }
-      }
-    },
-    "databricks_config": {
-      "type": "object",
-      "required": ["workspace_url"],
-      "properties": {
-        "workspace_url": { "type": "string", "description": "Databricks workspace URL" },
-        "auth_token": { "type": "string", "description": "Authentication token" },
-        "auth_client": { "type": "string", "description": "OAuth client ID" },
-        "auth_secret": { "type": "string", "description": "OAuth client secret" },
-        "warehouse": { "type": "string", "description": "SQL warehouse ID" }
-      }
-    },
-    "redshift_config": {
-      "type": "object",
-      "required": ["host", "database", "username"],
-      "properties": {
-        "host": { "type": "string" },
-        "port": { "type": "integer", "default": 5439 },
-        "database": { "type": "string" },
-        "username": { "type": "string" },
-        "password": { "type": "string" }
-      }
-    },
-    "trino_config": {
-      "type": "object",
-      "required": ["host"],
-      "properties": {
-        "host": { "type": "string", "description": "Host address" },
-        "port": { "type": "integer", "default": 8080, "description": "Port number" },
-        "catalogs": { "type": "array", "items": { "type": "string" }, "description": "Catalogs to connect to" },
-        "username": { "type": "string", "description": "Username for authentication" },
-        "password": { "type": "string", "description": "Password for authentication" },
-        "use_plaintext": { "type": "boolean", "default": false, "description": "Use non-SSL connection" }
-      }
-    },
-    "mssql_config": {
-      "type": "object",
-      "required": ["server", "database", "username"],
-      "properties": {
-        "server": { "type": "string", "description": "Server hostname or IP address" },
-        "port": { "type": "integer", "default": 1433, "description": "Port number" },
-        "database": { "type": "string", "description": "Database name" },
-        "username": { "type": "string", "description": "Database username" },
-        "password": { "type": "string", "description": "Database password" },
-        "instance": { "type": "string", "description": "Named instance (optional)" }
-      }
-    },
-    "oracle_config": {
-      "type": "object",
-      "required": ["host", "username"],
-      "properties": {
-        "host": { "type": "string", "description": "Server hostname or IP address" },
-        "port": { "type": "integer", "default": 1521, "description": "Port number" },
-        "service_name": { "type": "string", "description": "Oracle service name" },
-        "sid": { "type": "string", "description": "Oracle SID (alternative to service_name)" },
-        "username": { "type": "string", "description": "Login user" },
-        "password": { "type": "string", "description": "Login password" }
-      }
-    },
-    "reconciliation": {
-      "type": "object",
-      "required": ["source", "target", "key_column"],
-      "properties": {
-        "description": { "type": "string" },
-        "source": { "$ref": "#/$defs/dataset" },
-        "target": { "$ref": "#/$defs/dataset" },
-        "key_column": {
-          "type": "string",
-          "description": "Column used for bisection split points and aggregate grouping"
-        },
-        "mode": {
-          "type": "string",
-          "enum": ["row_count", "full", "aggregate"],
-          "default": "full",
-          "description": "Reconciliation mode"
-        },
-        "hash_algorithm": {
-          "type": "string",
-          "enum": ["auto", "md5", "farm_fingerprint", "xxhash64"],
-          "default": "auto",
-          "description": "Hash algorithm for row checksums"
-        },
-        "column_mapping": {
-          "oneOf": [
-            {
-              "type": "object",
-              "description": "Map source column names to target column names (object format)",
-              "additionalProperties": { "type": "string" }
-            },
-            {
-              "type": "array",
-              "description": "Map source column names to target column names (array format)",
-              "items": { "$ref": "#/$defs/column_mapping_entry" }
-            }
-          ],
-          "description": "Column name mapping between source and target datasets"
-        },
-        "case_insensitive": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically match columns case-insensitively (e.g., user_id matches USER_ID)"
-        },
-        "bisection": { "$ref": "#/$defs/bisection_config" },
-        "reporting": { "$ref": "#/$defs/reporting_config" },
-        "aggregate": { "$ref": "#/$defs/aggregate_config" }
-      }
-    },
-    "dataset": {
-      "type": "object",
-      "required": ["connection"],
-      "properties": {
-        "connection": {
-          "type": "string",
-          "description": "Connection name (must exist in connections map)"
-        },
-        "query": {
-          "type": "string",
-          "description": "Base SQL query for this dataset (mutually exclusive with 'table')"
-        },
-        "table": {
-          "type": "string",
-          "description": "Table name or fully-qualified name (e.g., 'schema.table'). Alternative to 'query'."
-        },
-        "columns": {
+        "measures": {
+          "items": {
+            "$ref": "#/$defs/MeasureConfig"
+          },
           "type": "array",
-          "items": { "type": "string" },
-          "description": "Explicit column list (only with 'table'). Mutually exclusive with 'exclude_columns'."
+          "minItems": 1
         },
-        "exclude_columns": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Columns to exclude (only with 'table', resolved at runtime). Mutually exclusive with 'columns'."
+        "group_columns": {
+          "$ref": "#/$defs/GroupColumns",
+          "description": "Column(s) defining the drill-down hierarchy."
         },
-        "as_of": {
-          "type": "string",
-          "description": "Time-travel timestamp (e.g., '2026-02-01 00:00:00')"
+        "thresholds": {
+          "$ref": "#/$defs/ThresholdConfig"
         }
       },
-      "oneOf": [
-        { "required": ["query"] },
-        { "required": ["table"] }
-      ]
-    },
-    "bisection_config": {
+      "additionalProperties": false,
       "type": "object",
+      "required": [
+        "measures"
+      ],
+      "description": "AggregateConfig defines aggregate comparison settings."
+    },
+    "BigQueryConf": {
       "properties": {
-        "enabled": { "type": "boolean", "default": true },
+        "project_id": {
+          "type": "string",
+          "description": "GCP project ID."
+        },
+        "region": {
+          "type": "string",
+          "description": "Region for BigQuery resources."
+        },
+        "service_account_key": {
+          "type": "string",
+          "description": "Inline JSON content of the service account key."
+        },
+        "service_account_key_file": {
+          "type": "string",
+          "description": "Path to the service account key JSON file."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "project_id",
+        "region"
+      ],
+      "description": "BigQueryConf contains BigQuery connection parameters."
+    },
+    "BisectionConfig": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
         "factor": {
           "type": "integer",
+          "maximum": 1024,
           "minimum": 2,
-          "default": 32,
-          "description": "Number of segments to split into per bisection level"
+          "description": "Number of segments per bisection level."
         },
         "threshold": {
           "type": "integer",
           "minimum": 1,
-          "default": 16384,
-          "description": "Stop drilling when segment row count falls below this"
+          "description": "Stop drilling when segment row count falls below this."
         },
         "strategy": {
-          "type": "string",
-          "enum": ["auto", "quantile", "hash", "time"],
-          "default": "auto",
-          "description": "Segmentation strategy for bisection drill-down"
+          "$ref": "#/$defs/SegmentationStrategy",
+          "description": "Segmentation strategy."
         },
         "time_column": {
           "type": "string",
-          "description": "Column containing timestamps for time-based partitioning (required when strategy is 'time')"
+          "description": "Column for time-based partitioning (required when strategy is 'time')."
         },
         "time_granularity": {
-          "type": "string",
-          "enum": ["hour", "day", "week", "month", "quarter", "year"],
-          "default": "day",
-          "description": "Time truncation granularity for time-based partitioning"
+          "$ref": "#/$defs/TimeGranularity",
+          "description": "Time truncation granularity."
         }
-      }
-    },
-    "reporting_config": {
+      },
+      "additionalProperties": false,
       "type": "object",
+      "description": "BisectionConfig controls the bisection drill-down behavior."
+    },
+    "ClickhouseConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string",
+          "description": "Database to connect to. If empty, all databases are scraped."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "username",
+        "password"
+      ],
+      "description": "ClickhouseConf contains ClickHouse connection parameters."
+    },
+    "ColumnMapping": {
+      "oneOf": [
+        {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Map source column names to target column names (object format)"
+        },
+        {
+          "items": {
+            "properties": {
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "type": "object",
+            "required": [
+              "source",
+              "target"
+            ]
+          },
+          "type": "array",
+          "description": "Map source column names to target column names (array format)"
+        }
+      ]
+    },
+    "Connection": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for this connection. Defaults to the connection ID (map key)."
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "When true, the connection is skipped during execution."
+        },
+        "parallelism": {
+          "type": "integer",
+          "maximum": 256,
+          "minimum": 1,
+          "description": "Maximum number of parallel queries. Range: 1-256. Defaults to 8."
+        },
+        "postgres": {
+          "$ref": "#/$defs/PostgresConf"
+        },
+        "snowflake": {
+          "$ref": "#/$defs/SnowflakeConf"
+        },
+        "bigquery": {
+          "$ref": "#/$defs/BigQueryConf"
+        },
+        "redshift": {
+          "$ref": "#/$defs/RedshiftConf"
+        },
+        "mysql": {
+          "$ref": "#/$defs/MySQLConf"
+        },
+        "clickhouse": {
+          "$ref": "#/$defs/ClickhouseConf"
+        },
+        "trino": {
+          "$ref": "#/$defs/TrinoConf"
+        },
+        "databricks": {
+          "$ref": "#/$defs/DatabricksConf"
+        },
+        "mssql": {
+          "$ref": "#/$defs/MSSQLConf"
+        },
+        "oracle": {
+          "$ref": "#/$defs/OracleConf"
+        },
+        "duckdb": {
+          "$ref": "#/$defs/DuckDBConf"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Connection is a single database connection entry in a connections map."
+    },
+    "DatabricksConf": {
+      "properties": {
+        "workspace_url": {
+          "type": "string",
+          "description": "Databricks workspace URL."
+        },
+        "auth_token": {
+          "type": "string",
+          "description": "Personal access token for authentication."
+        },
+        "auth_client": {
+          "type": "string",
+          "description": "OAuth client ID (M2M authentication)."
+        },
+        "auth_secret": {
+          "type": "string",
+          "description": "OAuth client secret (M2M authentication)."
+        },
+        "warehouse": {
+          "type": "string",
+          "description": "SQL warehouse ID to use for queries."
+        },
+        "refresh_table_metrics": {
+          "type": "boolean"
+        },
+        "refresh_table_metrics_use_scan": {
+          "type": "boolean"
+        },
+        "fetch_table_tags": {
+          "type": "boolean"
+        },
+        "use_show_create_table": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "workspace_url"
+      ],
+      "description": "DatabricksConf contains Databricks connection parameters."
+    },
+    "Dataset": {
+      "properties": {
+        "connection": {
+          "type": "string",
+          "description": "Connection name (must exist in connections map)."
+        },
+        "query": {
+          "type": "string",
+          "description": "Base SQL query (mutually exclusive with 'table'). Supports {{variable_name}} interpolation."
+        },
+        "table": {
+          "$ref": "#/$defs/TableReference",
+          "description": "Table reference (mutually exclusive with 'query'). Accepts \"db.schema.table\" string or structured object."
+        },
+        "columns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Explicit column list (only with 'table'). Mutually exclusive with 'exclude_columns'."
+        },
+        "exclude_columns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Columns to exclude (only with 'table', resolved at runtime). Mutually exclusive with 'columns'."
+        },
+        "as_of": {
+          "type": "string",
+          "description": "Time-travel timestamp. Wraps query with database-specific time-travel syntax."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "connection"
+      ],
+      "description": "Dataset defines a data source for reconciliation."
+    },
+    "DuckDBConf": {
+      "properties": {
+        "database": {
+          "type": "string",
+          "description": "File path, ':memory:' for in-memory, or MotherDuck database name."
+        },
+        "motherduck_account": {
+          "type": "string",
+          "description": "MotherDuck organization/account name (for cloud mode)."
+        },
+        "motherduck_token": {
+          "type": "string",
+          "description": "MotherDuck authentication token (required for cloud MotherDuck)."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "DuckDBConf contains DuckDB / MotherDuck connection parameters."
+    },
+    "ErrorHandlingConfig": {
+      "properties": {
+        "query_timeout": {
+          "type": "string",
+          "description": "Per-query timeout as a Go duration string (e.g., '30s', '5m')."
+        },
+        "max_retries": {
+          "type": "integer",
+          "maximum": 10,
+          "minimum": 0,
+          "description": "Maximum retry attempts for transient query failures."
+        },
+        "retry_initial_delay": {
+          "type": "string",
+          "description": "Initial backoff delay before the first retry."
+        },
+        "retry_backoff_factor": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Backoff multiplier applied after each retry."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "ErrorHandlingConfig controls retry behavior for query failures."
+    },
+    "GroupColumns": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Single group column"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "minItems": 1,
+          "description": "Hierarchical group columns for drill-down"
+        }
+      ]
+    },
+    "HashAlgorithm": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "md5",
+        "farm_fingerprint",
+        "xxhash64"
+      ]
+    },
+    "MSSQLConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "trust_cert": {
+          "type": "boolean",
+          "description": "Trust the server certificate without validation."
+        },
+        "encrypt": {
+          "type": "string",
+          "description": "Encryption mode (e.g. \"true\", \"false\", \"strict\")."
+        },
+        "fed_auth": {
+          "type": "string",
+          "description": "Federated authentication method (e.g. \"ActiveDirectoryDefault\")."
+        },
+        "access_token": {
+          "type": "string",
+          "description": "Pre-acquired access token for Azure AD authentication."
+        },
+        "application_client_id": {
+          "type": "string",
+          "description": "Azure AD application client ID for service principal auth."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "database"
+      ],
+      "description": "MSSQLConf contains Microsoft SQL Server / Azure SQL Database connection parameters."
+    },
+    "MeasureConfig": {
+      "properties": {
+        "column": {
+          "type": "string",
+          "minLength": 1
+        },
+        "function": {
+          "$ref": "#/$defs/MeasureFunction"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "column",
+        "function"
+      ],
+      "description": "MeasureConfig defines a column + aggregation function pair."
+    },
+    "MeasureFunction": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "SUM",
+            "COUNT",
+            "AVG",
+            "MIN",
+            "MAX"
+          ],
+          "description": "Single aggregation function"
+        },
+        {
+          "items": {
+            "type": "string",
+            "enum": [
+              "SUM",
+              "COUNT",
+              "AVG",
+              "MIN",
+              "MAX"
+            ]
+          },
+          "type": "array",
+          "minItems": 1,
+          "description": "Multiple aggregation functions"
+        }
+      ]
+    },
+    "MySQLConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
+        },
+        "params": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Additional DSN parameters passed to the driver."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "port",
+        "username",
+        "password"
+      ],
+      "description": "MySQLConf contains MySQL connection parameters."
+    },
+    "OracleConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "service_name": {
+          "type": "string",
+          "description": "Oracle service name."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "ssl": {
+          "type": "boolean",
+          "description": "Enable SSL/TLS for the connection."
+        },
+        "ssl_verify": {
+          "type": "boolean",
+          "description": "Verify the server's SSL certificate."
+        },
+        "wallet_path": {
+          "type": "string",
+          "description": "Path to Oracle Wallet directory for authentication."
+        },
+        "use_diagnostics_pack": {
+          "type": "boolean",
+          "description": "Enable Oracle Diagnostics Pack features (AWR, ASH)."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "service_name"
+      ],
+      "description": "OracleConf contains Oracle Database connection parameters."
+    },
+    "PercentageMode": {
+      "type": "string",
+      "enum": [
+        "source",
+        "target",
+        "symmetric"
+      ]
+    },
+    "PostgresConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "database",
+        "username",
+        "password"
+      ],
+      "description": "PostgresConf contains PostgreSQL connection parameters."
+    },
+    "Reconciliation": {
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Human-readable title."
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description."
+        },
+        "source": {
+          "$ref": "#/$defs/Dataset",
+          "description": "Source dataset."
+        },
+        "target": {
+          "$ref": "#/$defs/Dataset",
+          "description": "Target dataset."
+        },
+        "key_column": {
+          "type": "string",
+          "description": "Column used for bisection split points and aggregate grouping."
+        },
+        "mode": {
+          "$ref": "#/$defs/ReconciliationMode",
+          "description": "Reconciliation mode."
+        },
+        "hash_algorithm": {
+          "$ref": "#/$defs/HashAlgorithm",
+          "description": "Hash algorithm for row checksums."
+        },
+        "case_insensitive": {
+          "type": "boolean",
+          "description": "Automatically match columns case-insensitively."
+        },
+        "column_mapping": {
+          "$ref": "#/$defs/ColumnMapping",
+          "description": "Column name mapping between source and target."
+        },
+        "bisection": {
+          "$ref": "#/$defs/BisectionConfig"
+        },
+        "reporting": {
+          "$ref": "#/$defs/ReportingConfig"
+        },
+        "aggregate": {
+          "$ref": "#/$defs/AggregateConfig"
+        },
+        "error_handling": {
+          "$ref": "#/$defs/ErrorHandlingConfig"
+        },
+        "window": {
+          "$ref": "#/$defs/WindowConfig"
+        },
+        "setup": {
+          "additionalProperties": {
+            "$ref": "#/$defs/StringOrStrings"
+          },
+          "type": "object",
+          "description": "Per-reconciliation setup/teardown."
+        },
+        "teardown": {
+          "additionalProperties": {
+            "$ref": "#/$defs/StringOrStrings"
+          },
+          "type": "object"
+        },
+        "setup_file": {
+          "additionalProperties": {
+            "$ref": "#/$defs/StringOrStrings"
+          },
+          "type": "object"
+        },
+        "teardown_file": {
+          "additionalProperties": {
+            "$ref": "#/$defs/StringOrStrings"
+          },
+          "type": "object"
+        },
+        "teardown_on_failure": {
+          "type": "boolean",
+          "description": "Whether teardown runs on failure. Inherits from suite level when not set."
+        },
+        "ignore_setup_errors": {
+          "type": "boolean",
+          "description": "When true, logs setup errors as warnings. Inherits from suite level when not set."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "source",
+        "target"
+      ],
+      "description": "Reconciliation defines a single reconciliation scenario."
+    },
+    "ReconciliationMode": {
+      "type": "string",
+      "enum": [
+        "row_count",
+        "full",
+        "row_checksum",
+        "aggregate"
+      ]
+    },
+    "RedshiftConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "freshness_from_query_logs": {
+          "type": "boolean",
+          "description": "Estimate table freshness from Redshift query logs instead of metadata."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "port",
+        "database",
+        "username",
+        "password"
+      ],
+      "description": "RedshiftConf contains Amazon Redshift connection parameters."
+    },
+    "ReportingConfig": {
       "properties": {
         "level": {
-          "type": "string",
-          "enum": ["count_only", "with_keys", "detailed"],
-          "default": "count_only"
+          "$ref": "#/$defs/ReportingLevel"
         },
         "sample_limit": {
           "type": "integer",
-          "minimum": 0,
-          "description": "Maximum number of sample rows to report"
+          "minimum": 1
         },
         "consent_acknowledged": {
-          "type": "boolean",
-          "default": false,
-          "description": "Required for detailed reporting level"
+          "type": "boolean"
         }
-      }
-    },
-    "aggregate_config": {
+      },
+      "additionalProperties": false,
       "type": "object",
-      "required": ["measures"],
+      "description": "ReportingConfig controls what level of detail is reported."
+    },
+    "ReportingLevel": {
+      "type": "string",
+      "enum": [
+        "count_only",
+        "with_keys",
+        "detailed"
+      ]
+    },
+    "SYNQConfig": {
       "properties": {
-        "measures": {
+        "client_id": {
+          "type": "string",
+          "description": "OAuth client ID for authenticating with the SYNQ platform."
+        },
+        "client_secret": {
+          "type": "string",
+          "description": "OAuth client secret for authenticating with the SYNQ platform."
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "gRPC endpoint for the SYNQ API (e.g. \"developer.synq.io:443\")."
+        },
+        "ingest_endpoint": {
+          "type": "string",
+          "description": "gRPC endpoint for the SYNQ ingest API. Defaults to Endpoint if empty."
+        },
+        "oauth_url": {
+          "type": "string",
+          "description": "OAuth token URL. Derived from Endpoint if empty."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "SYNQConfig holds SYNQ platform connection settings."
+    },
+    "SegmentationStrategy": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "quantile",
+        "hash",
+        "time"
+      ]
+    },
+    "SnowflakeConf": {
+      "properties": {
+        "account": {
+          "type": "string",
+          "description": "Snowflake account identifier."
+        },
+        "warehouse": {
+          "type": "string",
+          "description": "Virtual warehouse to use for queries."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role to assume after connecting."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "private_key": {
+          "type": "string",
+          "description": "PEM-encoded private key content for key-pair authentication."
+        },
+        "private_key_file": {
+          "type": "string",
+          "description": "Path to a PEM-encoded private key file."
+        },
+        "private_key_passphrase": {
+          "type": "string",
+          "description": "Passphrase to decrypt the private key."
+        },
+        "databases": {
+          "items": {
+            "type": "string"
+          },
           "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/$defs/measure_config" }
+          "description": "Databases to include. If empty, all accessible databases are scraped."
         },
-        "group_columns": {
-          "oneOf": [
-            { "type": "string", "description": "Single group column" },
-            { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Hierarchical group columns for drill-down" }
-          ],
-          "description": "Column(s) defining the drill-down hierarchy; falls back to key_column if not set"
+        "use_get_ddl": {
+          "type": "boolean",
+          "description": "Use GET_DDL() to retrieve DDL for tables and views."
         },
-        "thresholds": { "$ref": "#/$defs/threshold_config" }
-      }
-    },
-    "measure_config": {
+        "account_usage_db": {
+          "type": "string",
+          "description": "Database containing the ACCOUNT_USAGE schema. Defaults to SNOWFLAKE."
+        },
+        "auth_type": {
+          "type": "string",
+          "description": "Set to \"externalbrowser\" to use SSO browser-based authentication."
+        }
+      },
+      "additionalProperties": false,
       "type": "object",
-      "required": ["column", "function"],
-      "properties": {
-        "column": { "type": "string" },
-        "function": {
-          "oneOf": [
-            {
+      "required": [
+        "account",
+        "warehouse",
+        "role",
+        "username"
+      ],
+      "description": "SnowflakeConf contains Snowflake connection parameters."
+    },
+    "StringOrStrings": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "TableReference": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Table in dotted format: 'table', 'schema.table', or 'database.schema.table'"
+        },
+        {
+          "properties": {
+            "database": {
               "type": "string",
-              "enum": ["SUM", "COUNT", "AVG", "MIN", "MAX"],
-              "description": "Single aggregation function"
+              "description": "Database/catalog name"
             },
-            {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": ["SUM", "COUNT", "AVG", "MIN", "MAX"]
-              },
-              "minItems": 1,
-              "description": "Multiple aggregation functions per column"
+            "schema": {
+              "type": "string",
+              "description": "Schema/dataset name"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Table or view name"
             }
+          },
+          "type": "object",
+          "required": [
+            "name"
           ],
-          "description": "Aggregation function(s) to apply to the column"
+          "description": "Structured table reference"
         }
-      }
+      ]
     },
-    "column_mapping_entry": {
-      "type": "object",
-      "required": ["source", "target"],
-      "properties": {
-        "source": {
-          "type": "string",
-          "description": "Source column name"
-        },
-        "target": {
-          "type": "string",
-          "description": "Target column name"
-        }
-      }
-    },
-    "threshold_config": {
-      "type": "object",
+    "ThresholdConfig": {
       "properties": {
         "absolute": {
           "type": "number",
           "minimum": 0,
-          "description": "Maximum absolute difference per measure"
+          "description": "Maximum absolute difference."
         },
         "percentage": {
           "type": "number",
           "minimum": 0,
-          "description": "Maximum percentage difference (0.1 = 10%)"
+          "description": "Maximum percentage difference (0.1 = 10%)."
         },
         "percentage_mode": {
-          "type": "string",
-          "enum": ["source", "target", "symmetric"],
-          "default": "source",
-          "description": "Which percentage formula to use for threshold comparison: source (|diff|/|source|, default), target (|diff|/|target|), symmetric (2*|diff|/(|source|+|target|))"
+          "$ref": "#/$defs/PercentageMode",
+          "description": "Percentage formula: source, target, or symmetric."
         },
         "per_column": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ThresholdConfig"
+          },
           "type": "object",
-          "description": "Per group_column threshold overrides",
-          "additionalProperties": { "$ref": "#/$defs/threshold_config" }
+          "description": "Per group_column threshold overrides."
+        },
+        "per_measure": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ThresholdConfig"
+          },
+          "type": "object",
+          "description": "Per measure threshold overrides, keyed by FUNC(column)."
         }
-      }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "ThresholdConfig defines tolerance for aggregate differences."
+    },
+    "TimeGranularity": {
+      "type": "string",
+      "enum": [
+        "hour",
+        "day",
+        "week",
+        "month",
+        "quarter",
+        "year"
+      ]
+    },
+    "TrinoConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "use_plaintext": {
+          "type": "boolean",
+          "description": "Use a plain HTTP connection instead of HTTPS."
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "catalogs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Catalogs to include. Required for most Trino deployments."
+        },
+        "no_show_create_view": {
+          "type": "boolean"
+        },
+        "no_show_create_table": {
+          "type": "boolean"
+        },
+        "no_materialized_views": {
+          "type": "boolean"
+        },
+        "fetch_table_comments": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host"
+      ],
+      "description": "TrinoConf contains Trino / Starburst connection parameters."
+    },
+    "WindowConfig": {
+      "properties": {
+        "column": {
+          "type": "string",
+          "description": "Column being windowed."
+        },
+        "lookback": {
+          "type": "string",
+          "description": "How far back to look from the current time (e.g., '14d', '2h')."
+        },
+        "strategy": {
+          "$ref": "#/$defs/WindowStrategy",
+          "description": "Windowing strategy: 'sliding' or 'fixed'."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "lookback"
+      ],
+      "description": "WindowConfig defines time-windowed reconciliation settings."
+    },
+    "WindowStrategy": {
+      "type": "string",
+      "enum": [
+        "sliding",
+        "fixed"
+      ]
     }
-  }
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "maxLength": 255,
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*$",
+      "description": "Short machine identifier for the suite."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title for the suite."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description."
+    },
+    "connections": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Connection"
+      },
+      "type": "object",
+      "description": "Database connection definitions."
+    },
+    "reconciliations": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Reconciliation"
+      },
+      "type": "object",
+      "description": "Reconciliation scenario definitions."
+    },
+    "variables": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "type": "object",
+      "description": "Template variables for query interpolation via {{variable_name}} syntax."
+    },
+    "setup": {
+      "additionalProperties": {
+        "$ref": "#/$defs/StringOrStrings"
+      },
+      "type": "object",
+      "description": "Setup queries run once before all reconciliations begin."
+    },
+    "teardown": {
+      "additionalProperties": {
+        "$ref": "#/$defs/StringOrStrings"
+      },
+      "type": "object",
+      "description": "Teardown queries run once after all reconciliations complete."
+    },
+    "setup_file": {
+      "additionalProperties": {
+        "$ref": "#/$defs/StringOrStrings"
+      },
+      "type": "object",
+      "description": "SQL file(s) to load and run as setup queries."
+    },
+    "teardown_file": {
+      "additionalProperties": {
+        "$ref": "#/$defs/StringOrStrings"
+      },
+      "type": "object",
+      "description": "SQL file(s) to load and run as teardown queries."
+    },
+    "teardown_on_failure": {
+      "type": "boolean",
+      "description": "Whether teardown runs even when reconciliations fail with infrastructure errors."
+    },
+    "ignore_setup_errors": {
+      "type": "boolean",
+      "description": "When true, logs setup query errors as warnings and continues instead of aborting."
+    },
+    "strict_time_references": {
+      "type": "boolean",
+      "description": "When true, time reference detection (NOW(), CURRENT_DATE, etc.) returns an error instead of a warning."
+    },
+    "synq": {
+      "$ref": "#/$defs/SYNQConfig",
+      "description": "SYNQ API credentials for sending audit logs."
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "connections",
+    "reconciliations"
+  ],
+  "title": "SYNQ Recon Configuration",
+  "description": "Configuration file format for synq-recon database reconciliation tool"
 }
