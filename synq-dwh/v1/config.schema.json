@@ -1,538 +1,392 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.synq.io/synq-dwh/v1/config.schema.json",
   "$defs": {
-    "synq.agent.dwh.v1.BigQueryConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "BigQuery specific configuration",
-      "patternProperties": {
-        "^(projectId)$": {
-          "description": "GCP project ID",
-          "type": "string"
-        },
-        "^(serviceAccountKey)$": {
-          "default": "",
-          "description": "Service account key JSON",
-          "type": "string"
-        },
-        "^(serviceAccountKeyFile)$": {
-          "default": "",
-          "description": "Location of service account key file",
-          "type": "string"
-        }
-      },
+    "BigQueryConf": {
       "properties": {
         "project_id": {
-          "description": "GCP project ID",
-          "type": "string"
+          "type": "string",
+          "description": "GCP project ID."
         },
         "region": {
-          "description": "Region for BigQuery resources",
-          "type": "string"
+          "type": "string",
+          "description": "Region for BigQuery resources."
         },
         "service_account_key": {
-          "default": "",
-          "description": "Service account key JSON",
-          "type": "string"
+          "type": "string",
+          "description": "Inline JSON content of the service account key."
         },
         "service_account_key_file": {
-          "default": "",
-          "description": "Location of service account key file",
-          "type": "string"
+          "type": "string",
+          "description": "Path to the service account key JSON file."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "project_id",
         "region"
       ],
-      "title": "Big Query Conf",
-      "type": "object"
+      "description": "BigQueryConf contains BigQuery connection parameters."
     },
-    "synq.agent.dwh.v1.ClickhouseConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "patternProperties": {
-        "^(allowInsecure)$": {
-          "default": false,
-          "description": "Whether to use disable SSL for connection",
-          "type": "boolean"
-        }
-      },
+    "ClickhouseConf": {
       "properties": {
-        "allow_insecure": {
-          "default": false,
-          "description": "Whether to use disable SSL for connection",
-          "type": "boolean"
-        },
-        "database": {
-          "default": "",
-          "description": "Database name",
-          "type": "string"
-        },
         "host": {
-          "description": "Host address",
-          "minLength": 1,
-          "type": "string"
-        },
-        "password": {
-          "description": "Password for authentication",
           "type": "string"
         },
         "port": {
-          "anyOf": [
-            {
-              "exclusiveMinimum": 0,
-              "maximum": 65535,
-              "type": "integer"
-            },
-            {
-              "pattern": "^-?[0-9]+$",
-              "type": "string"
-            }
-          ],
-          "description": "Port number"
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string",
+          "description": "Database to connect to. If empty, all databases are scraped."
         },
         "username": {
-          "description": "Username for authentication",
           "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "host",
-        "port",
         "username",
         "password"
       ],
-      "title": "Clickhouse Conf",
-      "type": "object"
+      "description": "ClickhouseConf contains ClickHouse connection parameters."
     },
-    "synq.agent.dwh.v1.Config.Agent": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "Agent contains metadata about this agent instance",
-      "patternProperties": {
-        "^(logJson)$": {
-          "type": "boolean"
-        },
-        "^(logLevel)$": {
-          "anyOf": [
-            {
-              "pattern": "^LOG_LEVEL_UNSPECIFIED$",
-              "type": "string"
-            },
-            {
-              "enum": [
-                "LOG_LEVEL_TRACE",
-                "LOG_LEVEL_DEBUG",
-                "LOG_LEVEL_INFO",
-                "LOG_LEVEL_WARN",
-                "LOG_LEVEL_ERROR"
-              ],
-              "type": "string"
-            },
-            {
-              "maximum": 2147483647,
-              "minimum": -2147483648,
-              "type": "integer"
-            }
-          ],
-          "default": 0,
-          "title": "Log Level"
-        },
-        "^(logReportCaller)$": {
-          "type": "boolean"
-        }
-      },
+    "Connection": {
       "properties": {
-        "log_json": {
-          "type": "boolean"
-        },
-        "log_level": {
-          "anyOf": [
-            {
-              "pattern": "^LOG_LEVEL_UNSPECIFIED$",
-              "type": "string"
-            },
-            {
-              "enum": [
-                "LOG_LEVEL_TRACE",
-                "LOG_LEVEL_DEBUG",
-                "LOG_LEVEL_INFO",
-                "LOG_LEVEL_WARN",
-                "LOG_LEVEL_ERROR"
-              ],
-              "type": "string"
-            },
-            {
-              "maximum": 2147483647,
-              "minimum": -2147483648,
-              "type": "integer"
-            }
-          ],
-          "default": 0,
-          "title": "Log Level"
-        },
-        "log_report_caller": {
-          "type": "boolean"
-        },
         "name": {
-          "default": "",
-          "description": "Name of the agent instance",
-          "type": "string"
-        },
-        "tags": {
-          "description": "Tags to categorize and organize the agent",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "title": "Agent",
-      "type": "object"
-    },
-    "synq.agent.dwh.v1.Config": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "Config represents the main configuration for the DWH agent",
-      "properties": {
-        "agent": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.Config.Agent",
-          "description": "Agent configuration"
-        },
-        "connections": {
-          "additionalProperties": {
-            "$ref": "#/$defs/synq.agent.dwh.v1.Connection"
-          },
-          "description": "Map of connection configurations",
-          "propertyNames": {
-            "pattern": "^[a-zA-Z][a-zA-Z0-9-_]*$",
-            "type": "string"
-          },
-          "type": "object"
-        },
-        "synq": {
-          "$ref": "#/$defs/synq.agent.v1.SYNQ",
-          "description": "SYNQ platform configuration"
-        }
-      },
-      "required": [
-        "connections"
-      ],
-      "title": "Config",
-      "type": "object"
-    },
-    "synq.agent.dwh.v1.Connection": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "Connection represents a database connection configuration",
-      "properties": {
-        "bigquery": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.BigQueryConf"
-        },
-        "clickhouse": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.ClickhouseConf"
-        },
-        "databricks": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.DatabricksConf"
+          "type": "string",
+          "description": "Display name for this connection. Defaults to the connection ID (map key)."
         },
         "disabled": {
-          "default": false,
-          "type": "boolean"
-        },
-        "mysql": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.MySQLConf"
-        },
-        "name": {
-          "description": "Name of the connection",
-          "type": "string"
+          "type": "boolean",
+          "description": "When true, the connection is skipped during execution."
         },
         "parallelism": {
-          "anyOf": [
-            {
-              "maximum": 256,
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "pattern": "^-?[0-9]+$",
-              "type": "string"
-            }
-          ],
-          "default": 0,
-          "description": "How many queries to DWH can be executed in parallel, defaults to 2"
+          "type": "integer",
+          "maximum": 256,
+          "minimum": 1,
+          "description": "Maximum number of parallel queries. Range: 1-256. Defaults to 8."
         },
         "postgres": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.PostgresConf"
-        },
-        "redshift": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.RedshiftConf"
+          "$ref": "#/$defs/PostgresConf"
         },
         "snowflake": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.SnowflakeConf"
+          "$ref": "#/$defs/SnowflakeConf"
+        },
+        "bigquery": {
+          "$ref": "#/$defs/BigQueryConf"
+        },
+        "redshift": {
+          "$ref": "#/$defs/RedshiftConf"
+        },
+        "mysql": {
+          "$ref": "#/$defs/MySQLConf"
+        },
+        "clickhouse": {
+          "$ref": "#/$defs/ClickhouseConf"
         },
         "trino": {
-          "$ref": "#/$defs/synq.agent.dwh.v1.TrinoConf"
+          "$ref": "#/$defs/TrinoConf"
+        },
+        "databricks": {
+          "$ref": "#/$defs/DatabricksConf"
+        },
+        "mssql": {
+          "$ref": "#/$defs/MSSQLConf"
+        },
+        "oracle": {
+          "$ref": "#/$defs/OracleConf"
+        },
+        "duckdb": {
+          "$ref": "#/$defs/DuckDBConf"
         }
       },
-      "required": [
-        "name"
-      ],
-      "title": "Connection",
-      "type": "object"
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Connection is a single database connection entry in a connections map."
     },
-    "synq.agent.dwh.v1.DatabricksConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "patternProperties": {
-        "^(authClient)$": {
-          "type": "string"
-        },
-        "^(authSecret)$": {
-          "type": "string"
-        },
-        "^(authToken)$": {
-          "type": "string"
-        },
-        "^(fetchTableTags)$": {
-          "default": false,
-          "type": "boolean"
-        },
-        "^(refreshTableMetrics)$": {
-          "default": false,
-          "type": "boolean"
-        },
-        "^(refreshTableMetricsUseScan)$": {
-          "default": false,
-          "type": "boolean"
-        },
-        "^(useShowCreateTable)$": {
-          "default": false,
-          "type": "boolean"
-        },
-        "^(workspaceUrl)$": {
-          "minLength": 1,
-          "pattern": "^(?:(?:[a-zA-Z][a-zA-Z\\d+\\-.]*):)?(?://(?:[A-Za-z0-9\\-\\.]+(?::\\d+)?))?(/[^\\?#]*)?(?:\\?([^\\#]*))?(?:\\#(.*))?$",
-          "type": "string"
-        }
-      },
+    "DatabricksConf": {
       "properties": {
-        "auth_client": {
-          "type": "string"
-        },
-        "auth_secret": {
-          "type": "string"
+        "workspace_url": {
+          "type": "string",
+          "description": "Databricks workspace URL."
         },
         "auth_token": {
-          "type": "string"
+          "type": "string",
+          "description": "Personal access token for authentication."
         },
-        "fetch_table_tags": {
-          "default": false,
-          "type": "boolean"
+        "auth_client": {
+          "type": "string",
+          "description": "OAuth client ID (M2M authentication)."
+        },
+        "auth_secret": {
+          "type": "string",
+          "description": "OAuth client secret (M2M authentication)."
+        },
+        "warehouse": {
+          "type": "string",
+          "description": "SQL warehouse ID to use for queries."
         },
         "refresh_table_metrics": {
-          "default": false,
           "type": "boolean"
         },
         "refresh_table_metrics_use_scan": {
-          "default": false,
+          "type": "boolean"
+        },
+        "fetch_table_tags": {
           "type": "boolean"
         },
         "use_show_create_table": {
-          "default": false,
           "type": "boolean"
-        },
-        "warehouse": {
-          "type": "string"
-        },
-        "workspace_url": {
-          "minLength": 1,
-          "pattern": "^(?:(?:[a-zA-Z][a-zA-Z\\d+\\-.]*):)?(?://(?:[A-Za-z0-9\\-\\.]+(?::\\d+)?))?(/[^\\?#]*)?(?:\\?([^\\#]*))?(?:\\#(.*))?$",
-          "type": "string"
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "workspace_url"
       ],
-      "title": "Databricks Conf",
-      "type": "object"
+      "description": "DatabricksConf contains Databricks connection parameters."
     },
-    "synq.agent.dwh.v1.MySQLConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "MySQL specific configuration",
-      "patternProperties": {
-        "^(allowInsecure)$": {
-          "default": false,
-          "description": "Whether to allow insecure connections",
-          "type": "boolean"
+    "DuckDBConf": {
+      "properties": {
+        "database": {
+          "type": "string",
+          "description": "File path, ':memory:' for in-memory, or MotherDuck database name."
+        },
+        "motherduck_account": {
+          "type": "string",
+          "description": "MotherDuck organization/account name (for cloud mode)."
+        },
+        "motherduck_token": {
+          "type": "string",
+          "description": "MotherDuck authentication token (required for cloud MotherDuck)."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "DuckDBConf contains DuckDB / MotherDuck connection parameters."
+    },
+    "LogLevel": {
+      "type": "string",
+      "enum": [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error",
+        "LOG_LEVEL_TRACE",
+        "LOG_LEVEL_DEBUG",
+        "LOG_LEVEL_INFO",
+        "LOG_LEVEL_WARN",
+        "LOG_LEVEL_ERROR"
+      ]
+    },
+    "MSSQLConf": {
       "properties": {
-        "allow_insecure": {
-          "default": false,
-          "description": "Whether to allow insecure connections",
-          "type": "boolean"
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
         },
         "database": {
-          "description": "Database name",
           "type": "string"
         },
-        "host": {
-          "description": "Host address",
-          "minLength": 1,
+        "username": {
           "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "trust_cert": {
+          "type": "boolean",
+          "description": "Trust the server certificate without validation."
+        },
+        "encrypt": {
+          "type": "string",
+          "description": "Encryption mode (e.g. \"true\", \"false\", \"strict\")."
+        },
+        "fed_auth": {
+          "type": "string",
+          "description": "Federated authentication method (e.g. \"ActiveDirectoryDefault\")."
+        },
+        "access_token": {
+          "type": "string",
+          "description": "Pre-acquired access token for Azure AD authentication."
+        },
+        "application_client_id": {
+          "type": "string",
+          "description": "Azure AD application client ID for service principal auth."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "database"
+      ],
+      "description": "MSSQLConf contains Microsoft SQL Server / Azure SQL Database connection parameters."
+    },
+    "MySQLConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
         },
         "params": {
           "additionalProperties": {
             "type": "string"
           },
-          "description": "Additional connection parameters",
-          "propertyNames": {
-            "type": "string"
-          },
-          "type": "object"
-        },
-        "password": {
-          "description": "Password for authentication",
-          "type": "string"
-        },
-        "port": {
-          "anyOf": [
-            {
-              "exclusiveMinimum": 0,
-              "maximum": 65535,
-              "type": "integer"
-            },
-            {
-              "pattern": "^-?[0-9]+$",
-              "type": "string"
-            }
-          ],
-          "description": "Port number"
-        },
-        "username": {
-          "description": "Username for authentication",
-          "type": "string"
+          "type": "object",
+          "description": "Additional DSN parameters passed to the driver."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "host",
         "port",
-        "database",
         "username",
         "password"
       ],
-      "title": "MySQL Conf",
-      "type": "object"
+      "description": "MySQLConf contains MySQL connection parameters."
     },
-    "synq.agent.dwh.v1.PostgresConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "Postgres specific configuration",
-      "patternProperties": {
-        "^(allowInsecure)$": {
-          "default": false,
-          "description": "Whether to allow insecure connections",
-          "type": "boolean"
-        }
-      },
+    "OracleConf": {
       "properties": {
-        "allow_insecure": {
-          "default": false,
-          "description": "Whether to allow insecure connections",
-          "type": "boolean"
-        },
-        "database": {
-          "description": "Database name",
-          "type": "string"
-        },
         "host": {
-          "description": "Host address",
-          "minLength": 1,
-          "type": "string"
-        },
-        "password": {
-          "description": "Password for authentication",
           "type": "string"
         },
         "port": {
-          "anyOf": [
-            {
-              "exclusiveMinimum": 0,
-              "maximum": 65535,
-              "type": "integer"
-            },
-            {
-              "pattern": "^-?[0-9]+$",
-              "type": "string"
-            }
-          ],
-          "default": 0,
-          "description": "Port number"
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "service_name": {
+          "type": "string",
+          "description": "Oracle service name."
         },
         "username": {
-          "description": "Username for authentication",
           "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "ssl": {
+          "type": "boolean",
+          "description": "Enable SSL/TLS for the connection."
+        },
+        "ssl_verify": {
+          "type": "boolean",
+          "description": "Verify the server's SSL certificate."
+        },
+        "wallet_path": {
+          "type": "string",
+          "description": "Path to Oracle Wallet directory for authentication."
+        },
+        "use_diagnostics_pack": {
+          "type": "boolean",
+          "description": "Enable Oracle Diagnostics Pack features (AWR, ASH)."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host",
+        "service_name"
+      ],
+      "description": "OracleConf contains Oracle Database connection parameters."
+    },
+    "PostgresConf": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
+        "database": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "allow_insecure": {
+          "type": "boolean",
+          "description": "Disable SSL certificate verification."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "host",
         "database",
         "username",
         "password"
       ],
-      "title": "Postgres Conf",
-      "type": "object"
+      "description": "PostgresConf contains PostgreSQL connection parameters."
     },
-    "synq.agent.dwh.v1.RedshiftConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "Redshift specific configuration",
-      "patternProperties": {
-        "^(freshnessFromQueryLogs)$": {
-          "default": false,
-          "description": "Estimate table freshness based on query logs",
-          "type": "boolean"
-        }
-      },
+    "RedshiftConf": {
       "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
+        },
         "database": {
-          "description": "Database name",
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
           "type": "string"
         },
         "freshness_from_query_logs": {
-          "default": false,
-          "description": "Estimate table freshness based on query logs",
-          "type": "boolean"
-        },
-        "host": {
-          "description": "Host address",
-          "minLength": 1,
-          "type": "string"
-        },
-        "password": {
-          "description": "Password for authentication",
-          "type": "string"
-        },
-        "port": {
-          "anyOf": [
-            {
-              "exclusiveMinimum": 0,
-              "maximum": 65535,
-              "type": "integer"
-            },
-            {
-              "pattern": "^-?[0-9]+$",
-              "type": "string"
-            }
-          ],
-          "description": "Port number"
-        },
-        "username": {
-          "description": "Username for authentication",
-          "type": "string"
+          "type": "boolean",
+          "description": "Estimate table freshness from Redshift query logs instead of metadata."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "host",
         "port",
@@ -540,279 +394,187 @@
         "username",
         "password"
       ],
-      "title": "Redshift Conf",
-      "type": "object"
+      "description": "RedshiftConf contains Amazon Redshift connection parameters."
     },
-    "synq.agent.dwh.v1.SnowflakeConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "Snowflake specific configuration",
-      "patternProperties": {
-        "^(accountUsageDb)$": {
-          "description": "Name of the database where ACCOUNT_USAGE schema is present, fallbacks to SNOWFLAKE",
-          "type": "string"
+    "SYNQConfig": {
+      "properties": {
+        "client_id": {
+          "type": "string",
+          "description": "OAuth client ID for authenticating with the SYNQ platform."
         },
-        "^(authType)$": {
-          "description": "Authentication type: empty (default, uses password or private_key), \"externalbrowser\" (SSO via browser)\n When set to \"externalbrowser\", opens browser for SSO login and caches the token locally.",
-          "type": "string"
+        "client_secret": {
+          "type": "string",
+          "description": "OAuth client secret for authenticating with the SYNQ platform."
         },
-        "^(privateKey)$": {
-          "default": "",
-          "description": "Content of Private key used for Snowflake authentication",
-          "type": "string"
+        "endpoint": {
+          "type": "string",
+          "description": "gRPC endpoint for the SYNQ API (e.g. \"developer.synq.io:443\")."
         },
-        "^(privateKeyFile)$": {
-          "default": "",
-          "description": "Location of the file containing Private key used for Snowflake authentication",
-          "type": "string"
+        "ingest_endpoint": {
+          "type": "string",
+          "description": "gRPC endpoint for the SYNQ ingest API. Defaults to Endpoint if empty."
         },
-        "^(privateKeyPassphrase)$": {
-          "description": "Passphrase used to decode Private key",
-          "type": "string"
-        },
-        "^(useGetDdl)$": {
-          "default": false,
-          "description": "Use GET_DDL to determine queries used for table/view creation",
-          "type": "boolean"
+        "oauth_url": {
+          "type": "string",
+          "description": "OAuth token URL. Derived from Endpoint if empty."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "SYNQConfig holds SYNQ platform connection settings."
+    },
+    "SnowflakeConf": {
       "properties": {
         "account": {
-          "description": "Snowflake account identifier",
-          "type": "string"
+          "type": "string",
+          "description": "Snowflake account identifier."
         },
-        "account_usage_db": {
-          "description": "Name of the database where ACCOUNT_USAGE schema is present, fallbacks to SNOWFLAKE",
-          "type": "string"
+        "warehouse": {
+          "type": "string",
+          "description": "Virtual warehouse to use for queries."
         },
-        "auth_type": {
-          "description": "Authentication type: empty (default, uses password or private_key), \"externalbrowser\" (SSO via browser)\n When set to \"externalbrowser\", opens browser for SSO login and caches the token locally.",
-          "type": "string"
+        "role": {
+          "type": "string",
+          "description": "Role to assume after connecting."
         },
-        "databases": {
-          "description": "Database to connect to",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+        "username": {
+          "type": "string"
         },
         "password": {
-          "default": "",
-          "description": "Password for authentication",
           "type": "string"
         },
         "private_key": {
-          "default": "",
-          "description": "Content of Private key used for Snowflake authentication",
-          "type": "string"
+          "type": "string",
+          "description": "PEM-encoded private key content for key-pair authentication."
         },
         "private_key_file": {
-          "default": "",
-          "description": "Location of the file containing Private key used for Snowflake authentication",
-          "type": "string"
+          "type": "string",
+          "description": "Path to a PEM-encoded private key file."
         },
         "private_key_passphrase": {
-          "description": "Passphrase used to decode Private key",
-          "type": "string"
+          "type": "string",
+          "description": "Passphrase to decrypt the private key."
         },
-        "role": {
-          "description": "Role to assume",
-          "type": "string"
+        "databases": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Databases to include. If empty, all accessible databases are scraped."
         },
         "use_get_ddl": {
-          "default": false,
-          "description": "Use GET_DDL to determine queries used for table/view creation",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Use GET_DDL() to retrieve DDL for tables and views."
         },
-        "username": {
-          "description": "Username for authentication",
-          "type": "string"
+        "account_usage_db": {
+          "type": "string",
+          "description": "Database containing the ACCOUNT_USAGE schema. Defaults to SNOWFLAKE."
         },
-        "warehouse": {
-          "description": "Virtual warehouse to use",
-          "type": "string"
+        "auth_type": {
+          "type": "string",
+          "description": "Set to \"externalbrowser\" to use SSO browser-based authentication."
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "account",
         "warehouse",
         "role",
         "username"
       ],
-      "title": "Snowflake Conf",
-      "type": "object"
+      "description": "SnowflakeConf contains Snowflake connection parameters."
     },
-    "synq.agent.dwh.v1.TrinoConf": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "Trino specific configuration",
-      "patternProperties": {
-        "^(fetchTableComments)$": {
-          "default": false,
-          "description": "Fetch Trino table comments from system.metadata.table_comments",
-          "type": "boolean"
-        },
-        "^(noMaterializedViews)$": {
-          "default": false,
-          "description": "Should it fetch system.metadata.materialized_views to get information about Trino MVs",
-          "type": "boolean"
-        },
-        "^(noShowCreateTable)$": {
-          "default": false,
-          "description": "Use SHOW CREATE TABLE to get tables DDLs",
-          "type": "boolean"
-        },
-        "^(noShowCreateView)$": {
-          "default": false,
-          "description": "Use SHOW CREATE VIEW to get views DDLs",
-          "type": "boolean"
-        },
-        "^(usePlaintext)$": {
-          "description": "Use non-SSL connection to Trino. This should only be enabled if the Trino cluster does not support SSL\n or if the connection is secured through other means (e.g., a VPN). Defaults to false (SSL enabled).",
-          "type": "boolean"
-        }
-      },
+    "TrinoConf": {
       "properties": {
-        "catalogs": {
-          "description": "To which catalogs to connect",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "fetch_table_comments": {
-          "default": false,
-          "description": "Fetch Trino table comments from system.metadata.table_comments",
-          "type": "boolean"
-        },
         "host": {
-          "description": "Host address",
-          "minLength": 1,
-          "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,63}(\\.[A-Za-z0-9-][A-Za-z0-9-]{0,63})*$",
-          "type": "string"
-        },
-        "no_materialized_views": {
-          "default": false,
-          "description": "Should it fetch system.metadata.materialized_views to get information about Trino MVs",
-          "type": "boolean"
-        },
-        "no_show_create_table": {
-          "default": false,
-          "description": "Use SHOW CREATE TABLE to get tables DDLs",
-          "type": "boolean"
-        },
-        "no_show_create_view": {
-          "default": false,
-          "description": "Use SHOW CREATE VIEW to get views DDLs",
-          "type": "boolean"
-        },
-        "password": {
-          "default": "",
-          "description": "Password for authentication",
           "type": "string"
         },
         "port": {
-          "anyOf": [
-            {
-              "exclusiveMinimum": 0,
-              "maximum": 65535,
-              "type": "integer"
-            },
-            {
-              "pattern": "^-?[0-9]+$",
-              "type": "string"
-            }
-          ],
-          "description": "Optional port to use, otherwise it will use the default port 8080"
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1
         },
         "use_plaintext": {
-          "description": "Use non-SSL connection to Trino. This should only be enabled if the Trino cluster does not support SSL\n or if the connection is secured through other means (e.g., a VPN). Defaults to false (SSL enabled).",
-          "type": "boolean"
+          "type": "boolean",
+          "description": "Use a plain HTTP connection instead of HTTPS."
         },
         "username": {
-          "default": "",
-          "description": "Username for authentication",
           "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "catalogs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Catalogs to include. Required for most Trino deployments."
+        },
+        "no_show_create_view": {
+          "type": "boolean"
+        },
+        "no_show_create_table": {
+          "type": "boolean"
+        },
+        "no_materialized_views": {
+          "type": "boolean"
+        },
+        "fetch_table_comments": {
+          "type": "boolean"
         }
       },
+      "additionalProperties": false,
+      "type": "object",
       "required": [
         "host"
       ],
-      "title": "Trino Conf",
-      "type": "object"
+      "description": "TrinoConf contains Trino / Starburst connection parameters."
     },
-    "synq.agent.v1.SYNQ": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "SYNQ contains authentication and connection details for the SYNQ platform",
-      "patternProperties": {
-        "^(clientId)$": {
-          "description": "Client ID for OAuth authentication",
-          "minLength": 1,
-          "type": "string"
-        },
-        "^(clientSecret)$": {
-          "description": "Client secret for OAuth authentication",
-          "minLength": 1,
-          "type": "string"
-        },
-        "^(ingestEndpoint)$": {
-          "description": "SYNQ API ingest endpoint (host:port)",
-          "minLength": 1,
-          "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{0,63}(\\.[A-Za-z0-9-][A-Za-z0-9-]{0,63})*|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|\\[(([0-9a-fA-F]{1,4}::?){1,7}([0-9a-fA-F]{1,4})|([0-9a-fA-F]{1,4}:){1,7}:|:((([0-9a-fA-F]{1,4}:){1,6})?[0-9a-fA-F]{1,4})?|::)\\]):([1-9][0-9]{0,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
-          "type": "string"
-        },
-        "^(oauthUrl)$": {
-          "description": "OAuth authentication URL",
-          "minLength": 1,
-          "pattern": "^(?:(?:[a-zA-Z][a-zA-Z\\d+\\-.]*):)?(?://(?:[A-Za-z0-9\\-\\.]+(?::\\d+)?))?(/[^\\?#]*)?(?:\\?([^\\#]*))?(?:\\#(.*))?$",
-          "type": "string"
-        }
-      },
+    "YAMLAgentConfig": {
       "properties": {
-        "client_id": {
-          "description": "Client ID for OAuth authentication",
-          "minLength": 1,
-          "type": "string"
+        "name": {
+          "type": "string",
+          "description": "Name of the agent instance. Defaults to the hostname if not set."
         },
-        "client_secret": {
-          "description": "Client secret for OAuth authentication",
-          "minLength": 1,
-          "type": "string"
+        "log_level": {
+          "$ref": "#/$defs/LogLevel",
+          "description": "Log verbosity level. Accepts \"trace\", \"debug\", \"info\", \"warn\", \"error\"."
         },
-        "endpoint": {
-          "description": "SYNQ API agent endpoint (host:port)",
-          "minLength": 1,
-          "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{0,63}(\\.[A-Za-z0-9-][A-Za-z0-9-]{0,63})*|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|\\[(([0-9a-fA-F]{1,4}::?){1,7}([0-9a-fA-F]{1,4})|([0-9a-fA-F]{1,4}:){1,7}:|:((([0-9a-fA-F]{1,4}:){1,6})?[0-9a-fA-F]{1,4})?|::)\\]):([1-9][0-9]{0,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
-          "type": "string"
+        "log_json": {
+          "type": "boolean",
+          "description": "Output logs in JSON format."
         },
-        "ingest_endpoint": {
-          "description": "SYNQ API ingest endpoint (host:port)",
-          "minLength": 1,
-          "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{0,63}(\\.[A-Za-z0-9-][A-Za-z0-9-]{0,63})*|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|\\[(([0-9a-fA-F]{1,4}::?){1,7}([0-9a-fA-F]{1,4})|([0-9a-fA-F]{1,4}:){1,7}:|:((([0-9a-fA-F]{1,4}:){1,6})?[0-9a-fA-F]{1,4})?|::)\\]):([1-9][0-9]{0,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$",
-          "type": "string"
-        },
-        "oauth_url": {
-          "description": "OAuth authentication URL",
-          "minLength": 1,
-          "pattern": "^(?:(?:[a-zA-Z][a-zA-Z\\d+\\-.]*):)?(?://(?:[A-Za-z0-9\\-\\.]+(?::\\d+)?))?(/[^\\?#]*)?(?:\\?([^\\#]*))?(?:\\#(.*))?$",
-          "type": "string"
+        "log_report_caller": {
+          "type": "boolean",
+          "description": "Include caller information in log entries."
         }
       },
-      "required": [
-        "client_id",
-        "client_secret",
-        "endpoint",
-        "ingest_endpoint",
-        "oauth_url"
-      ],
-      "title": "SYNQ",
+      "additionalProperties": false,
+      "type": "object",
+      "description": "YAMLAgentConfig contains agent metadata and logging settings."
+    }
+  },
+  "properties": {
+    "agent": {
+      "$ref": "#/$defs/YAMLAgentConfig"
+    },
+    "synq": {
+      "$ref": "#/$defs/SYNQConfig"
+    },
+    "connections": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Connection"
+      },
       "type": "object"
     }
   },
-  "$id": "https://schemas.synq.io/synq-dwh/v1/config.schema.json",
-  "$ref": "#/$defs/synq.agent.dwh.v1.Config",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "connections"
+  ],
   "title": "SYNQ DWH Agent Configuration",
-  "description": "Configuration file format for synq-dwh agent"
+  "description": "Configuration file format for the synq-dwh agent"
 }
