@@ -167,7 +167,7 @@ def collect_schemas(root: Path) -> list[dict]:
                 "rel_path": str(rel),
                 "html_path": html_path,
                 "title": data.get("title", base).removeprefix("SYNQ ").removeprefix("Coalesce Quality "),
-                "status": data.get("x-status", "stable"),
+                "status": "draft" if "draft" in rel.parts else data.get("x-status", "stable"),
                 "description": data.get("description", ""),
             }
         )
