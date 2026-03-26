@@ -152,6 +152,96 @@
         }
       ]
     },
+    "CutoffConfig": {
+      "properties": {
+        "column": {
+          "type": "string",
+          "description": "Simple shorthand: same column for both sides. Expands to source.column + target.column."
+        },
+        "source_column": {
+          "type": "string",
+          "description": "Medium shorthand: column to derive watermark from on source side."
+        },
+        "target_column": {
+          "type": "string",
+          "description": "Medium shorthand: column to derive watermark from on target side."
+        },
+        "source": {
+          "$ref": "#/$defs/CutoffSideConfig",
+          "description": "Advanced: full source-side watermark derivation config."
+        },
+        "target": {
+          "$ref": "#/$defs/CutoffSideConfig",
+          "description": "Advanced: full target-side watermark derivation config."
+        },
+        "combine": {
+          "type": "string",
+          "enum": ["MIN", "MAX", "SOURCE", "TARGET"],
+          "default": "MIN",
+          "description": "How to combine watermarks from both sides. Default: MIN (safer)."
+        },
+        "truncate": {
+          "type": "string",
+          "enum": ["HOUR", "DAY", "WEEK", "MONTH", "QUARTER", "YEAR"],
+          "description": "Truncate the cutoff value to a time boundary (e.g., HOUR truncates 08:47 to 08:00)."
+        },
+        "offset": {
+          "type": "string",
+          "description": "Time offset applied after truncation. Negative values subtract (safety buffer). Example: \"-30m\"."
+        },
+        "apply": {
+          "$ref": "#/$defs/CutoffApplyConfig",
+          "description": "Advanced: custom WHERE clause generation per side."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Dynamic cutoff filter for sync reconciliation. Derives a watermark from data to exclude not-yet-synced rows."
+    },
+    "CutoffSideConfig": {
+      "properties": {
+        "column": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Column to derive the watermark from (e.g., created_at, synced_at)."
+        },
+        "aggregate": {
+          "type": "string",
+          "enum": ["MAX", "MIN"],
+          "default": "MAX",
+          "description": "Aggregate function for watermark derivation. Default: MAX."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": ["column"]
+    },
+    "CutoffApplyConfig": {
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/CutoffApplySideConfig"
+        },
+        "target": {
+          "$ref": "#/$defs/CutoffApplySideConfig"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "CutoffApplySideConfig": {
+      "properties": {
+        "column": {
+          "type": "string",
+          "description": "Column to filter on. Defaults to the derivation column."
+        },
+        "operator": {
+          "type": "string",
+          "description": "Comparison operator. Default: \"<=\"."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Connection": {
       "properties": {
         "name": {
@@ -635,6 +725,9 @@
         "window": {
           "$ref": "#/$defs/WindowConfig"
         },
+        "cutoff": {
+          "$ref": "#/$defs/CutoffConfig"
+        },
         "setup": {
           "additionalProperties": {
             "$ref": "#/$defs/StringOrStrings"
@@ -1099,5 +1192,6 @@
     "reconciliations"
   ],
   "title": "SYNQ Recon Configuration",
-  "description": "Configuration file format for synq-recon database reconciliation tool"
+  "description": "Configuration file format for synq-recon database reconciliation tool",
+  "x-status": "draft"
 }
