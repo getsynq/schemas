@@ -15,7 +15,7 @@
           "type": "string"
         },
         "^(integrationId)$": {
-          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "description": "Coalesce Quality integration_id that identifies the Airflow instance",
           "type": "string"
         }
       },
@@ -25,7 +25,7 @@
           "type": "string"
         },
         "integration_id": {
-          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "description": "Coalesce Quality integration_id that identifies the Airflow instance",
           "type": "string"
         }
       },
@@ -45,7 +45,7 @@
           "type": "string"
         },
         "^(integrationId)$": {
-          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "description": "Coalesce Quality integration_id that identifies the Airflow instance",
           "type": "string"
         },
         "^(taskId)$": {
@@ -59,7 +59,7 @@
           "type": "string"
         },
         "integration_id": {
-          "description": "SYNQ integration_id that identifies the Airflow instance",
+          "description": "Coalesce Quality integration_id that identifies the Airflow instance",
           "type": "string"
         },
         "task_id": {
@@ -232,7 +232,7 @@
       "additionalProperties": true,
       "patternProperties": {
         "^(integrationId)$": {
-          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "description": "Coalesce Quality integration_id that identifies the dbt Core project",
           "minLength": 1,
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
           "type": "string"
@@ -244,7 +244,7 @@
       },
       "properties": {
         "integration_id": {
-          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "description": "Coalesce Quality integration_id that identifies the dbt Core project",
           "minLength": 1,
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
           "type": "string"
@@ -264,7 +264,7 @@
     "synq.entities.v1.Identifier": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
-      "description": "Identifier is a unique reference to an entity in SYNQ system. Entity identifiers\n are designed to closely mimic identifiers used by data platforms and tools. To construct\n an identifier, you need to know the kind of the entity and the ids that you would normally\n use to identify it in the data platform or tool. For example, to identify a table in BigQuery,\n you would need to know the project, dataset, and table names.",
+      "description": "Identifier is a unique reference to an entity in Coalesce Quality system. Entity identifiers\n are designed to closely mimic identifiers used by data platforms and tools. To construct\n an identifier, you need to know the kind of the entity and the ids that you would normally\n use to identify it in the data platform or tool. For example, to identify a table in BigQuery,\n you would need to know the project, dataset, and table names.",
       "patternProperties": {
         "^(airflowDag)$": {
           "$ref": "#/$defs/synq.entities.v1.AirflowDagIdentifier",
@@ -409,7 +409,7 @@
       "additionalProperties": true,
       "patternProperties": {
         "^(integrationId)$": {
-          "description": "SYNQ integration_id of the monitored identifier",
+          "description": "Coalesce Quality integration_id of the monitored identifier",
           "type": "string"
         },
         "^(monitorId)$": {
@@ -423,7 +423,7 @@
       },
       "properties": {
         "integration_id": {
-          "description": "SYNQ integration_id of the monitored identifier",
+          "description": "Coalesce Quality integration_id of the monitored identifier",
           "type": "string"
         },
         "monitor_id": {
@@ -570,7 +570,7 @@
           "type": "string"
         },
         "^(integrationId)$": {
-          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "description": "Coalesce Quality integration_id that identifies the dbt Core project",
           "minLength": 1,
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
           "type": "string"
@@ -586,7 +586,7 @@
           "type": "string"
         },
         "integration_id": {
-          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "description": "Coalesce Quality integration_id that identifies the dbt Core project",
           "minLength": 1,
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
           "type": "string"
@@ -605,7 +605,7 @@
       "additionalProperties": true,
       "patternProperties": {
         "^(integrationId)$": {
-          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "description": "Coalesce Quality integration_id that identifies the dbt Core project",
           "minLength": 1,
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
           "type": "string"
@@ -617,7 +617,7 @@
           "type": "string"
         },
         "integration_id": {
-          "description": "SYNQ integration_id that identifies the dbt Core project",
+          "description": "Coalesce Quality integration_id that identifies the dbt Core project",
           "minLength": 1,
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
           "type": "string"
@@ -635,7 +635,7 @@
       "additionalProperties": true,
       "properties": {
         "path": {
-          "description": "SYNQ path that identifies the SYNQ entity, needs to be one of supported paths",
+          "description": "Coalesce Quality path that identifies the Coalesce Quality entity, needs to be one of supported paths",
           "type": "string"
         }
       },
@@ -678,6 +678,7 @@
     "synq.issues.actor.v1.Actor": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
+      "description": "Producers should populate:\n   1. `name` \u2014 human-readable display label, derived from\n      `synq.auth.iam.v1.IamResponse.user_name` when available, falling back\n      to `user_email`. Avoid generic placeholders (\"MCP\", \"API\"); readers\n      treat those as \"no identity resolved\" and fall back to impersonal copy.\n   2. `user` \u2014 the strongest identifier the caller can prove. For human\n      callers, set `email` from `IamResponse.user_email` so the server can\n      resolve the caller back to a workspace user.\n   3. `via` \u2014 entry-point label for the channel through which the request\n      arrived (e.g. VIA_MCP for the MCP server), regardless of who the\n      caller is.",
       "properties": {
         "email": {
           "$ref": "#/$defs/synq.issues.actor.v1.EmailUser"
@@ -691,12 +692,36 @@
         },
         "slack": {
           "$ref": "#/$defs/synq.issues.actor.v1.SlackUser"
+        },
+        "via": {
+          "anyOf": [
+            {
+              "pattern": "^VIA_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "VIA_API",
+                "VIA_MCP",
+                "VIA_SLACK",
+                "VIA_PAGERDUTY"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "title": "Via"
         }
       },
       "required": [
         "name"
       ],
-      "title": "Actor",
+      "title": "Actor identifies who performed a write \u2014 set by the calling client and\n carried end-to-end through the public API into stored audit trails (issue\n status changes, comments, incident assignments) and rendered downstream\n (e.g. Slack/MSTeams/email alerts).",
       "type": "object"
     },
     "synq.issues.actor.v1.EmailUser": {
@@ -1382,6 +1407,13 @@
           "default": "",
           "type": "string"
         },
+        "^(monitoredEntities)$": {
+          "description": "The primary entities being monitored that are associated with this issue,\n for example the dbt model or dbt Cloud job that a failing test is attached to.",
+          "items": {
+            "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.IssueEntity"
+          },
+          "type": "array"
+        },
         "^(startedAt)$": {
           "$ref": "#/$defs/google.protobuf.Timestamp",
           "description": "Time when the issue was triggered."
@@ -1436,6 +1468,13 @@
         "issue_url": {
           "default": "",
           "type": "string"
+        },
+        "monitored_entities": {
+          "description": "The primary entities being monitored that are associated with this issue,\n for example the dbt model or dbt Cloud job that a failing test is attached to.",
+          "items": {
+            "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.IssueEntity"
+          },
+          "type": "array"
         },
         "started_at": {
           "$ref": "#/$defs/google.protobuf.Timestamp",
