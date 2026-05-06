@@ -19,6 +19,13 @@
         "service_account_key_file": {
           "type": "string",
           "description": "Path to the service account key JSON file."
+        },
+        "datasets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Explicit list of dataset names to scrape. When set, only these datasets are queried\nand project-level bigquery.datasets.list permission is not required."
         }
       },
       "additionalProperties": false,
