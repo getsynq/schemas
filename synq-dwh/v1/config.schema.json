@@ -2,6 +2,71 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.synq.io/synq-dwh/v1/config.schema.json",
   "$defs": {
+    "AthenaConf": {
+      "properties": {
+        "region": {
+          "type": "string",
+          "description": "AWS region hosting the Athena service and Glue Data Catalog."
+        },
+        "workgroup": {
+          "type": "string",
+          "description": "Athena workgroup. Defaults to \"primary\" when empty. Must have a\nResultConfiguration.OutputLocation configured."
+        },
+        "catalog": {
+          "type": "string",
+          "description": "Glue Data Catalog name. Defaults to \"AwsDataCatalog\" when empty."
+        },
+        "access_key_id": {
+          "type": "string",
+          "description": "Static AWS credentials. Pair access_key_id with secret_access_key."
+        },
+        "secret_access_key": {
+          "type": "string"
+        },
+        "session_token": {
+          "type": "string",
+          "description": "Optional STS session token, when access_key_id+secret_access_key are\nshort-lived STS credentials."
+        },
+        "aws_profile": {
+          "type": "string",
+          "description": "Named AWS shared-config profile (from ~/.aws/credentials or\n~/.aws/config). Used only when static credentials are absent."
+        },
+        "role_arn": {
+          "type": "string",
+          "description": "IAM role ARN to assume via STS. Wraps whichever base credentials\nresolved above (or the host's default chain when no other auth is set)."
+        },
+        "external_id": {
+          "type": "string",
+          "description": "External ID required by the role's trust policy. Pair with role_arn."
+        },
+        "role_session_name": {
+          "type": "string",
+          "description": "Optional STS session name. Defaults to \"synq-athena\"."
+        },
+        "scope": {
+          "$ref": "#/$defs/ScopeConf",
+          "description": "Scope filter for include/exclude filtering by Glue catalog, Glue\ndatabase, and table. Mapping: ScopeRule.database = Glue catalog,\nScopeRule.schema = Glue database, ScopeRule.table = Glue table/view."
+        },
+        "use_show_create_table": {
+          "type": "boolean",
+          "description": "Use SHOW CREATE TABLE to retrieve full table DDL (CTAS bodies, Iceberg\nTBLPROPERTIES, Hive external LOCATION/SerDe). One Athena query per\ntable — billed at the 10MB scan minimum each."
+        },
+        "use_show_create_view": {
+          "type": "boolean",
+          "description": "Use SHOW CREATE VIEW to retrieve full view DDL instead of the\nrewritten body from information_schema.views.view_definition."
+        },
+        "use_iceberg_metrics_scan": {
+          "type": "boolean",
+          "description": "For Iceberg tables, fan out one Athena query per table to read row\ncount, total file size, snapshot commit timestamp, and partition\ncolumns from the table's $files / $snapshots / $partitions metadata\ntables. Hive externals are unaffected."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "region"
+      ],
+      "description": "AthenaConf contains Amazon Athena connection parameters."
+    },
     "BigQueryConf": {
       "properties": {
         "project_id": {
@@ -118,6 +183,9 @@
         },
         "duckdb": {
           "$ref": "#/$defs/DuckDBConf"
+        },
+        "athena": {
+          "$ref": "#/$defs/AthenaConf"
         }
       },
       "additionalProperties": false,
@@ -429,6 +497,46 @@
       "additionalProperties": false,
       "type": "object",
       "description": "SYNQConfig holds SYNQ platform connection settings."
+    },
+    "ScopeConf": {
+      "properties": {
+        "include": {
+          "items": {
+            "$ref": "#/$defs/ScopeRuleConf"
+          },
+          "type": "array",
+          "description": "Include rules. If non-empty, only matching objects are accepted."
+        },
+        "exclude": {
+          "items": {
+            "$ref": "#/$defs/ScopeRuleConf"
+          },
+          "type": "array",
+          "description": "Exclude rules. Matching objects are rejected, even if they match an include rule."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "ScopeConf is the YAML representation of synq.common.v1.ScopeFilter — the shared include/exclude filter used by warehouses with hierarchical catalogs."
+    },
+    "ScopeRuleConf": {
+      "properties": {
+        "database": {
+          "type": "string",
+          "description": "Database-level pattern (catalog for Athena/Trino/Databricks, project for BigQuery)."
+        },
+        "schema": {
+          "type": "string",
+          "description": "Schema-level pattern (Glue database for Athena, dataset for BigQuery)."
+        },
+        "table": {
+          "type": "string",
+          "description": "Table or view name pattern."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "ScopeRuleConf is a single include/exclude rule."
     },
     "SnowflakeConf": {
       "properties": {
