@@ -26,6 +26,61 @@
       ],
       "description": "AggregateConfig defines aggregate comparison settings."
     },
+    "Annotations": {
+      "oneOf": [
+        {
+          "items": {
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 50,
+                "minLength": 1
+              },
+              "values": {
+                "items": {
+                  "type": "string",
+                  "maxLength": 50,
+                  "minLength": 1
+                },
+                "type": "array",
+                "maxItems": 20
+              }
+            },
+            "type": "object",
+            "required": [
+              "name"
+            ]
+          },
+          "type": "array",
+          "description": "Canonical list form. Each entry has a name and optional values."
+        },
+        {
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "maxLength": 50,
+                "minLength": 1
+              },
+              {
+                "items": {
+                  "type": "string",
+                  "maxLength": 50,
+                  "minLength": 1
+                },
+                "type": "array",
+                "maxItems": 20
+              }
+            ]
+          },
+          "type": "object",
+          "description": "Map shorthand: key is annotation name; value is null (name-only), a single string, or an array of strings."
+        }
+      ]
+    },
     "AthenaConf": {
       "properties": {
         "region": {
@@ -834,6 +889,10 @@
           "$ref": "#/$defs/CutoffConfig",
           "description": "Dynamic cutoff filter. Derives a watermark value from actual data to exclude rows not yet synced."
         },
+        "annotations": {
+          "$ref": "#/$defs/Annotations",
+          "description": "Annotations attached to this reconciliation case. Merged with suite-level annotations."
+        },
         "setup": {
           "additionalProperties": {
             "$ref": "#/$defs/StringOrStrings"
@@ -1329,6 +1388,10 @@
     "synq": {
       "$ref": "#/$defs/SYNQConfig",
       "description": "SYNQ API credentials for sending audit logs."
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Suite-level annotations."
     }
   },
   "additionalProperties": false,
