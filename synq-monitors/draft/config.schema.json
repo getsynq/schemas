@@ -84,6 +84,33 @@
         "id"
       ]
     },
+    "Evaluator": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sql_expression": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "INFO",
+            "WARNING",
+            "ERROR"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "sql_expression"
+      ]
+    },
     "FixedThresholds": {
       "properties": {
         "min": {
@@ -678,6 +705,52 @@
             "type",
             "column",
             "values"
+          ]
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "const": "business_query"
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "schedule": {
+              "$ref": "#/$defs/SimpleSchedule"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR"
+              ]
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "sql_query": {
+              "type": "string"
+            },
+            "evaluators": {
+              "items": {
+                "$ref": "#/$defs/Evaluator"
+              },
+              "type": "array",
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "type",
+            "sql_query"
           ]
         },
         {
