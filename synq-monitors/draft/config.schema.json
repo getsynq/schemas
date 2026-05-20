@@ -40,6 +40,9 @@
         },
         "timezone": {
           "type": "string"
+        },
+        "save_failures": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -118,6 +121,18 @@
         },
         "max": {
           "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "FreshnessSourceConfig": {
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "sql": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
@@ -214,6 +229,9 @@
             "time_partitioning_column": {
               "type": "string"
             },
+            "sql_source": {
+              "$ref": "#/$defs/SqlSourceConfig"
+            },
             "metric_aggregation": {
               "type": "string"
             }
@@ -269,6 +287,9 @@
                 "BALANCED",
                 "RELAXED"
               ]
+            },
+            "freshness_source": {
+              "$ref": "#/$defs/FreshnessSourceConfig"
             }
           },
           "additionalProperties": false,
@@ -316,6 +337,9 @@
             },
             "time_partitioning_column": {
               "type": "string"
+            },
+            "sql_source": {
+              "$ref": "#/$defs/SqlSourceConfig"
             },
             "columns": {
               "items": {
@@ -371,6 +395,9 @@
             },
             "time_partitioning_column": {
               "type": "string"
+            },
+            "sql_source": {
+              "$ref": "#/$defs/SqlSourceConfig"
             },
             "expression": {
               "type": "string"
@@ -461,6 +488,9 @@
             },
             "time_partitioning_column": {
               "type": "string"
+            },
+            "sql_source": {
+              "$ref": "#/$defs/SqlSourceConfig"
             }
           },
           "additionalProperties": false,
@@ -626,6 +656,9 @@
         }
       ]
     },
+    "SqlSourceConfig": {
+      "type": "string"
+    },
     "StructuredValue": {
       "anyOf": [
         {
@@ -692,6 +725,16 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
             "column": {
               "type": "string"
             },
@@ -734,6 +777,9 @@
             },
             "timezone": {
               "type": "string"
+            },
+            "save_failures": {
+              "type": "boolean"
             },
             "sql_query": {
               "type": "string"
@@ -781,6 +827,16 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
             "sql_expression": {
               "type": "string"
             }
@@ -820,12 +876,22 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
             "columns": {
               "items": {
                 "type": "string",
                 "minLength": 1
               },
               "type": "array"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             }
           },
           "additionalProperties": false,
@@ -863,11 +929,21 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
             "time_partition_column": {
               "type": "string"
             },
             "time_window_seconds": {
               "type": "integer"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             }
           },
           "additionalProperties": false,
@@ -903,6 +979,16 @@
             },
             "timezone": {
               "type": "string"
+            },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             },
             "column": {
               "type": "string"
@@ -949,6 +1035,16 @@
             },
             "timezone": {
               "type": "string"
+            },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             },
             "column": {
               "type": "string"
@@ -1000,6 +1096,16 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
             "column": {
               "type": "string"
             },
@@ -1046,12 +1152,22 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
             "columns": {
               "items": {
                 "type": "string",
                 "minLength": 1
               },
               "type": "array"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             }
           },
           "additionalProperties": false,
@@ -1088,6 +1204,16 @@
             },
             "timezone": {
               "type": "string"
+            },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             },
             "column": {
               "type": "string"
@@ -1132,11 +1258,21 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
             "time_partition_column": {
               "type": "string"
             },
             "time_window_seconds": {
               "type": "integer"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
             },
             "references": {
               "items": {
@@ -1183,6 +1319,16 @@
             "timezone": {
               "type": "string"
             },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "select_columns": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
             "column": {
               "type": "string"
             },
@@ -1225,6 +1371,9 @@
             },
             "timezone": {
               "type": "string"
+            },
+            "save_failures": {
+              "type": "boolean"
             },
             "columns": {
               "items": {
