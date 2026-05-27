@@ -75,6 +75,36 @@
       "title": "Airflow Task Identifier",
       "type": "object"
     },
+    "synq.entities.v1.AthenaTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "catalog": {
+          "description": "Glue Data Catalog name. Almost always \"AwsDataCatalog\" \u2014 the default\n catalog for Athena unless the customer registered a federated catalog.",
+          "type": "string"
+        },
+        "database": {
+          "description": "Glue database (the namespace users typically filter on).",
+          "type": "string"
+        },
+        "instance": {
+          "description": "AWS account and region the Athena workgroup runs in, formatted as\n \"<account-id>.<region>\" (e.g. \"123456789012.eu-west-1\"). Auto-derived\n from sts:GetCallerIdentity at integration setup time.",
+          "type": "string"
+        },
+        "table": {
+          "description": "Glue table or view name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "instance",
+        "catalog",
+        "database",
+        "table"
+      ],
+      "title": "Athena Table Identifier",
+      "type": "object"
+    },
     "synq.entities.v1.BigqueryTableIdentifier": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
@@ -274,6 +304,10 @@
           "$ref": "#/$defs/synq.entities.v1.AirflowTaskIdentifier",
           "description": "Airflow task identifier within a given DAG"
         },
+        "^(athenaTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.AthenaTableIdentifier",
+          "description": "Amazon Athena (Glue) table identifier"
+        },
         "^(bigqueryTable)$": {
           "$ref": "#/$defs/synq.entities.v1.BigqueryTableIdentifier",
           "description": "BigQuery table identifier"
@@ -294,9 +328,17 @@
           "$ref": "#/$defs/synq.entities.v1.DbtCoreNodeIdentifier",
           "description": "Dbt node that identifies one of dbt DAG nodes (model, test, etc) in dbt Core project"
         },
+        "^(mssqlTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.MssqlTableIdentifier",
+          "description": "SQL Server table identifier"
+        },
         "^(mysqlTable)$": {
           "$ref": "#/$defs/synq.entities.v1.MysqlTableIdentifier",
           "description": "Mysql table identifier"
+        },
+        "^(oracleTable)$": {
+          "$ref": "#/$defs/synq.entities.v1.OracleTableIdentifier",
+          "description": "Oracle table identifier"
         },
         "^(postgresTable)$": {
           "$ref": "#/$defs/synq.entities.v1.PostgresTableIdentifier",
@@ -336,6 +378,10 @@
           "$ref": "#/$defs/synq.entities.v1.AirflowTaskIdentifier",
           "description": "Airflow task identifier within a given DAG"
         },
+        "athena_table": {
+          "$ref": "#/$defs/synq.entities.v1.AthenaTableIdentifier",
+          "description": "Amazon Athena (Glue) table identifier"
+        },
         "bigquery_table": {
           "$ref": "#/$defs/synq.entities.v1.BigqueryTableIdentifier",
           "description": "BigQuery table identifier"
@@ -368,9 +414,17 @@
           "$ref": "#/$defs/synq.entities.v1.MonitorIdentifier",
           "description": "Monitor identifier"
         },
+        "mssql_table": {
+          "$ref": "#/$defs/synq.entities.v1.MssqlTableIdentifier",
+          "description": "SQL Server table identifier"
+        },
         "mysql_table": {
           "$ref": "#/$defs/synq.entities.v1.MysqlTableIdentifier",
           "description": "Mysql table identifier"
+        },
+        "oracle_table": {
+          "$ref": "#/$defs/synq.entities.v1.OracleTableIdentifier",
+          "description": "Oracle table identifier"
         },
         "postgres_table": {
           "$ref": "#/$defs/synq.entities.v1.PostgresTableIdentifier",
@@ -446,6 +500,36 @@
       "title": "Monitor Identifier",
       "type": "object"
     },
+    "synq.entities.v1.MssqlTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "properties": {
+        "database": {
+          "description": "SQL Server database",
+          "type": "string"
+        },
+        "host": {
+          "description": "Hostname of the SQL Server instance",
+          "type": "string"
+        },
+        "schema": {
+          "description": "SQL Server schema (e.g. \"dbo\")",
+          "type": "string"
+        },
+        "table": {
+          "description": "SQL Server table or view",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "database",
+        "schema",
+        "table"
+      ],
+      "title": "Mssql Table Identifier",
+      "type": "object"
+    },
     "synq.entities.v1.MysqlTableIdentifier": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
@@ -469,6 +553,42 @@
         "table"
       ],
       "title": "Mysql Table Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.OracleTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^(serviceName)$": {
+          "description": "Oracle service name (PDB)",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "host": {
+          "description": "Hostname of the Oracle instance",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Oracle schema (= owning user)",
+          "type": "string"
+        },
+        "service_name": {
+          "description": "Oracle service name (PDB)",
+          "type": "string"
+        },
+        "table": {
+          "description": "Oracle table or view",
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "service_name",
+        "schema",
+        "table"
+      ],
+      "title": "Oracle Table Identifier",
       "type": "object"
     },
     "synq.entities.v1.PostgresTableIdentifier": {
