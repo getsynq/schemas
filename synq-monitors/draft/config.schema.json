@@ -195,6 +195,64 @@
               "type": "string"
             },
             "type": {
+              "const": "category_distribution"
+            },
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "filter": {
+              "type": "string"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR"
+              ]
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "mode": {
+              "$ref": "#/$defs/Mode"
+            },
+            "segmentation": {
+              "$ref": "#/$defs/Segmentation"
+            },
+            "schedule": {
+              "$ref": "#/$defs/Schedule"
+            },
+            "time_partitioning_column": {
+              "type": "string"
+            },
+            "sql_source": {
+              "$ref": "#/$defs/SqlSourceConfig"
+            },
+            "column": {
+              "type": "string"
+            },
+            "top_k_limit": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "type",
+            "column"
+          ]
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
               "const": "custom_numeric"
             },
             "name": {
