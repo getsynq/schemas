@@ -851,8 +851,12 @@
           "description": "Target dataset."
         },
         "key_column": {
-          "type": "string",
-          "description": "Column used for bisection split points and aggregate grouping."
+          "$ref": "#/$defs/StringOrStrings",
+          "description": "Single key column for bisection split points and aggregate grouping.\nDeprecated in favor of key_columns; accepts a string or a one-element list.\nSet either key_column or key_columns, not both."
+        },
+        "key_columns": {
+          "$ref": "#/$defs/StringOrStrings",
+          "description": "Ordered key columns for bisection split points and aggregate grouping.\nSupports composite (multi-column) keys; the bisection orders and\nrange-filters on the column tuple. Accepts a string or a list of strings."
         },
         "mode": {
           "$ref": "#/$defs/ReconciliationMode",
