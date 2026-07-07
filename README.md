@@ -18,12 +18,14 @@ https://schemas.synq.io/<tool>/draft/<name>.schema.json
 
 ## Available Schemas
 
-### synq-recon
-
 | Schema | Status | Description |
 |--------|--------|-------------|
-| [config.schema.json](synq-recon/draft/config.schema.json) | Draft | Configuration file format for synq-recon |
-| [audit-log.schema.json](synq-recon/draft/audit-log.schema.json) | Draft | Audit log output format for synq-recon |
+| [synq-dwh/v1/config.schema.json](synq-dwh/v1/config.schema.json) | Stable | Configuration for the synq-dwh agent |
+| [synq-recon/v1/config.schema.json](synq-recon/v1/config.schema.json) | Stable | Configuration for the synq-recon reconciliation tool |
+| [synq-recon/v1/audit-log.schema.json](synq-recon/v1/audit-log.schema.json) | Stable | synq-recon reconciliation-run audit log output |
+| [synq-scout/v1/config.schema.json](synq-scout/v1/config.schema.json) | Stable | Configuration for the synq-scout triage agent |
+| [webhook/v1/event.schema.json](webhook/v1/event.schema.json) | Stable | Webhook event payload sent on issue/incident lifecycle events |
+| [synq-monitors/draft/config.schema.json](synq-monitors/draft/config.schema.json) | Draft | Configuration for synq-monitors (observability as code) |
 
 ## Adding a New Schema
 

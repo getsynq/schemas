@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.synq.io/synq-scout/draft/config.schema.json",
+  "$id": "https://schemas.synq.io/synq-scout/v1/config.schema.json",
   "$defs": {
     "AthenaConf": {
       "properties": {
@@ -49,7 +49,7 @@
         },
         "use_show_create_table": {
           "type": "boolean",
-          "description": "Use SHOW CREATE TABLE to retrieve full table DDL (CTAS bodies, Iceberg\nTBLPROPERTIES, Hive external LOCATION/SerDe). One Athena query per\ntable — billed at the 10MB scan minimum each."
+          "description": "Use SHOW CREATE TABLE to retrieve full table DDL (CTAS bodies, Iceberg\nTBLPROPERTIES, Hive external LOCATION/SerDe). One Athena query per\ntable \u2014 billed at the 10MB scan minimum each."
         },
         "use_show_create_view": {
           "type": "boolean",
@@ -502,7 +502,7 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "description": "ScopeConf is the YAML representation of synq.common.v1.ScopeFilter — the shared include/exclude filter used by warehouses with hierarchical catalogs."
+      "description": "ScopeConf is the YAML representation of synq.common.v1.ScopeFilter \u2014 the shared include/exclude filter used by warehouses with hierarchical catalogs."
     },
     "ScopeRuleConf": {
       "properties": {
@@ -691,7 +691,6 @@
   },
   "additionalProperties": false,
   "type": "object",
-  "title": "SYNQ Scout Agent Configuration",
-  "description": "Configuration file format for the synq-scout SRE agent",
-  "x-status": "draft"
+  "title": "Coalesce Quality Scout Agent Configuration",
+  "description": "Configuration file format for synq-scout, the Coalesce Quality agent that automatically triages data quality issues and incidents."
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Coalesce quality - JSON Schemas</title>
+  <title>Coalesce Quality - JSON Schemas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -113,9 +113,9 @@
 <body>
   <div class="header">
     <div class="header-inner">
-      <div class="logo"><img src="coalesce-quality-logo-white.svg" width="92" height="24" alt="Coalesce quality"></div>
+      <div class="logo"><img src="coalesce-quality-logo-white.svg" width="92" height="24" alt="Coalesce Quality"></div>
       <h1>JSON Schemas</h1>
-      <p>Public JSON Schema definitions for Coalesce quality tools and services.</p>
+      <p>Public JSON Schema definitions for Coalesce Quality tools and services.</p>
       <p>See <a href="https://docs.synq.io/">docs.synq.io</a> for full documentation.</p>
     </div>
   </div>
@@ -128,7 +128,23 @@
           <span class="badge badge-stable">stable</span>
         </div>
         <a class="schema-path" href="synq-dwh/v1/config.schema.json">synq-dwh/v1/config.schema.json</a>
-        <div class="schema-desc">Configuration file format for synq-dwh agent</div>
+        <div class="schema-desc">Configuration file format for the synq-dwh agent, which collects warehouse metadata, run results, and query logs from your data warehouse and sends them to Coalesce Quality.</div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-card-header">
+          <a class="schema-card-title" href="synq-recon/v1/audit-log.html">Recon Audit Log</a>
+          <span class="badge badge-stable">stable</span>
+        </div>
+        <a class="schema-path" href="synq-recon/v1/audit-log.schema.json">synq-recon/v1/audit-log.schema.json</a>
+        <div class="schema-desc">Audit log output capturing every operation performed during a synq-recon reconciliation run.</div>
+      </div>
+      <div class="schema-card">
+        <div class="schema-card-header">
+          <a class="schema-card-title" href="synq-recon/v1/config.html">Recon Configuration</a>
+          <span class="badge badge-stable">stable</span>
+        </div>
+        <a class="schema-path" href="synq-recon/v1/config.schema.json">synq-recon/v1/config.schema.json</a>
+        <div class="schema-desc">Configuration file format for synq-recon, the Coalesce Quality data reconciliation tool that compares datasets across databases.</div>
       </div>
       <div class="schema-card">
         <div class="schema-card-header">
@@ -136,7 +152,7 @@
           <span class="badge badge-stable">stable</span>
         </div>
         <a class="schema-path" href="synq-scout/v1/config.schema.json">synq-scout/v1/config.schema.json</a>
-        <div class="schema-desc">Configuration file format for synq-scout agent</div>
+        <div class="schema-desc">Configuration file format for synq-scout, the Coalesce Quality agent that automatically triages data quality issues and incidents.</div>
       </div>
       <div class="schema-card">
         <div class="schema-card-header">
@@ -144,34 +160,18 @@
           <span class="badge badge-stable">stable</span>
         </div>
         <a class="schema-path" href="webhook/v1/event.schema.json">webhook/v1/event.schema.json</a>
-        <div class="schema-desc">Webhook event payload sent by SYNQ</div>
+        <div class="schema-desc">Schema for webhook event payloads that Coalesce Quality POSTs to your endpoint on issue and incident lifecycle events.</div>
       </div>
     </div>
     <div class="schema-group">
       <div class="section-label">Draft</div>
       <div class="schema-card">
         <div class="schema-card-header">
-          <a class="schema-card-title" href="synq-recon/draft/audit-log.html">Recon Audit Log</a>
-          <span class="badge badge-draft">draft</span>
-        </div>
-        <a class="schema-path" href="synq-recon/draft/audit-log.schema.json">synq-recon/draft/audit-log.schema.json</a>
-        <div class="schema-desc">Audit log capturing all operations performed during a synq-recon reconciliation run</div>
-      </div>
-      <div class="schema-card">
-        <div class="schema-card-header">
-          <a class="schema-card-title" href="synq-recon/draft/config.html">Recon Configuration</a>
-          <span class="badge badge-draft">draft</span>
-        </div>
-        <a class="schema-path" href="synq-recon/draft/config.schema.json">synq-recon/draft/config.schema.json</a>
-        <div class="schema-desc">Configuration file format for synq-recon database reconciliation tool</div>
-      </div>
-      <div class="schema-card">
-        <div class="schema-card-header">
-          <a class="schema-card-title" href="synq-monitors/draft/config.html">SYNQ: Observability as Code</a>
+          <a class="schema-card-title" href="synq-monitors/draft/config.html">Coalesce Quality: Observability as Code</a>
           <span class="badge badge-draft">draft</span>
         </div>
         <a class="schema-path" href="synq-monitors/draft/config.schema.json">synq-monitors/draft/config.schema.json</a>
-        <div class="schema-desc">Configuration file format for synq-monitors data quality monitoring tool</div>
+        <div class="schema-desc">Configuration file format for synq-monitors, the Coalesce Quality observability-as-code tool for defining data quality monitors and tests.</div>
       </div>
     </div>
   </div>

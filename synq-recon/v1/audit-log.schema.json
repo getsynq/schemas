@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.synq.io/synq-recon/draft/audit-log.schema.json",
+  "$id": "https://schemas.synq.io/synq-recon/v1/audit-log.schema.json",
   "$defs": {
     "AggregateDrillChild": {
       "properties": {
@@ -1183,7 +1183,6 @@
     "reconciliations",
     "status"
   ],
-  "title": "SYNQ Recon Audit Log",
-  "description": "Audit log capturing all operations performed during a synq-recon reconciliation run",
-  "x-status": "draft"
+  "title": "Coalesce Quality Recon Audit Log",
+  "description": "Audit log output capturing every operation performed during a synq-recon reconciliation run."
 }
