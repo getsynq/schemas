@@ -1284,5 +1284,6 @@
   "$ref": "#/$defs/synq.webhooks.v1.Event",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Coalesce Quality Webhook Event",
-  "description": "Schema for webhook event payloads that Coalesce Quality POSTs to your endpoint on issue and incident lifecycle events."
+  "description": "Schema for webhook event payloads that Coalesce Quality POSTs to your endpoint on issue and incident lifecycle events.",
+  "x-status": "stable"
 }

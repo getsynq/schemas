@@ -1,1188 +1,3341 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.synq.io/synq-recon/v1/audit-log.schema.json",
   "$defs": {
-    "AggregateDrillChild": {
+    "google.protobuf.Duration": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "format": "duration",
+      "title": "Duration",
+      "type": "string"
+    },
+    "google.protobuf.Struct": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Struct",
+      "type": "object"
+    },
+    "google.protobuf.Timestamp": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "google.protobuf.Value": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Value"
+    },
+    "synq.agent.recon.v1.AggregateConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "AggregateConfig defines aggregate comparison settings.\n Used when mode is AGGREGATE to compare grouped measures between source and target.",
       "properties": {
-        "key": {
-          "type": "object"
+        "group_columns": {
+          "description": "Single column: flat GROUP BY comparison.\n   group_columns: [\"region\"]\n   \u2192 GROUP BY region\n\n Multiple columns: cumulative GROUP BY drill-down, pruning matched groups\n at each level to focus on divergent branches.\n   group_columns: [\"region\", \"city\", \"store\"]\n   \u2192 Level 0: GROUP BY region\n   \u2192 Level 1: GROUP BY region, city  (only for mismatched regions)\n   \u2192 Level 2: GROUP BY region, city, store (only for mismatched cities)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Columns defining the drill-down hierarchy for aggregate comparison.\n Falls back to key_column if not set.",
+          "type": "array"
         },
-        "type": {
-          "type": "string",
-          "enum": [
-            "mismatch",
-            "missing_source",
-            "missing_target",
-            "value_mismatch"
-          ]
+        "measures": {
+          "description": "Measures to compare between source and target.\n Each measure defines a column and one or more aggregate functions to apply.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.Measure"
+          },
+          "type": "array"
+        },
+        "thresholds": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ThresholdConfig",
+          "description": "Tolerance thresholds for aggregate comparisons.\n When not set, exact match is required for all measures."
+        }
+      },
+      "title": "Aggregate Config",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.AggregateDrillChild": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "AggregateDrillChild represents a single divergent group within a drill-down level.",
+      "properties": {
+        "differences": {
+          "$ref": "#/$defs/synq.agent.recon.v1.MeasureDifferences",
+          "description": "All difference variants computed for this group."
+        },
+        "drill_down": {
+          "$ref": "#/$defs/synq.agent.recon.v1.AggregateDrillNode",
+          "description": "Further drill-down into this divergent group."
+        },
+        "key": {
+          "$ref": "#/$defs/google.protobuf.Struct",
+          "description": "Group key values (column name -> value)."
+        },
+        "source_query": {
+          "default": "",
+          "description": "Investigation query for source data.",
+          "type": "string"
         },
         "source_values": {
           "additionalProperties": {
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "description": "Source measure values (measure key -> value).",
+          "propertyNames": {
+            "type": "string"
           },
           "type": "object"
+        },
+        "target_query": {
+          "default": "",
+          "description": "Investigation query for target data.",
+          "type": "string"
         },
         "target_values": {
           "additionalProperties": {
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "description": "Target measure values (measure key -> value).",
+          "propertyNames": {
+            "type": "string"
           },
           "type": "object"
-        },
-        "differences": {
-          "$ref": "#/$defs/MeasureDifferences"
         },
         "threshold_evaluation": {
-          "$ref": "#/$defs/ThresholdEvaluation"
+          "$ref": "#/$defs/synq.agent.recon.v1.ThresholdEvaluation",
+          "description": "Threshold evaluation results for this group."
         },
-        "source_query": {
-          "type": "string"
-        },
-        "target_query": {
-          "type": "string"
-        },
-        "drill_down": {
-          "$ref": "#/$defs/AggregateDrillNode"
+        "type": {
+          "anyOf": [
+            {
+              "pattern": "^AGGREGATE_DIVERGENCE_TYPE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "AGGREGATE_DIVERGENCE_TYPE_MISMATCH",
+                "AGGREGATE_DIVERGENCE_TYPE_MISSING_SOURCE",
+                "AGGREGATE_DIVERGENCE_TYPE_MISSING_TARGET",
+                "AGGREGATE_DIVERGENCE_TYPE_VALUE_MISMATCH"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Type of divergence.",
+          "title": "Aggregate Divergence Type"
         }
       },
-      "type": "object",
-      "description": "AggregateDrillChild represents a single divergent group within a drill-down level."
+      "title": "Aggregate Drill Child",
+      "type": "object"
     },
-    "AggregateDrillNode": {
+    "synq.agent.recon.v1.AggregateDrillNode": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "AggregateDrillNode represents a node in the hierarchical aggregate drill-down tree.",
       "properties": {
-        "level": {
-          "type": "integer"
+        "children": {
+          "description": "Divergent children (mismatched or missing groups).",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.AggregateDrillChild"
+          },
+          "type": "array"
         },
         "group_column": {
+          "default": "",
+          "description": "Group column used at this level.",
           "type": "string"
         },
-        "total_groups": {
-          "type": "integer"
+        "level": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Drill-down level (0-based)."
         },
         "matched_groups": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of matched groups at this level."
         },
-        "children": {
-          "items": {
-            "$ref": "#/$defs/AggregateDrillChild"
-          },
-          "type": "array"
+        "total_groups": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Total groups at this level."
         }
       },
-      "type": "object",
-      "description": "AggregateDrillNode represents a node in the hierarchical aggregate drill-down tree."
+      "title": "Aggregate Drill Node",
+      "type": "object"
     },
-    "AggregateStageResult": {
+    "synq.agent.recon.v1.AggregateStageResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "AggregateStageResult is the result for an aggregate_check stage.",
       "properties": {
-        "total_groups": {
-          "type": "integer"
-        },
-        "matched_groups": {
-          "type": "integer"
-        },
-        "mismatch_groups": {
-          "type": "integer"
-        },
-        "missing_source": {
-          "type": "integer"
-        },
-        "missing_target": {
-          "type": "integer"
-        },
-        "match": {
-          "type": "boolean"
-        },
-        "early_termination_reason": {
-          "type": "string"
+        "divergent_groups": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Top-level groups that diverged (counterpart of matched_groups, same level as\n total_groups). This is the same-level numerator for a \"divergent_groups of\n total_groups diverged\" summary \u2014 unlike the leaf-level mismatch_groups /\n missing_* counts above, which can exceed total_groups in a multi-level drill."
         },
         "drill_down": {
-          "$ref": "#/$defs/AggregateDrillNode"
-        }
-      },
-      "type": "object",
-      "description": "AggregateStageResult is the typed result for an aggregate_check stage."
-    },
-    "AuditMeta": {
-      "properties": {
-        "version": {
-          "type": "string",
-          "description": "Module version or tag (e.g. v1.2.3)"
-        },
-        "vcs_commit": {
-          "type": "string",
-          "description": "VCS revision hash"
-        },
-        "vcs_time": {
-          "type": "string",
-          "description": "VCS commit timestamp (RFC3339)"
-        },
-        "vcs_dirty": {
-          "type": "boolean",
-          "description": "True if the working tree had uncommitted changes"
-        },
-        "go_version": {
-          "type": "string",
-          "description": "Go toolchain version used to build the binary"
-        }
-      },
-      "type": "object",
-      "description": "AuditMeta holds build and environment metadata for the synq-recon binary."
-    },
-    "AuditSummary": {
-      "properties": {
-        "overall_match": {
-          "type": "boolean",
-          "description": "True when every reconciliation matched (exactly or within threshold)"
-        },
-        "total": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Total number of reconciliations executed"
-        },
-        "matched": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Number of reconciliations that completed and matched exactly"
-        },
-        "matched_within_threshold": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Number of reconciliations that had differences within configured thresholds"
-        },
-        "mismatched": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Number of reconciliations that completed but found data differences exceeding thresholds"
-        },
-        "failed": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Number of reconciliations that encountered an infrastructure error"
-        }
-      },
-      "type": "object",
-      "required": [
-        "overall_match",
-        "total"
-      ],
-      "description": "AuditSummary holds aggregated counts derived from individual reconciliation results."
-    },
-    "BisectionStageConfig": {
-      "properties": {
-        "factor": {
-          "type": "integer"
-        },
-        "threshold": {
-          "type": "integer"
-        },
-        "max_depth": {
-          "type": "integer"
-        },
-        "strategy": {
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "description": "BisectionStageConfig is the typed config for a bisection_drill stage."
-    },
-    "BisectionStageResult": {
-      "properties": {
-        "total_segments": {
-          "type": "integer"
-        },
-        "mismatch_count": {
-          "type": "integer"
-        },
-        "error_count": {
-          "type": "integer"
-        },
-        "max_depth": {
-          "type": "integer"
+          "$ref": "#/$defs/synq.agent.recon.v1.AggregateDrillNode",
+          "description": "Hierarchical drill-down tree for aggregate comparison."
         },
         "early_termination_reason": {
+          "default": "",
+          "description": "Reason if aggregate check terminated early.",
           "type": "string"
         },
-        "statistics": {
-          "$ref": "#/$defs/BisectionStatistics"
+        "match": {
+          "default": false,
+          "description": "Overall match result.",
+          "type": "boolean"
         },
-        "mismatch_leaves": {
+        "matched_groups": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Top-level groups that matched \u2014 directly, or because their whole subtree\n resolved. Same level as total_groups."
+        },
+        "mismatch_groups": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Leaf-level groups with value differences (deepest drill level). NOT\n comparable to total_groups: one divergent top-level group can contain many\n divergent leaves. For a same-level \"X of Y diverged\" ratio use\n divergent_groups / total_groups; use these leaf counts for detail."
+        },
+        "missing_source": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Leaf-level groups present in target but missing in source."
+        },
+        "missing_target": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Leaf-level groups present in source but missing in target."
+        },
+        "total_groups": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Top-level (first group column) total group count. With a multi-level\n drill-down this is the number of distinct first-level groups, NOT the number\n of leaf groups. Invariant: total_groups == matched_groups + divergent_groups."
+        }
+      },
+      "title": "Aggregate Stage Result",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.AuditLog": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "AuditLog is the root structure for a reconciliation run audit.\n It captures all operations performed during a synq-recon reconciliation run.",
+      "properties": {
+        "completed_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "When the run completed."
+        },
+        "config_file": {
+          "default": "",
+          "description": "Path to the configuration file used.",
+          "type": "string"
+        },
+        "duration": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Total run duration."
+        },
+        "environment": {
+          "description": "Name of the environment used for this run.\n Empty for direct/unmanaged runs where no environment was applied.",
+          "type": "string"
+        },
+        "invocation_id": {
+          "description": "Unique identifier for this invocation/run.",
+          "minLength": 1,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "meta": {
+          "$ref": "#/$defs/synq.agent.recon.v1.AuditMeta",
+          "description": "Build and environment metadata for the synq-recon binary."
+        },
+        "parent_invocation_id": {
+          "description": "Invocation ID of the parent run this continues from.\n Set when this run resumes or drills deeper into a previous run's results.",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "type": "string"
+        },
+        "reconciliations": {
+          "description": "Audit records for each reconciliation executed.",
           "items": {
-            "$ref": "#/$defs/MismatchLeafDetail"
+            "$ref": "#/$defs/synq.agent.recon.v1.ReconciliationAudit"
           },
           "type": "array"
         },
-        "investigation_queries": {
+        "resolved_table_references": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Effective table references after environment overrides were applied.\n Keyed by \"reconciliation_name.source\" or \"reconciliation_name.target\".\n Only populated when an environment was active and overrides were applied.\n The suite field (14) still contains the original pre-override config.",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "resolved_variables": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Resolved template variable values used for query interpolation.\n Contains the actual values after template evaluation\n (e.g. \"{{today - 30d}}\" resolved to \"2026-01-27\").",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "started_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "When the run started."
+        },
+        "status": {
+          "anyOf": [
+            {
+              "pattern": "^AUDIT_STATUS_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "AUDIT_STATUS_PASSED",
+                "AUDIT_STATUS_MISMATCHED_WITHIN_THRESHOLD",
+                "AUDIT_STATUS_MISMATCHED",
+                "AUDIT_STATUS_FAILED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Overall execution status derived from individual reconciliation outcomes.",
+          "title": "Audit Status"
+        },
+        "suite": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ReconcilationSuite",
+          "description": "Full suite configuration snapshot as executed.\n Contains all reconciliation definitions, variables, thresholds, etc."
+        },
+        "suite_description": {
+          "description": "Suite description (promoted from suite.description).",
+          "type": "string"
+        },
+        "suite_name": {
+          "description": "Suite machine identifier (promoted from suite.name).",
+          "type": "string"
+        },
+        "suite_title": {
+          "description": "Human-readable title (promoted from suite.title).",
+          "type": "string"
+        },
+        "summary": {
+          "$ref": "#/$defs/synq.agent.recon.v1.AuditSummary",
+          "description": "Aggregated counts derived from individual reconciliation results."
+        },
+        "total_stats": {
+          "$ref": "#/$defs/synq.agent.recon.v1.QueryStats",
+          "description": "Aggregated query execution statistics across all queries in this run."
+        },
+        "version": {
+          "description": "Schema version. Must be \"1\".",
+          "enum": [
+            "1"
+          ],
+          "minLength": 1,
+          "type": "string"
+        },
+        "warnings": {
+          "description": "Suite-level warnings detected during config validation.",
           "items": {
-            "$ref": "#/$defs/InvestigationQuery"
+            "type": "string"
           },
           "type": "array"
         }
       },
-      "type": "object",
-      "description": "BisectionStageResult is the typed result for a bisection_drill stage."
+      "required": [
+        "version",
+        "invocation_id",
+        "suite_name",
+        "started_at",
+        "completed_at",
+        "duration"
+      ],
+      "title": "Audit Log",
+      "type": "object"
     },
-    "BisectionStatistics": {
+    "synq.agent.recon.v1.AuditMeta": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "AuditMeta holds build and environment metadata for the synq-recon binary.",
       "properties": {
-        "total_nodes": {
-          "type": "integer"
+        "go_version": {
+          "default": "",
+          "description": "Go toolchain version used to build the binary.",
+          "type": "string"
         },
-        "matched_nodes": {
-          "type": "integer"
+        "vcs_commit": {
+          "default": "",
+          "description": "VCS revision hash.",
+          "type": "string"
         },
-        "mismatched_nodes": {
-          "type": "integer"
+        "vcs_dirty": {
+          "default": false,
+          "description": "True if the working tree had uncommitted changes.",
+          "type": "boolean"
         },
-        "leaf_nodes": {
-          "type": "integer"
+        "vcs_time": {
+          "default": "",
+          "description": "VCS commit timestamp (RFC3339).",
+          "type": "string"
+        },
+        "version": {
+          "default": "",
+          "description": "Module version or tag (e.g. v1.2.3).",
+          "type": "string"
+        }
+      },
+      "title": "Audit Meta",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.AuditSummary": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "AuditSummary holds aggregated counts derived from individual reconciliation results.",
+      "properties": {
+        "errors": {
+          "description": "Error messages collected from failed reconciliations.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "failed": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of reconciliations that encountered an infrastructure error."
+        },
+        "matched": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of reconciliations that completed and matched exactly."
+        },
+        "matched_within_threshold": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of reconciliations that had differences within configured thresholds.\n These are warning-level outcomes \u2014 data differs but within acceptable tolerance."
+        },
+        "mismatched": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of reconciliations that completed but found data differences\n exceeding thresholds (or no thresholds configured)."
+        },
+        "overall_match": {
+          "default": false,
+          "description": "True when every reconciliation matched (exactly or within threshold).\n False when any reconciliation failed or had an exceeding mismatch.",
+          "type": "boolean"
+        },
+        "total": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Total number of reconciliations executed."
+        }
+      },
+      "title": "Audit Summary",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.BisectionConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "BisectionConfig controls the bisection drill-down algorithm that recursively\n splits the key range to locate individual mismatched rows.\n Only used in ROW_CHECKSUM mode.",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "description": "Whether bisection drill-down is enabled.\n When false, only the quick-check (count + checksum) runs \u2014 mismatches\n are detected but not localized to specific rows.",
+          "type": "boolean"
+        },
+        "factor": {
+          "anyOf": [
+            {
+              "maximum": 1024,
+              "minimum": 2,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Branching factor: how many segments each level is split into.\n Higher values find mismatches faster (fewer levels) but issue more queries per level.\n Default: 32. Typical range: 4\u201364."
+        },
+        "strategy": {
+          "anyOf": [
+            {
+              "pattern": "^SEGMENTATION_STRATEGY_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "SEGMENTATION_STRATEGY_QUANTILE",
+                "SEGMENTATION_STRATEGY_HASH",
+                "SEGMENTATION_STRATEGY_TIME"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Segmentation strategy for splitting key ranges.",
+          "title": "Segmentation Strategy"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Row count threshold: stop bisecting when a segment has fewer rows than this.\n Lower values find more precise mismatch locations but issue more queries.\n Default: 16384. Set to 1 to drill down to individual rows."
+        },
+        "time_column": {
+          "description": "Column for time-based partitioning. Required when strategy is TIME.\n Must be a timestamp, date, or datetime column in the dataset.",
+          "type": "string"
+        },
+        "time_granularity": {
+          "anyOf": [
+            {
+              "pattern": "^TIME_GRANULARITY_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "TIME_GRANULARITY_HOUR",
+                "TIME_GRANULARITY_DAY",
+                "TIME_GRANULARITY_WEEK",
+                "TIME_GRANULARITY_MONTH",
+                "TIME_GRANULARITY_QUARTER",
+                "TIME_GRANULARITY_YEAR"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Granularity for time-based segmentation. Default: DAY.\n Controls the width of each time bucket when strategy is TIME.",
+          "title": "Time Granularity"
+        }
+      },
+      "title": "Bisection Config",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.BisectionStageResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "BisectionStageResult is the result for a bisection_drill stage.",
+      "properties": {
+        "early_termination_reason": {
+          "default": "",
+          "description": "Reason if bisection terminated early.",
+          "type": "string"
+        },
+        "error_count": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of segments that encountered errors."
+        },
+        "investigation_queries": {
+          "description": "Merged investigation queries for adjacent mismatch regions.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.InvestigationQuery"
+          },
+          "type": "array"
+        },
+        "max_depth": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Maximum depth reached in the segment tree."
+        },
+        "mismatch_count": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of mismatched leaf segments."
+        },
+        "mismatch_leaves": {
+          "description": "Details for each mismatched leaf segment.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.MismatchLeafDetail"
+          },
+          "type": "array"
+        },
+        "statistics": {
+          "$ref": "#/$defs/synq.agent.recon.v1.BisectionStatistics",
+          "description": "Detailed tree statistics."
+        },
+        "total_segments": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Total number of segments processed."
+        }
+      },
+      "title": "Bisection Stage Result",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.BisectionStatistics": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "BisectionStatistics holds statistics about the bisection segment tree.",
+      "properties": {
+        "depth_distribution": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer"
+              },
+              {
+                "pattern": "^-?[0-9]+$",
+                "type": "string"
+              }
+            ]
+          },
+          "description": "Number of segments at each depth level.",
+          "propertyNames": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer"
+              },
+              {
+                "pattern": "^-?[0-9]+$",
+                "type": "string"
+              }
+            ]
+          },
+          "type": "object"
         },
         "intermediate_nodes": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "leaf_nodes": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         },
         "matched_leaves": {
-          "type": "integer"
-        },
-        "mismatched_leaves": {
-          "type": "integer"
-        },
-        "depth_distribution": {
-          "patternProperties": {
-            "^[0-9]+$": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
             }
-          },
-          "additionalProperties": false,
-          "type": "object"
+          ],
+          "default": 0
+        },
+        "matched_nodes": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         },
         "mismatch_by_depth": {
-          "patternProperties": {
-            "^[0-9]+$": {
-              "type": "integer"
-            }
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer"
+              },
+              {
+                "pattern": "^-?[0-9]+$",
+                "type": "string"
+              }
+            ]
           },
-          "additionalProperties": false,
+          "description": "Number of mismatched segments at each depth level.",
+          "propertyNames": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer"
+              },
+              {
+                "pattern": "^-?[0-9]+$",
+                "type": "string"
+              }
+            ]
+          },
           "type": "object"
+        },
+        "mismatch_source_rows": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "mismatch_target_rows": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "mismatched_leaves": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "mismatched_nodes": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         },
         "per_depth": {
           "additionalProperties": {
-            "$ref": "#/$defs/DepthStats"
+            "$ref": "#/$defs/synq.agent.recon.v1.DepthStats"
+          },
+          "description": "Detailed per-depth statistics.",
+          "propertyNames": {
+            "type": "string"
           },
           "type": "object"
         },
+        "total_nodes": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
         "total_source_rows": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         },
         "total_target_rows": {
-          "type": "integer"
-        },
-        "mismatch_source_rows": {
-          "type": "integer"
-        },
-        "mismatch_target_rows": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         }
       },
-      "type": "object",
-      "description": "BisectionStatistics holds statistics about the bisection segment tree."
+      "title": "Bisection Statistics",
+      "type": "object"
     },
-    "DatasetInfo": {
+    "synq.agent.recon.v1.ColumnMapping": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ColumnMapping maps a source column name to a target column name.\n Used when source and target use different naming conventions for the same data\n (e.g., snake_case vs SCREAMING_SNAKE_CASE, or completely different names).\n Only columns with different names need explicit mapping \u2014 columns with\n identical names (or case-insensitive matches when case_insensitive is true)\n are matched automatically.",
       "properties": {
-        "connection": {
+        "source": {
+          "description": "Column name in the source dataset.",
+          "minLength": 1,
           "type": "string"
         },
-        "dialect": {
+        "target": {
+          "description": "Corresponding column name in the target dataset.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "Column Mapping",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ColumnThresholdOverride": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ColumnThresholdOverride associates threshold overrides with a specific\n group_column level in the aggregate drill-down hierarchy.",
+      "properties": {
+        "column": {
+          "description": "Group column name this override applies to.\n Must match one of the group_columns in the AggregateConfig.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "thresholds": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ThresholdConfig",
+          "description": "Threshold overrides for this group column level.\n Values here override the parent ThresholdConfig for reconciliation groups\n at this drill-down level. May include per_measure for further specificity."
+        }
+      },
+      "required": [
+        "column",
+        "thresholds"
+      ],
+      "title": "Column Threshold Override",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ConnectionQueries": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ConnectionQueries associates SQL queries with a specific connection.\n Used for setup and teardown blocks at both suite and reconciliation level.",
+      "properties": {
+        "connection": {
+          "description": "Connection name to execute these queries on.\n Must reference a connection configured in the runner's connection map.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "queries": {
+          "description": "SQL queries to execute in order on this connection.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "connection"
+      ],
+      "title": "Connection Queries",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.CutoffApplyConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "CutoffApplyConfig controls how the resolved cutoff value is applied as a WHERE filter.",
+      "properties": {
+        "column": {
+          "description": "Column to filter on. When not set, uses the derivation column from that side.",
+          "type": "string"
+        },
+        "operator": {
+          "description": "Comparison operator. Default: \"<=\".",
+          "type": "string"
+        }
+      },
+      "title": "Cutoff Apply Config",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.CutoffConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "The cutoff is resolved at runtime before comparison queries run:\n  1. Derive watermark(s) from source and/or target via aggregate queries.\n  2. Combine them (default: MIN of both sides).\n  3. Optionally truncate to a time boundary and apply an offset.\n  4. Apply as WHERE filter to both source and target queries.",
+      "properties": {
+        "apply_source": {
+          "$ref": "#/$defs/synq.agent.recon.v1.CutoffApplyConfig",
+          "description": "How to apply the cutoff as a WHERE filter on the source side.\n When not set, uses the source derivation column with <= operator."
+        },
+        "apply_target": {
+          "$ref": "#/$defs/synq.agent.recon.v1.CutoffApplyConfig",
+          "description": "How to apply the cutoff as a WHERE filter on the target side.\n When not set, uses the target derivation column with <= operator."
+        },
+        "combine": {
+          "anyOf": [
+            {
+              "pattern": "^CUTOFF_COMBINE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "CUTOFF_COMBINE_MIN",
+                "CUTOFF_COMBINE_MAX",
+                "CUTOFF_COMBINE_SOURCE",
+                "CUTOFF_COMBINE_TARGET"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "How to combine watermarks when both sides are configured.\n Default: MIN (use the smaller watermark for safety).\n Ignored when only one side has a watermark.",
+          "title": "Cutoff Combine"
+        },
+        "offset": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Time offset applied after truncation.\n Negative durations subtract from the cutoff (safety buffer).\n Example: \"-30m\" shifts the cutoff 30 minutes earlier."
+        },
+        "source": {
+          "$ref": "#/$defs/synq.agent.recon.v1.CutoffSideConfig",
+          "description": "Per-side watermark derivation config for source.\n When not set, derives from target only."
+        },
+        "target": {
+          "$ref": "#/$defs/synq.agent.recon.v1.CutoffSideConfig",
+          "description": "Per-side watermark derivation config for target.\n When not set, derives from source only."
+        },
+        "truncate": {
+          "anyOf": [
+            {
+              "pattern": "^CUTOFF_TRUNCATE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "CUTOFF_TRUNCATE_HOUR",
+                "CUTOFF_TRUNCATE_DAY",
+                "CUTOFF_TRUNCATE_WEEK",
+                "CUTOFF_TRUNCATE_MONTH",
+                "CUTOFF_TRUNCATE_QUARTER",
+                "CUTOFF_TRUNCATE_YEAR"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Truncate the combined watermark to a time boundary.\n Example: HOUR truncates 08:47:12 to 08:00:00.\n Applied after combining, before offset.",
+          "title": "Cutoff Truncate"
+        }
+      },
+      "title": "CutoffConfig defines a dynamic cutoff filter for sync reconciliation.\n It derives a watermark value from the actual data (e.g., MAX(created_at))\n to automatically exclude rows that haven't been synced yet.",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.CutoffResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "CutoffResult captures the runtime resolution of a cutoff filter.\n Stored in the audit log to provide full transparency into how the cutoff\n was derived and applied.",
+      "properties": {
+        "cutoff_value": {
+          "default": "",
+          "description": "Final cutoff value after combining source/target watermarks\n and applying truncation and offset transforms.",
+          "type": "string"
+        },
+        "source_watermark": {
+          "default": "",
+          "description": "Watermark value derived from the source dataset.\n Empty when cutoff was configured for target-only derivation.",
+          "type": "string"
+        },
+        "source_where": {
+          "default": "",
+          "description": "WHERE clause applied to the source query.",
+          "type": "string"
+        },
+        "target_watermark": {
+          "default": "",
+          "description": "Watermark value derived from the target dataset.\n Empty when cutoff was configured for source-only derivation.",
+          "type": "string"
+        },
+        "target_where": {
+          "default": "",
+          "description": "WHERE clause applied to the target query.",
+          "type": "string"
+        }
+      },
+      "title": "Cutoff Result",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.CutoffSideConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "There are two modes:\n  1. Column + aggregate (default): auto-generates a watermark query from the dataset.\n     For table-based datasets, queries the table directly (the column does NOT need\n     to be in the reconciliation column list). For query-based datasets, wraps the\n     query as a subquery (the column MUST be in the query's SELECT list).\n  2. Custom query: provide a SQL query that returns a single row with a \"watermark\" column.\n     Use this when the auto-generated query doesn't work (e.g., complex joins, custom logic).\n\n After resolution at runtime, the `query` field is always populated with the actual SQL\n that was executed, regardless of which mode was used. This ensures the audit log captures\n the exact query for reproducibility.",
+      "properties": {
+        "aggregate": {
+          "anyOf": [
+            {
+              "pattern": "^CUTOFF_AGGREGATE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "CUTOFF_AGGREGATE_MAX",
+                "CUTOFF_AGGREGATE_MIN"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Aggregate function to derive the watermark. Default: MAX.\n Only used when query is not set.",
+          "title": "Cutoff Aggregate"
+        },
+        "column": {
+          "default": "",
+          "description": "Column to derive the watermark from (e.g., \"created_at\", \"synced_at\").\n Required when query is not set.",
           "type": "string"
         },
         "query": {
+          "description": "Custom SQL query for watermark derivation.\n Must return a single row with a \"watermark\" column.\n When not set, auto-generated from the dataset at runtime.\n After resolution, this field is populated with the actual query that was executed.",
           "type": "string"
         }
       },
-      "type": "object",
+      "title": "CutoffSideConfig configures watermark derivation for one side (source or target).",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.Dataset": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Dataset defines a source or target dataset for reconciliation.\n A dataset specifies which connection to use and how to select data \u2014\n either via a raw SQL query or by referencing a table with optional column filtering.",
+      "properties": {
+        "as_of": {
+          "description": "Time-travel timestamp for snapshot queries (e.g., \"2026-02-01 00:00:00\").\n When set, wraps the query with database-specific time-travel syntax:\n   - Snowflake: AT(TIMESTAMP => '<as_of>')\n   - BigQuery: FOR SYSTEM_TIME AS OF TIMESTAMP '<as_of>'\n   - Databricks: TIMESTAMP AS OF '<as_of>'\n Has no effect on databases that don't support time-travel.",
+          "type": "string"
+        },
+        "connection": {
+          "description": "Name of the connection to use. Must reference a connection configured\n in the runner's connection map.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "query": {
+          "description": "Raw SQL query returning the dataset.\n Should be a SELECT or WITH (CTE) statement.\n Supports template variable interpolation via {{variable_name}} syntax.",
+          "type": "string"
+        },
+        "table": {
+          "$ref": "#/$defs/synq.agent.recon.v1.TableReference",
+          "description": "Table reference with optional column selection.\n Automatically generates a SELECT query from the table metadata."
+        }
+      },
+      "required": [
+        "connection"
+      ],
+      "title": "Dataset",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.DatasetInfo": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "DatasetInfo captures runtime information about a source or target dataset.",
+      "properties": {
+        "connection": {
+          "description": "Connection name used.",
+          "type": "string"
+        },
+        "dialect": {
+          "default": "",
+          "description": "Database dialect detected at runtime (e.g. \"postgres\", \"snowflake\").",
+          "type": "string"
+        },
+        "query": {
+          "description": "Resolved SQL query actually executed (after variable interpolation).",
+          "type": "string"
+        }
+      },
       "required": [
         "connection",
         "query"
       ],
-      "description": "DatasetInfo identifies a source or target dataset."
+      "title": "Dataset Info",
+      "type": "object"
     },
-    "DepthStats": {
+    "synq.agent.recon.v1.DepthStats": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "DepthStats holds per-depth-level statistics for the bisection tree.",
       "properties": {
-        "total_rows": {
-          "type": "integer"
-        },
         "mismatched_rows": {
-          "type": "integer"
-        },
-        "segments": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         },
         "mismatched_segments": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "segments": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "total_rows": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         }
       },
-      "type": "object",
-      "description": "DepthStats holds per-depth-level statistics for the bisection tree."
+      "title": "Depth Stats",
+      "type": "object"
     },
-    "DiffQueriesAudit": {
+    "synq.agent.recon.v1.DiffQueries": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "DiffQueries holds investigation queries for a mismatch leaf.",
       "properties": {
         "source_rows": {
+          "default": "",
+          "description": "SQL query to retrieve source rows in the mismatch segment.",
           "type": "string"
         },
         "target_rows": {
+          "default": "",
+          "description": "SQL query to retrieve target rows in the mismatch segment.",
           "type": "string"
         }
       },
-      "type": "object",
-      "description": "DiffQueriesAudit holds investigation queries for a mismatch leaf."
+      "title": "Diff Queries",
+      "type": "object"
     },
-    "InvestigationQuery": {
+    "synq.agent.recon.v1.ErrorHandlingConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ErrorHandlingConfig controls retry and timeout behavior for database queries.\n Applies to all queries within a reconciliation (setup, comparison, teardown).",
       "properties": {
-        "min_key": {
+        "max_retries": {
           "anyOf": [
             {
+              "maximum": 10,
+              "minimum": 0,
               "type": "integer"
             },
             {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Maximum retry attempts for transient query failures.\n The total number of attempts is max_retries + 1 (initial + retries).\n Default: 2."
+        },
+        "query_timeout": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Per-query timeout. When a query exceeds this duration, it is cancelled.\n Default: no per-query limit (only the global run timeout applies)."
+        },
+        "retry_backoff_factor": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity"
+              ],
               "type": "string"
             },
             {
-              "type": "null"
+              "type": "string"
             }
-          ]
+          ],
+          "description": "Backoff multiplier applied after each retry.\n Delay for attempt N = retry_initial_delay * retry_backoff_factor^(N-1).\n Must be >= 1.0 to ensure delays don't decrease.\n Default: 2.0."
+        },
+        "retry_initial_delay": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Initial backoff delay before the first retry.\n Subsequent retries multiply this by retry_backoff_factor.\n Default: 1s."
+        }
+      },
+      "title": "Error Handling Config",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.InvestigationQuery": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "InvestigationQuery represents a merged diff query covering one or more\n adjacent mismatch leaves.",
+      "properties": {
+        "leaves_covered": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of mismatch leaves covered by this query."
         },
         "max_key": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "$ref": "#/$defs/google.protobuf.Value",
+          "description": "Maximum key (exclusive)."
         },
-        "time_bucket": {
-          "type": "string"
-        },
-        "leaves_covered": {
-          "type": "integer",
-          "minimum": 1
+        "min_key": {
+          "$ref": "#/$defs/google.protobuf.Value",
+          "description": "Minimum key (inclusive)."
         },
         "source_query": {
+          "description": "SQL query to retrieve source rows.",
           "type": "string"
         },
         "target_query": {
+          "description": "SQL query to retrieve target rows.",
+          "type": "string"
+        },
+        "time_bucket": {
+          "default": "",
+          "description": "Time bucket label (for time-based segmentation).",
           "type": "string"
         }
       },
-      "type": "object",
       "required": [
-        "min_key",
-        "max_key",
-        "leaves_covered",
         "source_query",
         "target_query"
       ],
-      "description": "InvestigationQuery represents a merged diff query covering one or more adjacent mismatch leaves."
+      "title": "Investigation Query",
+      "type": "object"
     },
-    "MeasureDifferences": {
+    "synq.agent.recon.v1.Measure": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Measure defines a column and aggregate function(s) to compare\n between source and target datasets.\n A single measure with multiple functions expands into multiple comparisons\n (e.g., column=\"amount\" functions=[SUM, AVG] produces \"SUM(amount)\" and \"AVG(amount)\").",
       "properties": {
-        "relative": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "type": "object",
-          "description": "Relative difference per measure (target - source). Positive means target is larger."
+        "column": {
+          "description": "Column name to aggregate. Must exist in both source and target datasets\n (after column mapping is applied).",
+          "minLength": 1,
+          "type": "string"
         },
+        "functions": {
+          "description": "Aggregate functions to apply to this column.\n Multiple functions produce multiple measure comparisons from one column.",
+          "items": {
+            "anyOf": [
+              {
+                "enum": [
+                  "AGGREGATE_FUNCTION_SUM",
+                  "AGGREGATE_FUNCTION_COUNT",
+                  "AGGREGATE_FUNCTION_AVG",
+                  "AGGREGATE_FUNCTION_MIN",
+                  "AGGREGATE_FUNCTION_MAX"
+                ],
+                "type": "string"
+              },
+              {
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer"
+              }
+            ],
+            "title": "Aggregate Function"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "column"
+      ],
+      "title": "Measure",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.MeasureDifferences": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "MeasureDifferences holds all difference variants for measure comparisons.",
+      "properties": {
         "absolute": {
           "additionalProperties": {
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
           },
-          "type": "object",
-          "description": "Absolute difference per measure: |target - source|. Always non-negative."
-        },
-        "pct_vs_source": {
-          "additionalProperties": {
-            "type": "number"
+          "description": "Absolute difference per measure: |target - source|.",
+          "propertyNames": {
+            "type": "string"
           },
-          "type": "object",
-          "description": "Percentage difference relative to source: |diff| / |source|."
-        },
-        "pct_vs_target": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "type": "object",
-          "description": "Percentage difference relative to target: |diff| / |target|."
+          "type": "object"
         },
         "pct_symmetric": {
           "additionalProperties": {
-            "type": "number"
-          },
-          "type": "object",
-          "description": "Symmetric percentage difference: 2*|diff| / (|source| + |target|)."
-        }
-      },
-      "type": "object",
-      "description": "MeasureDifferences holds all difference variants for measure comparisons."
-    },
-    "MeasureVerdict": {
-      "properties": {
-        "exceeded": {
-          "type": "boolean",
-          "description": "Exceeded is true when the measure difference exceeds all configured thresholds."
-        },
-        "reason": {
-          "type": "string",
-          "enum": [
-            "exact_match",
-            "within_absolute_threshold",
-            "within_percentage_threshold",
-            "exceeded_all_thresholds",
-            "no_thresholds_configured"
-          ],
-          "description": "Reason explains why the measure was considered within or outside thresholds."
-        },
-        "effective_absolute": {
-          "type": "number",
-          "description": "EffectiveAbsolute is the absolute threshold that was applied to this measure (may differ per measure via per_measure config)."
-        },
-        "effective_percentage": {
-          "type": "number",
-          "description": "EffectivePercentage is the percentage threshold that was applied to this measure."
-        },
-        "effective_percentage_mode": {
-          "type": "string",
-          "description": "EffectivePercentageMode is the percentage mode that was applied to this measure."
-        }
-      },
-      "type": "object",
-      "description": "MeasureVerdict captures the threshold evaluation result for a single measure."
-    },
-    "MismatchLeafDetail": {
-      "properties": {
-        "segment": {
-          "$ref": "#/$defs/MismatchLeafSegment"
-        },
-        "source_count": {
-          "type": "integer"
-        },
-        "target_count": {
-          "type": "integer"
-        },
-        "source_checksum": {
-          "type": "integer"
-        },
-        "target_checksum": {
-          "type": "integer"
-        },
-        "count_difference": {
-          "type": "integer"
-        },
-        "mismatch_types": {
-          "items": {
-            "type": "string",
-            "enum": [
-              "missing_in_source",
-              "missing_in_target",
-              "count_mismatch",
-              "data_mismatch",
-              "unknown"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
             ]
           },
-          "type": "array"
+          "description": "Symmetric percentage difference: 2*|diff| / (|source| + |target|).",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
         },
-        "termination_reason": {
-          "type": "string",
-          "enum": [
-            "threshold_reached",
-            "max_depth_reached",
-            "empty_segment",
-            "cannot_split",
-            "matched",
-            "error"
-          ]
+        "pct_vs_source": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "description": "Percentage difference relative to source: |diff| / |source|.",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "pct_vs_target": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "description": "Percentage difference relative to target: |diff| / |target|.",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "relative": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "enum": [
+                  "Infinity",
+                  "-Infinity",
+                  "NaN"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "description": "Relative difference per measure (target - source). Positive means target is larger.",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "title": "Measure Differences",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.MeasureThresholdOverride": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "MeasureThresholdOverride associates threshold overrides with a specific\n measure (aggregate function + column combination).",
+      "properties": {
+        "column": {
+          "description": "Column name this override applies to.\n Together with function, forms the measure key (e.g., SUM + \"amount\" = \"SUM(amount)\").",
+          "minLength": 1,
+          "type": "string"
+        },
+        "function": {
+          "anyOf": [
+            {
+              "enum": [
+                "AGGREGATE_FUNCTION_SUM",
+                "AGGREGATE_FUNCTION_COUNT",
+                "AGGREGATE_FUNCTION_AVG",
+                "AGGREGATE_FUNCTION_MIN",
+                "AGGREGATE_FUNCTION_MAX"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Aggregate function this override applies to.",
+          "title": "Aggregate Function"
+        },
+        "thresholds": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ThresholdConfig",
+          "description": "Threshold overrides for this specific measure.\n Values here override the parent ThresholdConfig (and any per_column override)\n for this measure only."
+        }
+      },
+      "required": [
+        "column",
+        "thresholds"
+      ],
+      "title": "Measure Threshold Override",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.MeasureVerdict": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "MeasureVerdict captures the threshold evaluation result for a single measure.",
+      "properties": {
+        "effective_absolute": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Absolute threshold applied to this measure (may differ via per_measure config)."
+        },
+        "effective_percentage": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Percentage threshold applied to this measure."
+        },
+        "effective_percentage_mode": {
+          "default": "",
+          "description": "Percentage mode applied to this measure.",
+          "type": "string"
+        },
+        "exceeded": {
+          "default": false,
+          "description": "True when the measure difference exceeds all configured thresholds.",
+          "type": "boolean"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "pattern": "^MEASURE_VERDICT_REASON_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "MEASURE_VERDICT_REASON_EXACT_MATCH",
+                "MEASURE_VERDICT_REASON_WITHIN_ABSOLUTE_THRESHOLD",
+                "MEASURE_VERDICT_REASON_WITHIN_PERCENTAGE_THRESHOLD",
+                "MEASURE_VERDICT_REASON_EXCEEDED_ALL_THRESHOLDS",
+                "MEASURE_VERDICT_REASON_NO_THRESHOLDS_CONFIGURED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Explains why the measure was considered within or outside thresholds.",
+          "title": "Measure Verdict Reason"
+        }
+      },
+      "title": "Measure Verdict",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.MismatchLeafDetail": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "MismatchLeafDetail holds detailed information about a single mismatch leaf.",
+      "properties": {
+        "count_difference": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
         },
         "diff_queries": {
-          "$ref": "#/$defs/DiffQueriesAudit"
+          "$ref": "#/$defs/synq.agent.recon.v1.DiffQueries",
+          "description": "Investigation queries to inspect this mismatch."
         },
-        "row_mismatches": {
+        "mismatch_types": {
+          "description": "Types of mismatch detected.",
           "items": {
-            "$ref": "#/$defs/RowMismatchDetail"
+            "anyOf": [
+              {
+                "enum": [
+                  "MISMATCH_TYPE_UNSPECIFIED",
+                  "MISMATCH_TYPE_MISSING_IN_SOURCE",
+                  "MISMATCH_TYPE_MISSING_IN_TARGET",
+                  "MISMATCH_TYPE_COUNT_MISMATCH",
+                  "MISMATCH_TYPE_DATA_MISMATCH",
+                  "MISMATCH_TYPE_UNKNOWN"
+                ],
+                "type": "string"
+              },
+              {
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer"
+              }
+            ],
+            "title": "Mismatch Type"
           },
           "type": "array"
         },
         "row_mismatch_count": {
-          "type": "integer"
-        }
-      },
-      "type": "object",
-      "description": "MismatchLeafDetail holds detailed information about a single mismatch leaf."
-    },
-    "MismatchLeafSegment": {
-      "properties": {
-        "min_key": {
+          "anyOf": [
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Total number of row mismatches (may exceed row_mismatches length due to sample_limit)."
+        },
+        "row_mismatches": {
+          "description": "Per-row mismatch details (when reporting level allows).",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.RowMismatchDetail"
+          },
+          "type": "array"
+        },
+        "segment": {
+          "$ref": "#/$defs/synq.agent.recon.v1.SegmentInfo",
+          "description": "Segment boundaries."
+        },
+        "source_checksum": {
           "anyOf": [
             {
               "type": "integer"
             },
             {
+              "pattern": "^-?[0-9]+$",
               "type": "string"
-            },
-            {
-              "type": "null"
             }
-          ]
+          ],
+          "default": 0
         },
-        "max_key": {
+        "source_count": {
           "anyOf": [
             {
               "type": "integer"
             },
             {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "target_checksum": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "target_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "termination_reason": {
+          "anyOf": [
+            {
+              "pattern": "^TERMINATION_REASON_UNSPECIFIED$",
               "type": "string"
             },
             {
-              "type": "null"
+              "enum": [
+                "TERMINATION_REASON_THRESHOLD_REACHED",
+                "TERMINATION_REASON_MAX_DEPTH_REACHED",
+                "TERMINATION_REASON_EMPTY_SEGMENT",
+                "TERMINATION_REASON_CANNOT_SPLIT",
+                "TERMINATION_REASON_MATCHED",
+                "TERMINATION_REASON_ERROR"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
             }
-          ]
-        },
-        "depth": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "index": {
-          "type": "integer",
-          "minimum": 0
+          ],
+          "default": 0,
+          "description": "Why bisection stopped at this leaf.",
+          "title": "Termination Reason"
         }
       },
-      "type": "object",
-      "description": "MismatchLeafSegment identifies the segment of a mismatch leaf."
+      "title": "Mismatch Leaf Detail",
+      "type": "object"
     },
-    "Normalization": {
+    "synq.agent.recon.v1.Normalization": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Normalization records the column expressions used after cross-DB type alignment.",
       "properties": {
         "source_columns": {
+          "description": "Source column expressions after normalization.",
           "items": {
             "type": "string"
           },
           "type": "array"
         },
         "target_columns": {
+          "description": "Target column expressions after normalization.",
           "items": {
             "type": "string"
           },
           "type": "array"
         }
       },
-      "type": "object",
-      "description": "Normalization records the column expressions used after cross-DB type alignment."
+      "title": "Normalization",
+      "type": "object"
     },
-    "QueryRecord": {
+    "synq.agent.recon.v1.QueryRecord": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "QueryRecord captures a single SQL query execution.",
       "properties": {
-        "id": {
-          "type": "string"
-        },
-        "role": {
-          "type": "string",
-          "enum": [
-            "source",
-            "target"
-          ]
-        },
         "connection": {
+          "description": "Connection name used.",
           "type": "string"
         },
         "dialect": {
+          "default": "",
+          "description": "Database dialect.",
           "type": "string"
         },
-        "sql": {
-          "type": "string"
-        },
-        "started_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "duration_ms": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "rows_returned": {
-          "type": "integer",
-          "minimum": 0
+        "duration": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Query execution duration."
         },
         "error": {
+          "default": "",
+          "description": "Error message if the query failed.",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique query identifier within this run.",
           "type": "string"
         },
         "retry_attempt": {
-          "type": "integer",
-          "minimum": 0
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Retry attempt number (0 for first attempt)."
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "QUERY_ROLE_SOURCE",
+                "QUERY_ROLE_TARGET"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Whether this query ran against source or target.",
+          "title": "Query Role"
+        },
+        "rows_returned": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Number of result rows returned."
+        },
+        "sql": {
+          "description": "SQL query text.",
+          "type": "string"
+        },
+        "started_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "When the query started."
         },
         "stats": {
-          "$ref": "#/$defs/QueryStats"
+          "$ref": "#/$defs/synq.agent.recon.v1.QueryStats",
+          "description": "Execution statistics collected from the database driver."
         }
       },
-      "type": "object",
       "required": [
         "id",
-        "role",
         "connection",
         "sql",
         "started_at",
-        "duration_ms"
+        "duration"
       ],
-      "description": "QueryRecord captures a single SQL query execution."
+      "title": "Query Record",
+      "type": "object"
     },
-    "QueryStats": {
+    "synq.agent.recon.v1.QueryStats": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "QueryStats holds execution statistics collected from the database driver.\n Fields are optional \u2014 absent means the metric is not available for the driver.",
       "properties": {
-        "query_id": {
-          "type": "string",
-          "description": "QueryID is the database-assigned query identifier for auditing.\nAvailable for BigQuery (job ID), Snowflake, ClickHouse (client-generated)."
-        },
-        "rows_read": {
-          "type": "integer",
-          "description": "RowsRead is the number of rows read/scanned by the query engine."
-        },
-        "bytes_read": {
-          "type": "integer",
-          "description": "BytesRead is the number of bytes read/scanned by the query engine."
-        },
-        "rows_produced": {
-          "type": "integer",
-          "description": "RowsProduced is the number of result rows returned to the caller."
-        },
-        "cache_hit": {
-          "type": "boolean",
-          "description": "CacheHit indicates whether the query result was served from cache."
-        },
-        "bytes_billed": {
-          "type": "integer",
-          "description": "BytesBilled is the number of bytes billed (BigQuery)."
-        },
-        "slot_millis": {
-          "type": "integer",
-          "description": "SlotMillis is the slot time consumed (BigQuery)."
-        },
         "blocks": {
-          "type": "integer",
-          "description": "Blocks is the number of data blocks read (ClickHouse)."
-        },
-        "completed_splits": {
-          "type": "integer",
-          "description": "CompletedSplits is the number of completed splits (Trino)."
-        },
-        "cpu_time_millis": {
-          "type": "integer",
-          "description": "CPUTimeMillis is the CPU time consumed (Trino)."
-        },
-        "wall_time_millis": {
-          "type": "integer",
-          "description": "WallTimeMillis is the wall time reported by the engine (Trino)."
-        }
-      },
-      "type": "object",
-      "description": "QueryStats holds execution statistics collected from the database driver."
-    },
-    "QuickCheckStageResult": {
-      "properties": {
-        "source_count": {
-          "type": "integer"
-        },
-        "target_count": {
-          "type": "integer"
-        },
-        "source_checksum": {
-          "type": "integer"
-        },
-        "target_checksum": {
-          "type": "integer"
-        },
-        "match": {
-          "type": "boolean"
-        },
-        "count_difference": {
-          "type": "integer"
-        },
-        "error": {
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "description": "QuickCheckStageResult is the typed result for a quick_check stage."
-    },
-    "ReconciliationAudit": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Machine identifier (YAML key)"
-        },
-        "title": {
-          "type": "string",
-          "description": "Human-readable title (from YAML title field or falls back to name)"
-        },
-        "description": {
-          "type": "string"
-        },
-        "mode": {
-          "type": "string",
-          "enum": [
-            "row_count",
-            "full",
-            "aggregate"
-          ]
-        },
-        "config": {
-          "type": "object"
-        },
-        "raw_config": {
-          "type": "object"
-        },
-        "source": {
-          "$ref": "#/$defs/DatasetInfo"
-        },
-        "target": {
-          "$ref": "#/$defs/DatasetInfo"
-        },
-        "original_source_query": {
-          "type": "string"
-        },
-        "original_target_query": {
-          "type": "string"
-        },
-        "key_column": {
-          "type": "string"
-        },
-        "hash_algorithm": {
-          "type": "string"
-        },
-        "columns": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "normalization": {
-          "$ref": "#/$defs/Normalization"
-        },
-        "column_mapping": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "type": "object"
-        },
-        "stages": {
-          "items": {
-            "$ref": "#/$defs/StageAudit"
-          },
-          "type": "array"
-        },
-        "warnings": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "passed",
-            "failed",
-            "mismatched",
-            "mismatched_within_threshold"
-          ],
-          "description": "Outcome of this reconciliation"
-        },
-        "overall_match": {
-          "type": "boolean"
-        },
-        "error": {
-          "type": "string"
-        }
-      },
-      "type": "object",
-      "required": [
-        "name",
-        "mode",
-        "source",
-        "target",
-        "key_column",
-        "stages",
-        "status",
-        "overall_match"
-      ],
-      "description": "ReconciliationAudit captures everything about a single reconciliation execution."
-    },
-    "RowMismatchAudit": {
-      "properties": {
-        "pk": {
           "anyOf": [
             {
               "type": "integer"
             },
             {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Number of data blocks read (ClickHouse)."
+        },
+        "bytes_billed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Number of bytes billed (BigQuery)."
+        },
+        "bytes_read": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Number of bytes read/scanned by the query engine."
+        },
+        "cache_hit": {
+          "description": "Whether the query result was served from cache.",
+          "type": "boolean"
+        },
+        "completed_splits": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Number of completed splits (Trino)."
+        },
+        "cpu_time_millis": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "CPU time consumed (Trino)."
+        },
+        "query_id": {
+          "default": "",
+          "description": "Database-assigned query identifier for auditing.\n Available for BigQuery (job ID), Snowflake, ClickHouse.",
+          "type": "string"
+        },
+        "rows_produced": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Number of result rows returned to the caller."
+        },
+        "rows_read": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Number of rows read/scanned by the query engine."
+        },
+        "slot_millis": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Slot time consumed (BigQuery)."
+        },
+        "wall_time_millis": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Wall time reported by the engine (Trino)."
+        }
+      },
+      "title": "Query Stats",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.QuickCheckStageResult": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "QuickCheckStageResult is the result for a quick_check stage.",
+      "properties": {
+        "count_difference": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "error": {
+          "default": "",
+          "type": "string"
+        },
+        "match": {
+          "default": false,
+          "type": "boolean"
+        },
+        "source_checksum": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "source_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "target_checksum": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "target_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        }
+      },
+      "title": "Quick Check Stage Result",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.Reconcilation": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Reconcilation defines a single reconciliation scenario comparing data\n between a source and target dataset. Each reconciliation runs independently\n and produces its own pass/mismatch/fail result.",
+      "properties": {
+        "aggregate": {
+          "$ref": "#/$defs/synq.agent.recon.v1.AggregateConfig",
+          "description": "Aggregate comparison settings. Required when mode is AGGREGATE.\n Defines which measures to compare and tolerance thresholds."
+        },
+        "annotations": {
+          "description": "Case-level annotations. Merged with suite-level annotations and\n deployment-level annotations at promote time, then exposed on the\n case asset (PromotedReconCaseMetadata).",
+          "items": {
+            "$ref": "#/$defs/synq.entities.v1.Annotation"
+          },
+          "type": "array"
+        },
+        "bisection": {
+          "$ref": "#/$defs/synq.agent.recon.v1.BisectionConfig",
+          "description": "Bisection drill-down configuration for ROW_CHECKSUM mode.\n Controls how the key range is recursively split to locate mismatches.\n When not set, uses sensible defaults (factor=32, threshold=16384)."
+        },
+        "case_insensitive": {
+          "description": "When true, automatically matches columns differing only in letter case\n (e.g., user_id matches USER_ID). Defaults to true when not set.\n Set to false to require exact case matching.",
+          "type": "boolean"
+        },
+        "column_mapping": {
+          "description": "Explicit column name mapping between source and target.\n Only columns with different names need mapping \u2014 identical names\n (or case-insensitive matches) are matched automatically.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.ColumnMapping"
+          },
+          "type": "array"
+        },
+        "cutoff": {
+          "$ref": "#/$defs/synq.agent.recon.v1.CutoffConfig",
+          "description": "Dynamic cutoff filter for sync reconciliation.\n Derives a watermark from actual data to exclude rows not yet synced.\n Applied as WHERE filter to both source and target queries at runtime."
+        },
+        "description": {
+          "description": "Optional longer description explaining what this reconciliation validates.",
+          "type": "string"
+        },
+        "error_handling": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ErrorHandlingConfig",
+          "description": "Error handling and retry configuration for database queries.\n Controls timeouts and retry behavior for transient failures."
+        },
+        "hash_algorithm": {
+          "anyOf": [
+            {
+              "enum": [
+                "HASH_ALGORITHM_UNSPECIFIED",
+                "HASH_ALGORITHM_MD5",
+                "HASH_ALGORITHM_FARM_FINGERPRINT",
+                "HASH_ALGORITHM_XXHASH64"
+              ],
               "type": "string"
             },
             {
-              "type": "null"
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
             }
-          ]
+          ],
+          "description": "Hash algorithm for row checksums in ROW_CHECKSUM mode.\n When unset, auto-negotiates the best common algorithm between the\n source and target database dialects.",
+          "title": "Hash Algorithm"
         },
-        "type": {
-          "type": "string",
-          "enum": [
-            "missing_in_target",
-            "missing_in_source",
-            "modified"
-          ]
+        "ignore_setup_errors": {
+          "description": "When true, logs setup errors as warnings and continues.\n When not set, inherits from suite-level ignore_setup_errors.",
+          "type": "boolean"
+        },
+        "key_column": {
+          "description": "Deprecated: use key_columns instead. Single primary key column used for\n ordering and segmentation during bisection. Retained for backward\n compatibility \u2014 existing single-key configs and stored audit logs keep\n working. When key_columns is set, this field is ignored. Readers should\n resolve the effective key via key_columns first, falling back to this.",
+          "type": "string"
+        },
+        "key_columns": {
+          "description": "Ordered list of key columns used for ordering and segmentation during\n bisection. Supports composite (multi-column) keys; the bisection orders and\n range-filters on the column tuple so the engine can prune via a matching\n primary key / index. A single-element list is equivalent to setting\n key_column. Required for ROW_CHECKSUM and ROW_COUNT modes (this or the\n deprecated key_column). Optional in AGGREGATE mode when group_columns\n provides the grouping key.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "RECONCILATION_MODE_ROW_COUNT",
+                "RECONCILATION_MODE_ROW_CHECKSUM",
+                "RECONCILATION_MODE_AGGREGATE"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Comparison mode controlling how source and target are compared.",
+          "title": "Reconcilation Mode"
+        },
+        "name": {
+          "description": "Unique machine identifier within the suite. Alphanumerics, hyphens, and underscores. May be a UUID.",
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*$",
+          "type": "string"
+        },
+        "reporting": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ReportingConfig",
+          "description": "Reporting output configuration controlling how much detail is included\n in the audit log for mismatched rows."
+        },
+        "setup": {
+          "description": "Setup queries run before this specific reconciliation.\n Executes after suite-level setup but before data comparison.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.ConnectionQueries"
+          },
+          "type": "array"
+        },
+        "source": {
+          "$ref": "#/$defs/synq.agent.recon.v1.Dataset",
+          "description": "Source dataset to compare from \u2014 the \"expected\" or \"authoritative\" side."
+        },
+        "target": {
+          "$ref": "#/$defs/synq.agent.recon.v1.Dataset",
+          "description": "Target dataset to compare against \u2014 the \"actual\" or \"replicated\" side."
+        },
+        "teardown": {
+          "description": "Teardown queries run after this specific reconciliation completes.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.ConnectionQueries"
+          },
+          "type": "array"
+        },
+        "teardown_on_failure": {
+          "description": "Whether teardown runs on failure for this reconciliation.\n When not set, inherits from suite-level teardown_on_failure.",
+          "type": "boolean"
+        },
+        "title": {
+          "description": "Human-readable title. Displayed in reports. Defaults to name when not set.",
+          "type": "string"
+        },
+        "window": {
+          "$ref": "#/$defs/synq.agent.recon.v1.WindowConfig",
+          "description": "Time window for incremental comparison.\n When set, automatically provides a {{window_start}} template variable\n for filtering queries to a recent time range."
+        }
+      },
+      "required": [
+        "name",
+        "source",
+        "target"
+      ],
+      "title": "Reconcilation",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ReconcilationSuite": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ReconcilationSuite is the root configuration for a reconciliation suite.\n It defines template variables and one or more reconciliation scenarios\n that compare data between source and target databases.\n Database connections are configured separately and referenced by name.",
+      "properties": {
+        "annotations": {
+          "description": "Suite-level annotations. Each annotation is a name with zero or more\n string values. Applied to the deployed suite asset and inherited by every\n reconciliation case under the suite. Merged with per-case annotations and\n deployment-level annotations at promote time \u2014 the final, deduplicated\n list is exposed on PromotedReconSuiteMetadata / PromotedReconCaseMetadata\n and surfaced to the rest of the SYNQ platform via EntityAnnotations.",
+          "items": {
+            "$ref": "#/$defs/synq.entities.v1.Annotation"
+          },
+          "type": "array"
+        },
+        "description": {
+          "description": "Optional longer description of the suite's purpose.",
+          "type": "string"
+        },
+        "ignore_setup_errors": {
+          "default": false,
+          "description": "When true, logs setup query errors as warnings and continues execution\n instead of aborting the run. Useful when setup creates IF NOT EXISTS objects.",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Short machine identifier for the suite.\n Unique machine identifier for the suite, used as the stable key for tracking runs over time.\n Alphanumerics, hyphens, and underscores. May be a UUID.",
+          "maxLength": 255,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*$",
+          "type": "string"
+        },
+        "reconciliations": {
+          "description": "Reconciliation scenarios to execute.\n Each reconciliation compares data between a source and target dataset.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.Reconcilation"
+          },
+          "type": "array"
+        },
+        "setup": {
+          "description": "Setup queries run once before all reconciliations begin.\n Use for creating temp tables, loading fixtures, or preparing the environment.\n Queries execute in order; all connections run sequentially.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.ConnectionQueries"
+          },
+          "type": "array"
+        },
+        "strict_time_references": {
+          "default": false,
+          "description": "When true, time reference detection (e.g. NOW(), CURRENT_DATE, GETDATE()\n in queries) returns an error instead of a warning. Prevents non-deterministic\n queries that produce different results on each run.",
+          "type": "boolean"
+        },
+        "teardown": {
+          "description": "Teardown queries run once after all reconciliations complete.\n Use for cleaning up temp tables or restoring state.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.ConnectionQueries"
+          },
+          "type": "array"
+        },
+        "teardown_on_failure": {
+          "default": false,
+          "description": "Whether teardown runs even when reconciliations fail with infrastructure errors.\n When false (default), teardown is skipped on failure to preserve state for debugging.",
+          "type": "boolean"
+        },
+        "title": {
+          "description": "Human-readable title for the suite.\n Displayed in dashboards and reports. Defaults to name when not set.",
+          "type": "string"
+        },
+        "variables": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Template variables for query interpolation via {{variable_name}} syntax.\n Values can be literal strings or template expressions:\n   - Literal: \"2026-01-01\"\n   - Time expression: \"{{today - 30d}}\", \"{{now - 2h}}\"\n   - Built-in: \"{{now}}\", \"{{today}}\", \"{{window_start}}\"\n Variables are resolved once at the start of the run and frozen.",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Reconcilation Suite",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ReconciliationAudit": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ReconciliationAudit captures the configuration and runtime execution data\n for a single reconciliation.",
+      "properties": {
+        "columns": {
+          "description": "Column names discovered at runtime via QueryShape.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "cutoff_result": {
+          "$ref": "#/$defs/synq.agent.recon.v1.CutoffResult",
+          "description": "Cutoff resolution details (when cutoff was configured).\n Captures the derived watermark values, final cutoff, and WHERE clauses\n so the run can be fully understood and reproduced."
+        },
+        "error": {
+          "default": "",
+          "description": "Error message if the reconciliation failed due to an infrastructure error.",
+          "type": "string"
+        },
+        "normalization": {
+          "$ref": "#/$defs/synq.agent.recon.v1.Normalization",
+          "description": "Column normalization expressions applied after cross-DB type alignment."
+        },
+        "original_source_query": {
+          "default": "",
+          "description": "Source query before variable interpolation (differs from suite query when variables are used).",
+          "type": "string"
+        },
+        "original_target_query": {
+          "default": "",
+          "description": "Target query before variable interpolation.",
+          "type": "string"
+        },
+        "overall_match": {
+          "default": false,
+          "description": "Whether source and target matched overall.\n True when data matched exactly or differences were within configured thresholds.",
+          "type": "boolean"
+        },
+        "reconcilation": {
+          "$ref": "#/$defs/synq.agent.recon.v1.Reconcilation",
+          "description": "The reconciliation configuration as executed."
+        },
+        "source": {
+          "$ref": "#/$defs/synq.agent.recon.v1.DatasetInfo",
+          "description": "Runtime dataset information (resolved queries, detected dialects)."
+        },
+        "stages": {
+          "description": "Execution stages (quick_check, bisection_drill, aggregate_check).",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.StageAudit"
+          },
+          "type": "array"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "pattern": "^RECONCILIATION_STATUS_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "RECONCILIATION_STATUS_PASSED",
+                "RECONCILIATION_STATUS_MISMATCHED_WITHIN_THRESHOLD",
+                "RECONCILIATION_STATUS_MISMATCHED",
+                "RECONCILIATION_STATUS_FAILED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Outcome status of this reconciliation.\n Distinguishes infrastructure errors from data mismatches and threshold-based outcomes.",
+          "title": "Reconciliation Status"
+        },
+        "target": {
+          "$ref": "#/$defs/synq.agent.recon.v1.DatasetInfo"
+        },
+        "warnings": {
+          "description": "Per-reconciliation warnings.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "reconcilation",
+        "source",
+        "target"
+      ],
+      "title": "Reconciliation Audit",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ReportingConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ReportingConfig controls the level of detail included in reconciliation output\n for mismatched rows. Higher detail levels reveal more data but may have\n privacy implications.",
+      "properties": {
+        "consent_acknowledged": {
+          "default": false,
+          "description": "Explicit acknowledgment that detailed row data may be included in the audit log.\n Required when level is DETAILED to prevent accidental exposure of sensitive data.\n The caller must set this to true to confirm they understand the privacy implications.",
+          "type": "boolean"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "pattern": "^REPORTING_LEVEL_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "REPORTING_LEVEL_COUNT_ONLY",
+                "REPORTING_LEVEL_WITH_KEYS",
+                "REPORTING_LEVEL_DETAILED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Output detail level for mismatched rows.",
+          "title": "Reporting Level"
+        },
+        "sample_limit": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Maximum number of sample rows to include in output per mismatch segment.\n Limits the size of the audit log when there are many mismatches.\n When not set, all mismatched rows within the reporting level are included."
+        }
+      },
+      "title": "Reporting Config",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.RowMismatchAudit": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "RowMismatchAudit captures a single row-level mismatch in the segment tree.",
+      "properties": {
+        "pk": {
+          "$ref": "#/$defs/google.protobuf.Value",
+          "description": "Primary key value."
         },
         "source_row_hash": {
-          "type": "integer"
-        },
-        "target_row_hash": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Source row hash (when available)."
         },
         "source_values": {
           "additionalProperties": {
             "type": "string"
           },
+          "description": "Source column values (detailed reporting only).",
+          "propertyNames": {
+            "type": "string"
+          },
           "type": "object"
+        },
+        "target_row_hash": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Target row hash (when available)."
         },
         "target_values": {
           "additionalProperties": {
             "type": "string"
           },
+          "description": "Target column values (detailed reporting only).",
+          "propertyNames": {
+            "type": "string"
+          },
           "type": "object"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "pattern": "^ROW_MISMATCH_TYPE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "ROW_MISMATCH_TYPE_MISSING_IN_TARGET",
+                "ROW_MISMATCH_TYPE_MISSING_IN_SOURCE",
+                "ROW_MISMATCH_TYPE_MODIFIED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Type of row mismatch.",
+          "title": "Row Mismatch Type"
         }
       },
-      "type": "object",
-      "required": [
-        "pk",
-        "type"
-      ],
-      "description": "RowMismatchAudit captures a single row-level mismatch in the audit log."
+      "title": "Row Mismatch Audit",
+      "type": "object"
     },
-    "RowMismatchDetail": {
+    "synq.agent.recon.v1.RowMismatchDetail": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "RowMismatchDetail holds per-row mismatch detail.",
       "properties": {
         "pk": {
+          "$ref": "#/$defs/google.protobuf.Value",
+          "description": "Primary key value."
+        },
+        "source_row_hash": {
           "anyOf": [
             {
               "type": "integer"
             },
             {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Source row hash (when available)."
+        },
+        "target_row_hash": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Target row hash (when available)."
+        },
+        "type": {
+          "anyOf": [
+            {
+              "pattern": "^ROW_MISMATCH_TYPE_UNSPECIFIED$",
               "type": "string"
             },
             {
-              "type": "null"
+              "enum": [
+                "ROW_MISMATCH_TYPE_MISSING_IN_TARGET",
+                "ROW_MISMATCH_TYPE_MISSING_IN_SOURCE",
+                "ROW_MISMATCH_TYPE_MODIFIED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
             }
-          ]
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "missing_in_target",
-            "missing_in_source",
-            "modified"
-          ]
-        },
-        "source_row_hash": {
-          "type": "integer"
-        },
-        "target_row_hash": {
-          "type": "integer"
+          ],
+          "default": 0,
+          "description": "Type of row mismatch.",
+          "title": "Row Mismatch Type"
         }
       },
-      "type": "object",
-      "description": "RowMismatchDetail holds per-row mismatch detail in the stage result."
+      "title": "Row Mismatch Detail",
+      "type": "object"
     },
-    "SegmentAuditNode": {
+    "synq.agent.recon.v1.SegmentAuditNode": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "SegmentAuditNode represents a node in the bisection segment tree.",
       "properties": {
-        "segment": {
-          "$ref": "#/$defs/SegmentInfo"
-        },
-        "source_count": {
-          "type": "integer"
-        },
-        "target_count": {
-          "type": "integer"
-        },
-        "source_checksum": {
-          "type": "integer"
-        },
-        "target_checksum": {
-          "type": "integer"
-        },
-        "match": {
-          "type": "boolean"
+        "children": {
+          "description": "Child segments (empty for leaf nodes).",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.SegmentAuditNode"
+          },
+          "type": "array"
         },
         "is_leaf": {
+          "default": false,
+          "description": "Whether this is a leaf node (no further splitting).",
           "type": "boolean"
         },
-        "termination_reason": {
-          "type": "string",
-          "enum": [
-            "threshold_reached",
-            "max_depth_reached",
-            "empty_segment",
-            "cannot_split",
-            "matched",
-            "error"
-          ]
+        "match": {
+          "default": false,
+          "description": "Whether source and target matched for this segment.",
+          "type": "boolean"
         },
         "mismatch_rows_in_subtree": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "total_rows_in_subtree": {
-          "type": "integer",
-          "minimum": 0
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Sum of mismatched rows in this subtree."
         },
         "query_ids": {
+          "description": "References to QueryRecord.id values for queries that populated this node.",
           "items": {
             "type": "string"
           },
           "type": "array"
         },
-        "children": {
+        "row_mismatches": {
+          "description": "Row-level mismatches (only for leaf nodes with detailed reporting).",
           "items": {
-            "$ref": "#/$defs/SegmentAuditNode"
+            "$ref": "#/$defs/synq.agent.recon.v1.RowMismatchAudit"
           },
           "type": "array"
         },
-        "row_mismatches": {
-          "items": {
-            "$ref": "#/$defs/RowMismatchAudit"
-          },
-          "type": "array"
+        "segment": {
+          "$ref": "#/$defs/synq.agent.recon.v1.SegmentInfo",
+          "description": "Segment boundaries."
+        },
+        "source_checksum": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "source_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "target_checksum": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "target_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0
+        },
+        "termination_reason": {
+          "anyOf": [
+            {
+              "pattern": "^TERMINATION_REASON_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "TERMINATION_REASON_THRESHOLD_REACHED",
+                "TERMINATION_REASON_MAX_DEPTH_REACHED",
+                "TERMINATION_REASON_EMPTY_SEGMENT",
+                "TERMINATION_REASON_CANNOT_SPLIT",
+                "TERMINATION_REASON_MATCHED",
+                "TERMINATION_REASON_ERROR"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Why bisection stopped at this node.",
+          "title": "Termination Reason"
+        },
+        "total_rows_in_subtree": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Sum of all rows in this subtree."
         }
       },
-      "type": "object",
-      "required": [
-        "match",
-        "is_leaf"
-      ],
-      "description": "SegmentAuditNode represents a node in the bisection segment tree with query references."
+      "title": "Segment Audit Node",
+      "type": "object"
     },
-    "SegmentInfo": {
+    "synq.agent.recon.v1.SegmentInfo": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "SegmentInfo identifies a key range segment.",
       "properties": {
-        "min_key": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "max_key": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "depth": {
-          "type": "integer",
-          "minimum": 0
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Depth in the bisection tree."
         },
         "index": {
-          "type": "integer",
-          "minimum": 0
+          "anyOf": [
+            {
+              "exclusiveMaximum": 2147483648,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Index within the depth level."
+        },
+        "max_key": {
+          "$ref": "#/$defs/google.protobuf.Value",
+          "description": "Maximum key (exclusive). Unset means unbounded."
+        },
+        "min_key": {
+          "$ref": "#/$defs/google.protobuf.Value",
+          "description": "Minimum key (inclusive). Unset means unbounded."
         },
         "time_bucket": {
+          "default": "",
+          "description": "Time bucket label (for time-based segmentation).",
           "type": "string"
         }
       },
-      "type": "object",
-      "description": "SegmentInfo identifies a key range segment."
+      "title": "Segment Info",
+      "type": "object"
     },
-    "StageAudit": {
+    "synq.agent.recon.v1.StageAudit": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "StageAudit captures one reconciliation stage execution.",
       "properties": {
-        "stage": {
-          "type": "string",
-          "enum": [
-            "quick_check",
-            "bisection_drill",
-            "aggregate_check"
-          ]
+        "aggregate_result": {
+          "$ref": "#/$defs/synq.agent.recon.v1.AggregateStageResult",
+          "description": "Result for aggregate_check stage."
         },
-        "started_at": {
-          "type": "string",
-          "format": "date-time"
+        "bisection_result": {
+          "$ref": "#/$defs/synq.agent.recon.v1.BisectionStageResult",
+          "description": "Result for bisection_drill stage."
         },
         "completed_at": {
-          "type": "string",
-          "format": "date-time"
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "When the stage completed."
         },
-        "duration_ms": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "config": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/BisectionStageConfig"
-            }
-          ]
+        "duration": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Stage duration."
         },
         "queries": {
+          "description": "SQL queries executed during this stage.",
           "items": {
-            "$ref": "#/$defs/QueryRecord"
+            "$ref": "#/$defs/synq.agent.recon.v1.QueryRecord"
           },
           "type": "array"
         },
-        "segment_tree": {
-          "$ref": "#/$defs/SegmentAuditNode"
+        "quick_check_result": {
+          "$ref": "#/$defs/synq.agent.recon.v1.QuickCheckStageResult",
+          "description": "Result for quick_check stage."
         },
-        "result": {
+        "segment_tree": {
+          "$ref": "#/$defs/synq.agent.recon.v1.SegmentAuditNode",
+          "description": "Bisection segment tree (only for bisection_drill stage)."
+        },
+        "stage": {
           "anyOf": [
             {
-              "$ref": "#/$defs/QuickCheckStageResult"
+              "enum": [
+                "STAGE_TYPE_QUICK_CHECK",
+                "STAGE_TYPE_BISECTION_DRILL",
+                "STAGE_TYPE_AGGREGATE_CHECK"
+              ],
+              "type": "string"
             },
             {
-              "$ref": "#/$defs/BisectionStageResult"
-            },
-            {
-              "$ref": "#/$defs/AggregateStageResult"
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
             }
-          ]
+          ],
+          "default": 0,
+          "description": "Stage type.",
+          "title": "Stage Type"
+        },
+        "started_at": {
+          "$ref": "#/$defs/google.protobuf.Timestamp",
+          "description": "When the stage started."
         }
       },
-      "type": "object",
       "required": [
-        "stage",
         "started_at",
         "completed_at",
-        "duration_ms",
-        "queries"
+        "duration"
       ],
-      "description": "StageAudit captures one reconciliation stage (quick_check, bisection_drill, aggregate_check)."
+      "title": "Stage Audit",
+      "type": "object"
     },
-    "ThresholdEvaluation": {
+    "synq.agent.recon.v1.TableReference": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "`name` is the table or view name (e.g., \"orders\", \"fact_sales\").\n `database` and `schema` are optional namespace qualifiers.\n The actual SQL FQN is generated at runtime using the appropriate dialect quoting.",
       "properties": {
-        "absolute_threshold": {
-          "type": "number",
-          "description": "AbsoluteThreshold is the configured maximum absolute difference, or 0 if not set."
+        "columns": {
+          "description": "Explicit list of columns to include in the comparison.\n When set, only these columns are selected from the table.\n Mutually exclusive with exclude_columns.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
-        "percentage_threshold": {
-          "type": "number",
-          "description": "PercentageThreshold is the configured maximum percentage difference, or 0 if not set."
+        "database": {
+          "description": "Database/catalog name (e.g., \"PROD_RAW\", \"my_project\").\n Maps to: Snowflake database, BigQuery project, Databricks catalog.",
+          "type": "string"
+        },
+        "exclude_columns": {
+          "description": "Columns to exclude from the comparison.\n All columns except these are selected (resolved at runtime via table metadata).\n Useful for skipping volatile columns (e.g., updated_at, etl_batch_id).\n Mutually exclusive with columns.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "description": "Table or view name (e.g., \"orders\", \"fact_sales\").\n Required \u2014 this is the actual object name.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "schema": {
+          "description": "Schema/dataset name (e.g., \"public\", \"analytics\").\n Maps to: Snowflake schema, BigQuery dataset, Databricks schema.",
+          "type": "string"
+        },
+        "where": {
+          "description": "Row filter \u2014 appended as WHERE clause to the generated SELECT.\n Example: \"created_at >= '2024-01-01' AND status = 'active'\"",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "TableReference specifies a table and optional column filtering.\n Use this instead of a raw query when you want to compare all (or most) columns\n of a table without writing SQL.",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ThresholdConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Thresholds can be overridden at finer granularity:\n   - per_column: override thresholds for a specific group_column drill-down level.\n   - per_measure: override thresholds for a specific measure (e.g., \"SUM(amount)\").\n   - Nesting: per_column entries may contain per_measure overrides (most specific wins).\n\n When no thresholds are configured at any level, exact match is required.",
+      "properties": {
+        "absolute": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Maximum allowed absolute difference per measure.\n When set, differences <= this value are considered within tolerance.\n Example: absolute = 0.01 accepts sub-cent rounding differences."
+        },
+        "per_column": {
+          "description": "Per group_column level threshold overrides.\n Allows different tolerance for different levels of the drill-down hierarchy.\n For example, tighter thresholds at the city level than at the region level.\n Entries may themselves contain per_measure overrides for maximum specificity.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.ColumnThresholdOverride"
+          },
+          "type": "array"
+        },
+        "per_measure": {
+          "description": "Per measure threshold overrides.\n Allows different tolerance for different measures within the same reconciliation.\n For example, allow 1% tolerance for SUM(amount) but require exact COUNT match.",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.MeasureThresholdOverride"
+          },
+          "type": "array"
+        },
+        "percentage": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Maximum allowed percentage difference per measure.\n Expressed as a decimal fraction: 0.1 = 10%, 0.01 = 1%.\n The formula used depends on percentage_mode.\n When set, differences <= this percentage are considered within tolerance."
         },
         "percentage_mode": {
-          "type": "string",
-          "description": "PercentageMode is which percentage formula was used: source, target, or symmetric."
+          "anyOf": [
+            {
+              "pattern": "^PERCENTAGE_MODE_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "PERCENTAGE_MODE_SOURCE",
+                "PERCENTAGE_MODE_TARGET",
+                "PERCENTAGE_MODE_SYMMETRIC"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Which percentage formula to use for threshold evaluation.\n Only relevant when percentage is set.",
+          "title": "Percentage Mode"
+        }
+      },
+      "title": "ThresholdConfig defines tolerance thresholds for aggregate comparisons.\n A difference is reported as a mismatch only when it exceeds ALL configured\n thresholds (AND logic: both absolute AND percentage must be exceeded).",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ThresholdEvaluation": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ThresholdEvaluation captures the effective thresholds applied and per-measure verdicts.",
+      "properties": {
+        "absolute_threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Configured maximum absolute difference, or 0 if not set."
         },
         "measures": {
           "additionalProperties": {
-            "$ref": "#/$defs/MeasureVerdict"
+            "$ref": "#/$defs/synq.agent.recon.v1.MeasureVerdict"
           },
-          "type": "object",
-          "description": "Measures holds per-measure threshold evaluation results."
+          "description": "Per-measure threshold evaluation results.",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "percentage_mode": {
+          "default": "",
+          "description": "Which percentage formula was used.",
+          "type": "string"
+        },
+        "percentage_threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "Infinity",
+                "-Infinity",
+                "NaN"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "default": 0,
+          "description": "Configured maximum percentage difference, or 0 if not set."
         }
       },
-      "type": "object",
-      "description": "ThresholdEvaluation captures the effective thresholds applied and per-measure verdicts."
-    }
-  },
-  "properties": {
-    "version": {
-      "type": "string",
-      "const": "1",
-      "description": "Schema version"
+      "title": "Threshold Evaluation",
+      "type": "object"
     },
-    "invocation_id": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Unique identifier for this invocation/run"
-    },
-    "meta": {
-      "$ref": "#/$defs/AuditMeta"
-    },
-    "config_file": {
-      "type": "string",
-      "description": "Path to the configuration file used"
-    },
-    "suite": {
-      "type": "string",
-      "description": "Machine identifier for the config suite (from YAML name field or filename)"
-    },
-    "suite_title": {
-      "type": "string",
-      "description": "Human-readable title of the config suite (from YAML title field or falls back to suite id)"
-    },
-    "description": {
-      "type": "string",
-      "description": "Longer description of the configuration suite"
-    },
-    "variables": {
-      "additionalProperties": {
-        "type": "string"
+    "synq.agent.recon.v1.WindowConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "WindowConfig defines a time window for incremental comparison.\n When configured, automatically provides a {{window_start}} template variable\n that resolves to (current_time - lookback). Use this in query WHERE clauses\n to limit comparison to recent data.",
+      "properties": {
+        "column": {
+          "description": "Column being windowed.\n Informational metadata for the audit trail \u2014 the actual filtering is done\n via the {{window_start}} variable in your query WHERE clause.",
+          "type": "string"
+        },
+        "lookback": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "How far back to look from the current time.\n Defines the window as [now - lookback, now].\n Examples: \"336h\" (14 days), \"2h\", \"720h\" (30 days)."
+        },
+        "strategy": {
+          "anyOf": [
+            {
+              "pattern": "^WINDOW_STRATEGY_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "WINDOW_STRATEGY_SLIDING",
+                "WINDOW_STRATEGY_FIXED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Windowing strategy controlling how boundaries are computed.",
+          "title": "Window Strategy"
+        }
       },
-      "type": "object",
-      "description": "Resolved template variable values used for query interpolation"
-    },
-    "started_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "RFC3339 timestamp when the run started"
-    },
-    "completed_at": {
-      "type": "string",
-      "format": "date-time",
-      "description": "RFC3339 timestamp when the run completed"
-    },
-    "duration_ms": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Total run duration in milliseconds"
-    },
-    "warnings": {
-      "items": {
-        "type": "string"
-      },
-      "type": "array",
-      "description": "Suite-level warnings detected during config validation"
-    },
-    "reconciliations": {
-      "items": {
-        "$ref": "#/$defs/ReconciliationAudit"
-      },
-      "type": "array",
-      "description": "Audit records for each reconciliation executed"
-    },
-    "total_stats": {
-      "$ref": "#/$defs/QueryStats"
-    },
-    "status": {
-      "type": "string",
-      "enum": [
-        "passed",
-        "failed",
-        "mismatched",
-        "mismatched_within_threshold"
+      "required": [
+        "lookback"
       ],
-      "description": "Overall execution status derived from individual reconciliation outcomes"
+      "title": "Window Config",
+      "type": "object"
     },
-    "summary": {
-      "$ref": "#/$defs/AuditSummary"
+    "synq.entities.v1.Annotation": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Annotations can be used to annotate any entity with a key:value pair.\n These annotations can be used for filtering and searching entities.",
+      "properties": {
+        "name": {
+          "description": "String key for the annotation.",
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+        },
+        "values": {
+          "description": "Optional list of values that the annotation can carry.",
+          "items": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Annotation",
+      "type": "object"
     }
   },
-  "type": "object",
-  "required": [
-    "version",
-    "started_at",
-    "completed_at",
-    "duration_ms",
-    "reconciliations",
-    "status"
-  ],
+  "$id": "https://schemas.synq.io/synq-recon/v1/audit-log.schema.json",
+  "$ref": "#/$defs/synq.agent.recon.v1.AuditLog",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Coalesce Quality Recon Audit Log",
-  "description": "Audit log output capturing every operation performed during a synq-recon reconciliation run."
+  "description": "Audit log emitted by synq-recon for each reconciliation run: per-check results, mismatch drill-downs, and the queries executed.",
+  "x-status": "stable"
 }

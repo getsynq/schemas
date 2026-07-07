@@ -55,3 +55,35 @@ jobs:
           fi
 
           echo "All schemas are valid JSON"
+
+      - name: Validate schemas against JSON Schema metaschema
+        run: |
+          pip install --quiet check-jsonschema
+          # Fails if any file is not itself a valid JSON Schema (draft 2020-12 etc.).
+          check-jsonschema --check-metaschema $(find . -name '*.schema.json' -not -path './.github/*')
+
+      - name: Validate x-status is present and matches the path convention
+        run: |
+          errors=0
+          for schema in $(find . -name '*.schema.json' -not -path './.github/*'); do
+            rel_path="${schema#./}"
+            status=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('x-status',''))" "$schema")
+
+            if [ "$status" != "stable" ] && [ "$status" != "draft" ]; then
+              echo "::error file=${rel_path}::x-status must be 'stable' or 'draft' (got '${status}')"
+              errors=$((errors + 1))
+              continue
+            fi
+
+            # draft/ path <=> x-status draft; a versioned path (v1/, v2/, ...) <=> stable.
+            case "/${rel_path}" in
+              */draft/*) [ "$status" = "draft" ] || { echo "::error file=${rel_path}::draft/ path must have x-status 'draft'"; errors=$((errors + 1)); } ;;
+              */v[0-9]*/*) [ "$status" = "stable" ] || { echo "::error file=${rel_path}::versioned path must have x-status 'stable'"; errors=$((errors + 1)); } ;;
+            esac
+          done
+
+          if [ "$errors" -gt 0 ]; then
+            exit 1
+          fi
+
+          echo "All schemas have a consistent x-status"

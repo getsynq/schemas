@@ -166,8 +166,10 @@ def collect_schemas(root: Path) -> list[dict]:
             {
                 "rel_path": str(rel),
                 "html_path": html_path,
-                "title": data.get("title", base).removeprefix("SYNQ ").removeprefix("Coalesce Quality "),
-                "status": "draft" if "draft" in rel.parts else data.get("x-status", "stable"),
+                "title": data.get("title", base).removeprefix("Coalesce Quality "),
+                # x-status is the single source of truth for stability (set by each
+                # schema's generator). The v1/ vs draft/ path is a URL convention only.
+                "status": data.get("x-status", "stable"),
                 "description": data.get("description", ""),
             }
         )

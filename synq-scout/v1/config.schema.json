@@ -49,7 +49,7 @@
         },
         "use_show_create_table": {
           "type": "boolean",
-          "description": "Use SHOW CREATE TABLE to retrieve full table DDL (CTAS bodies, Iceberg\nTBLPROPERTIES, Hive external LOCATION/SerDe). One Athena query per\ntable \u2014 billed at the 10MB scan minimum each."
+          "description": "Use SHOW CREATE TABLE to retrieve full table DDL (CTAS bodies, Iceberg\nTBLPROPERTIES, Hive external LOCATION/SerDe). One Athena query per\ntable — billed at the 10MB scan minimum each."
         },
         "use_show_create_view": {
           "type": "boolean",
@@ -502,7 +502,7 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "description": "ScopeConf is the YAML representation of synq.common.v1.ScopeFilter \u2014 the shared include/exclude filter used by warehouses with hierarchical catalogs."
+      "description": "ScopeConf is the YAML representation of synq.common.v1.ScopeFilter — the shared include/exclude filter used by warehouses with hierarchical catalogs."
     },
     "ScopeRuleConf": {
       "properties": {
@@ -692,5 +692,6 @@
   "additionalProperties": false,
   "type": "object",
   "title": "Coalesce Quality Scout Agent Configuration",
-  "description": "Configuration file format for synq-scout, the Coalesce Quality agent that automatically triages data quality issues and incidents."
+  "description": "Configuration file format for synq-scout, the Coalesce Quality triage agent run on-premise: your data and the chosen LLM (e.g. an internal LiteLLM proxy, Google Vertex, or AWS Bedrock) stay within your environment, and only the triage resolution — not the underlying data or investigation — is sent back to Coalesce Quality. Defines the agent's data warehouse connections and LLM endpoint.",
+  "x-status": "stable"
 }

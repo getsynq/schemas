@@ -128,7 +128,7 @@
         },
         "use_show_create_table": {
           "type": "boolean",
-          "description": "Use SHOW CREATE TABLE to retrieve full table DDL (CTAS bodies, Iceberg\nTBLPROPERTIES, Hive external LOCATION/SerDe). One Athena query per\ntable \u2014 billed at the 10MB scan minimum each."
+          "description": "Use SHOW CREATE TABLE to retrieve full table DDL (CTAS bodies, Iceberg\nTBLPROPERTIES, Hive external LOCATION/SerDe). One Athena query per\ntable — billed at the 10MB scan minimum each."
         },
         "use_show_create_view": {
           "type": "boolean",
@@ -364,7 +364,7 @@
         },
         "operator": {
           "type": "string",
-          "description": "Comparison operator. Default: \"<=\"."
+          "description": "Comparison operator. Default: \"\u003c=\"."
         }
       },
       "additionalProperties": false,
@@ -1054,7 +1054,7 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "description": "ScopeConf is the YAML representation of synq.common.v1.ScopeFilter \u2014 the shared include/exclude filter used by warehouses with hierarchical catalogs."
+      "description": "ScopeConf is the YAML representation of synq.common.v1.ScopeFilter — the shared include/exclude filter used by warehouses with hierarchical catalogs."
     },
     "ScopeRuleConf": {
       "properties": {
@@ -1405,5 +1405,6 @@
     "reconciliations"
   ],
   "title": "Coalesce Quality Recon Configuration",
-  "description": "Configuration file format for synq-recon, the Coalesce Quality data reconciliation tool that compares datasets across databases."
+  "description": "Configuration file format for synq-recon, the Coalesce Quality data reconciliation tool that compares datasets across databases.",
+  "x-status": "stable"
 }

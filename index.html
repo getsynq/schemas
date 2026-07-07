@@ -128,7 +128,7 @@
           <span class="badge badge-stable">stable</span>
         </div>
         <a class="schema-path" href="synq-dwh/v1/config.schema.json">synq-dwh/v1/config.schema.json</a>
-        <div class="schema-desc">Configuration file format for the synq-dwh agent, which collects warehouse metadata, run results, and query logs from your data warehouse and sends them to Coalesce Quality.</div>
+        <div class="schema-desc">Configuration file format for the synq-dwh agent, which connects to your data warehouse to collect schema metadata and metrics and run monitors on-premise, sending the results to Coalesce Quality.</div>
       </div>
       <div class="schema-card">
         <div class="schema-card-header">
@@ -136,7 +136,7 @@
           <span class="badge badge-stable">stable</span>
         </div>
         <a class="schema-path" href="synq-recon/v1/audit-log.schema.json">synq-recon/v1/audit-log.schema.json</a>
-        <div class="schema-desc">Audit log output capturing every operation performed during a synq-recon reconciliation run.</div>
+        <div class="schema-desc">Audit log emitted by synq-recon for each reconciliation run: per-check results, mismatch drill-downs, and the queries executed.</div>
       </div>
       <div class="schema-card">
         <div class="schema-card-header">
@@ -152,7 +152,7 @@
           <span class="badge badge-stable">stable</span>
         </div>
         <a class="schema-path" href="synq-scout/v1/config.schema.json">synq-scout/v1/config.schema.json</a>
-        <div class="schema-desc">Configuration file format for synq-scout, the Coalesce Quality agent that automatically triages data quality issues and incidents.</div>
+        <div class="schema-desc">Configuration file format for synq-scout, the Coalesce Quality triage agent run on-premise: your data and the chosen LLM (e.g. an internal LiteLLM proxy, Google Vertex, or AWS Bedrock) stay within your environment, and only the triage resolution — not the underlying data or investigation — is sent back to Coalesce Quality. Defines the agent's data warehouse connections and LLM endpoint.</div>
       </div>
       <div class="schema-card">
         <div class="schema-card-header">
