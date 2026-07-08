@@ -1230,6 +1230,11 @@
           "default": 0,
           "title": "Issue Status"
         },
+        "status_actor": {
+          "$ref": "#/$defs/synq.issues.actor.v1.Actor",
+          "description": "Set only when an actor is known: it is populated on `issue_status_updated`\n events and left unset for system-driven transitions with no human actor\n (e.g. a status implied by a monitor run). Consumers must treat it as\n optional and tolerate its absence.\n\n Carries the strongest identity the caller proved \u2014 a Coalesce Quality\n email, Slack user id, or PagerDuty user id \u2014 alongside a display `name`.",
+          "title": "The user who set the current status, when the transition was\n human-initiated (e.g. someone pressing Expected / Fixed / No action\n needed / Investigating in the app or via the public API). This is the\n same actor exposed by the Issues API as `Issue.latest_status_actor`, so\n the two feeds can be joined on it."
+        },
         "title": {
           "default": "",
           "description": "Summary of the issue, what happened and where.",
