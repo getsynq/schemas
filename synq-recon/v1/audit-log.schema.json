@@ -39,6 +39,7 @@
           "items": {
             "$ref": "#/$defs/synq.agent.recon.v1.Measure"
           },
+          "minItems": 1,
           "type": "array"
         },
         "thresholds": {
@@ -1086,6 +1087,7 @@
           "items": {
             "type": "string"
           },
+          "minItems": 1,
           "type": "array"
         }
       },
@@ -1533,6 +1535,7 @@
             ],
             "title": "Aggregate Function"
           },
+          "minItems": 1,
           "type": "array"
         }
       },
@@ -2465,6 +2468,7 @@
           "items": {
             "$ref": "#/$defs/synq.agent.recon.v1.Reconcilation"
           },
+          "minItems": 1,
           "type": "array"
         },
         "setup": {
@@ -3322,6 +3326,8 @@
             "minLength": 1,
             "type": "string"
           },
+          "maxItems": 20,
+          "minItems": 0,
           "type": "array"
         }
       },
