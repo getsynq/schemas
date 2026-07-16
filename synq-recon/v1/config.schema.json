@@ -330,6 +330,9 @@
         },
         "athena": {
           "$ref": "#/$defs/AthenaConf"
+        },
+        "fabric": {
+          "$ref": "#/$defs/FabricConf"
         }
       },
       "additionalProperties": false,
@@ -582,6 +585,72 @@
       "additionalProperties": false,
       "type": "object",
       "description": "ErrorHandlingConfig controls retry behavior for query failures."
+    },
+    "FabricConf": {
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Hostname of the workspace's SQL analytics endpoint. Copy it from the\nFabric portal: open your Warehouse or Lakehouse, then Settings → SQL\nconnection string.",
+          "examples": [
+            "my-workspace.datawarehouse.fabric.microsoft.com"
+          ]
+        },
+        "database": {
+          "type": "string",
+          "description": "Default database for queries that don't name one explicitly. Optional —\ndefaults to \"master\". Because metadata and metric queries are always\nfully qualified, this only affects ad-hoc SQL that omits the database.",
+          "examples": [
+            "my_warehouse"
+          ]
+        },
+        "auth_type": {
+          "type": "string",
+          "description": "How to authenticate to Fabric. Optional — defaults to a service principal\n(client_id + client_secret). Values are matched case-insensitively, and\nthe equivalent dbt-fabric and Microsoft ODBC spellings are also accepted:\n  - \"service_principal\" (default): Entra ID service principal. Set\n    client_id, client_secret and, if needed, tenant_id.\n  - \"azure_cli\": reuse the machine's `az login` session. On-prem agent only.\n  - \"default\": try Azure's default credential chain (environment, managed\n    identity, CLI, ...). On-prem agent only.\n  - \"managed_identity\": use an Azure managed identity; set client_id to\n    select a user-assigned identity. On-prem agent only.",
+          "examples": [
+            "service_principal",
+            "azure_cli",
+            "default",
+            "managed_identity"
+          ]
+        },
+        "client_id": {
+          "type": "string",
+          "description": "Application (client) ID of the Entra ID service principal. When auth_type\nis \"managed_identity\", this instead selects a user-assigned identity.",
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
+        },
+        "client_secret": {
+          "type": "string",
+          "description": "Client secret for the service principal. Supply it through an environment\nvariable (e.g. ${FABRIC_CLIENT_SECRET}) rather than committing it in plain\ntext.",
+          "examples": [
+            "${FABRIC_CLIENT_SECRET}"
+          ]
+        },
+        "tenant_id": {
+          "type": "string",
+          "description": "Entra ID tenant (directory) ID. Optional — inferred from the endpoint\nhostname when omitted. Set it only when the service principal lives in a\ndifferent tenant than the workspace.",
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
+        },
+        "access_token": {
+          "type": "string",
+          "description": "A pre-acquired Entra ID OAuth access token for the SQL scope\n(https://database.windows.net/.default). Optional — when set it overrides\nevery other authentication method. Mainly for hosted deployments that mint\ntheir own token.",
+          "examples": [
+            "${FABRIC_ACCESS_TOKEN}"
+          ]
+        },
+        "scope": {
+          "$ref": "#/$defs/ScopeConf",
+          "description": "Optional include/exclude filter that limits which databases, schemas and\ntables are scanned. When omitted, the whole workspace is scanned."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host"
+      ],
+      "description": "FabricConf contains the connection settings for a Microsoft Fabric Warehouse or Lakehouse SQL analytics endpoint."
     },
     "GroupColumns": {
       "oneOf": [
