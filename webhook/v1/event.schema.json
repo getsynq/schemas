@@ -223,9 +223,7 @@
       "additionalProperties": true,
       "properties": {
         "integration_id": {
-          "description": "Coalesce Quality integration_id that identifies the dbt Core project",
-          "minLength": 1,
-          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          "description": "Opaque identifier of the dbt Core project. Usually the Coalesce Quality\n integration id (a UUID), but may also be the dbt project name from\n manifest.json when the integration is configured to identify assets by\n project name. Treat it as an opaque string, not a UUID.",
           "type": "string"
         },
         "node_id": {
@@ -238,6 +236,47 @@
         "node_id"
       ],
       "title": "Dbt Core Node Identifier",
+      "type": "object"
+    },
+    "synq.entities.v1.FabricTableIdentifier": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "Microsoft Fabric warehouse/lakehouse table identifier. Fabric is\n workspace-scoped with cross-database three-part [database].[schema].[table]\n T-SQL names.",
+      "properties": {
+        "database": {
+          "description": "Fabric warehouse / lakehouse (database).",
+          "type": "string"
+        },
+        "instance": {
+          "description": "Workspace SQL analytics endpoint host, e.g.\n \"<workspace-id>.datawarehouse.fabric.microsoft.com\".",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Schema within the database.",
+          "type": "string"
+        },
+        "table": {
+          "description": "Table or view name.",
+          "type": "string"
+        },
+        "tenant_id": {
+          "default": "",
+          "description": "Entra (Azure AD) tenant GUID, decoded from the endpoint host in `instance`.\n Optional and informational, like workspace_id.",
+          "type": "string"
+        },
+        "workspace_id": {
+          "default": "",
+          "description": "Fabric workspace GUID, decoded from the endpoint host in `instance`.\n Optional and informational: the table is addressed by\n instance/database/schema/table, so leave it empty if you don't have it \u2014\n it does not affect how the identifier resolves.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "instance",
+        "database",
+        "schema",
+        "table"
+      ],
+      "title": "Fabric Table Identifier",
       "type": "object"
     },
     "synq.entities.v1.Identifier": {
@@ -284,6 +323,10 @@
         "dbt_core_node": {
           "$ref": "#/$defs/synq.entities.v1.DbtCoreNodeIdentifier",
           "description": "Dbt node that identifies one of dbt DAG nodes (model, test, etc) in dbt Core project"
+        },
+        "fabric_table": {
+          "$ref": "#/$defs/synq.entities.v1.FabricTableIdentifier",
+          "description": "Microsoft Fabric table identifier"
         },
         "monitor": {
           "$ref": "#/$defs/synq.entities.v1.MonitorIdentifier",
@@ -958,6 +1001,7 @@
     "synq.webhooks.v1.Event": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
+      "description": "Payload signing: every outgoing request is signed so the receiver can verify\n it originated from Coalesce Quality and was not tampered with or replayed. Two\n headers are sent on every delivery:\n\n   X-Coalesce-Timestamp: <unix seconds when the delivery was signed>\n   X-Coalesce-Signature: v1=<hex-encoded HMAC-SHA256>\n\n The signature is computed as:\n\n   signed_payload = \"{X-Coalesce-Timestamp}.\" + <raw request body bytes>\n   signature      = hex( HMAC_SHA256(key = signing_secret, msg = signed_payload) )\n\n where signing_secret is the per-integration secret shown (read-only) in the\n webhook integration settings. To verify:\n\n   1. Read X-Coalesce-Timestamp and the raw request body.\n   2. Recompute the signature with your copy of the signing secret and compare\n      it against the v1=... value in X-Coalesce-Signature using a constant-time\n      comparison.\n   3. Optionally reject deliveries whose timestamp is outside your tolerance\n      window (retries reuse the original signing timestamp, so allow for the\n      retry backoff window \u2014 up to ~30 minutes).\n\n The v1= prefix identifies the signature scheme; future schemes may add\n additional space-separated values to the header.",
       "properties": {
         "callbacks": {
           "items": {
@@ -1029,7 +1073,7 @@
           "type": "string"
         }
       },
-      "title": "Event",
+      "title": "A webhook event delivered to a customer-configured endpoint.",
       "type": "object"
     },
     "synq.webhooks.v1.IncidentCancelled": {
@@ -1158,6 +1202,30 @@
       "title": "Issue Entity",
       "type": "object"
     },
+    "synq.webhooks.v1.IssueSummary.Owner": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "An owner (person or team) responsible for an entity, as assigned in\n Coalesce Quality (natively or synced from a catalog).",
+      "properties": {
+        "id": {
+          "default": "",
+          "description": "Identifier of the owner within the workspace. Matches the id on the\n Owners API, so callers can fetch the full owner record (contacts,\n source) from that API.",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "description": "Display name of the owner, e.g. a team or person name.",
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "description": "Deep link to the owner in the Coalesce Quality app.",
+          "type": "string"
+        }
+      },
+      "title": "Owner",
+      "type": "object"
+    },
     "synq.webhooks.v1.IssueSummary": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
@@ -1200,6 +1268,14 @@
           "items": {
             "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.IssueEntity"
           },
+          "type": "array"
+        },
+        "owners": {
+          "description": "Covers only the direct owners of the affected entities, not the owners of\n downstream entities. Empty when the affected entities have no owner\n assigned. Ordered as shown in the app.",
+          "items": {
+            "$ref": "#/$defs/synq.webhooks.v1.IssueSummary.Owner"
+          },
+          "title": "Owners of the entities this issue is about.",
           "type": "array"
         },
         "started_at": {
