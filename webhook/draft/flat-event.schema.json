@@ -1001,7 +1001,7 @@
     "synq.webhooks.v1.FlatEvent": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
-      "description": "Instead of nesting the payload under a per-event-type field (issue_created,\n issue_updated, incident_open, \u2026), the payload is carried by a single\n top-level field \u2014 `issue`, `incident`, or `ping` \u2014 and `event_type` says\n which one is set and why. A receiver can then read a value the same way on\n every event, e.g. `issue.owners[0].title` on any issue event, instead of a\n different path per event type.\n\n Exactly one of `issue`, `incident`, or `ping` is set, matching `event_type`.\n Select this format per webhook integration; the default is the nested Event.\n Payload signing is identical \u2014 see Event for the signature scheme.\n\n Experimental: this shape may change while we gather feedback.",
+      "description": "Instead of nesting the payload under a per-event-type field (`issue_created`,\n `issue_updated`, `incident_open`, \u2026), the payload is carried by a single\n top-level field \u2014 `issue`, `incident`, or `ping` \u2014 and `event_type` says\n which one is set and why. A receiver can then read a value the same way on\n every event, e.g. `issue.owners[0].title` on any issue event, instead of a\n different path per event type.\n\n Exactly one of `issue`, `incident`, or `ping` is set, matching `event_type`.\n Select this format per webhook integration; the default is the nested `Event`.\n Payload signing is identical \u2014 see `Event` for the signature scheme.\n\n Experimental: this shape may change while we gather feedback.",
       "properties": {
         "callbacks": {
           "items": {
@@ -1047,22 +1047,22 @@
         },
         "incident": {
           "$ref": "#/$defs/synq.webhooks.v1.IncidentSummary",
-          "description": "Incident payload. Set on every EVENT_TYPE_INCIDENT_* event."
+          "description": "Incident payload. Set on every `EVENT_TYPE_INCIDENT_*` event."
         },
         "issue": {
           "$ref": "#/$defs/synq.webhooks.v1.IssueSummary",
-          "description": "Issue payload. Set on every EVENT_TYPE_ISSUE_* event."
+          "description": "Issue payload. Set on every `EVENT_TYPE_ISSUE_*` event."
         },
         "ping": {
           "$ref": "#/$defs/synq.webhooks.v1.Ping",
-          "description": "Test payload. Set on EVENT_TYPE_PING (sent during webhook setup)."
+          "description": "Test payload. Set on `EVENT_TYPE_PING` (sent during webhook setup)."
         },
         "workspace": {
           "default": "",
           "type": "string"
         }
       },
-      "title": "A webhook event in the flat format \u2014 an experimental, opt-in alternative to\n Event that carries the same information in a flatter shape.",
+      "title": "A webhook event in the flat format \u2014 an experimental, opt-in alternative to\n `Event` that carries the same information in a flatter shape.",
       "type": "object"
     },
     "synq.webhooks.v1.IncidentSummary": {
