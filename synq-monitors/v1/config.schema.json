@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.synq.io/synq-monitors/draft/config.schema.json",
+  "$id": "https://schemas.synq.io/synq-monitors/v1/config.schema.json",
   "$defs": {
     "AnomalyEngine": {
       "properties": {
@@ -1795,5 +1795,5 @@
   ],
   "title": "Coalesce Quality: Observability as Code",
   "description": "Configuration file format for synq-monitors, the Coalesce Quality observability-as-code tool for defining data quality monitors and tests.",
-  "x-status": "draft"
+  "x-status": "stable"
 }
