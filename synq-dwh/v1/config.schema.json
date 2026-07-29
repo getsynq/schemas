@@ -544,19 +544,19 @@
       "properties": {
         "client_id": {
           "type": "string",
-          "description": "OAuth client ID for authenticating with the SYNQ platform."
+          "description": "OAuth client ID for authenticating with Coalesce Quality."
         },
         "client_secret": {
           "type": "string",
-          "description": "OAuth client secret for authenticating with the SYNQ platform."
+          "description": "OAuth client secret for authenticating with Coalesce Quality."
         },
         "endpoint": {
           "type": "string",
-          "description": "gRPC endpoint for the SYNQ API (e.g. \"developer.synq.io:443\")."
+          "description": "gRPC endpoint for the Coalesce Quality API (e.g. \"developer.synq.io:443\")."
         },
         "ingest_endpoint": {
           "type": "string",
-          "description": "gRPC endpoint for the SYNQ ingest API. Defaults to Endpoint if empty."
+          "description": "gRPC endpoint for the Coalesce Quality ingest API. Defaults to Endpoint if empty."
         },
         "oauth_url": {
           "type": "string",
@@ -565,7 +565,7 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "description": "SYNQConfig holds SYNQ platform connection settings."
+      "description": "SYNQConfig holds Coalesce Quality connection settings."
     },
     "ScopeConf": {
       "properties": {
