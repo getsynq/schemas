@@ -139,10 +139,10 @@
             },
             {
               "enum": [
-                "AGGREGATE_DIVERGENCE_TYPE_MISMATCH",
-                "AGGREGATE_DIVERGENCE_TYPE_MISSING_SOURCE",
-                "AGGREGATE_DIVERGENCE_TYPE_MISSING_TARGET",
-                "AGGREGATE_DIVERGENCE_TYPE_VALUE_MISMATCH"
+                "AGGREGATE_DIVERGENCE_TYPE_SUBGROUP_MISMATCH",
+                "AGGREGATE_DIVERGENCE_TYPE_MISSING_IN_SOURCE",
+                "AGGREGATE_DIVERGENCE_TYPE_MISSING_IN_TARGET",
+                "AGGREGATE_DIVERGENCE_TYPE_MEASURE_MISMATCH"
               ],
               "type": "string"
             },
@@ -410,15 +410,15 @@
         "status": {
           "anyOf": [
             {
-              "pattern": "^AUDIT_STATUS_UNSPECIFIED$",
+              "pattern": "^AUDIT_OUTCOME_UNSPECIFIED$",
               "type": "string"
             },
             {
               "enum": [
-                "AUDIT_STATUS_PASSED",
-                "AUDIT_STATUS_MISMATCHED_WITHIN_THRESHOLD",
-                "AUDIT_STATUS_MISMATCHED",
-                "AUDIT_STATUS_FAILED"
+                "AUDIT_OUTCOME_PASSED",
+                "AUDIT_OUTCOME_MISMATCHED_WITHIN_THRESHOLD",
+                "AUDIT_OUTCOME_MISMATCHED",
+                "AUDIT_OUTCOME_FAILED"
               ],
               "type": "string"
             },
@@ -430,10 +430,10 @@
           ],
           "default": 0,
           "description": "Overall execution status derived from individual reconciliation outcomes.",
-          "title": "Audit Status"
+          "title": "Audit Outcome"
         },
         "suite": {
-          "$ref": "#/$defs/synq.agent.recon.v1.ReconcilationSuite",
+          "$ref": "#/$defs/synq.agent.recon.v1.ReconciliationSuite",
           "description": "Full suite configuration snapshot as executed.\n Contains all reconciliation definitions, variables, thresholds, etc."
         },
         "suite_description": {
@@ -1130,15 +1130,15 @@
         "combine": {
           "anyOf": [
             {
-              "pattern": "^CUTOFF_COMBINE_UNSPECIFIED$",
+              "pattern": "^CUTOFF_COMBINE_STRATEGY_UNSPECIFIED$",
               "type": "string"
             },
             {
               "enum": [
-                "CUTOFF_COMBINE_MIN",
-                "CUTOFF_COMBINE_MAX",
-                "CUTOFF_COMBINE_SOURCE",
-                "CUTOFF_COMBINE_TARGET"
+                "CUTOFF_COMBINE_STRATEGY_MIN",
+                "CUTOFF_COMBINE_STRATEGY_MAX",
+                "CUTOFF_COMBINE_STRATEGY_SOURCE",
+                "CUTOFF_COMBINE_STRATEGY_TARGET"
               ],
               "type": "string"
             },
@@ -1150,7 +1150,7 @@
           ],
           "default": 0,
           "description": "How to combine watermarks when both sides are configured.\n Default: MIN (use the smaller watermark for safety).\n Ignored when only one side has a watermark.",
-          "title": "Cutoff Combine"
+          "title": "Cutoff Combine Strategy"
         },
         "offset": {
           "$ref": "#/$defs/google.protobuf.Duration",
@@ -1167,17 +1167,17 @@
         "truncate": {
           "anyOf": [
             {
-              "pattern": "^CUTOFF_TRUNCATE_UNSPECIFIED$",
+              "pattern": "^CUTOFF_TRUNCATE_UNIT_UNSPECIFIED$",
               "type": "string"
             },
             {
               "enum": [
-                "CUTOFF_TRUNCATE_HOUR",
-                "CUTOFF_TRUNCATE_DAY",
-                "CUTOFF_TRUNCATE_WEEK",
-                "CUTOFF_TRUNCATE_MONTH",
-                "CUTOFF_TRUNCATE_QUARTER",
-                "CUTOFF_TRUNCATE_YEAR"
+                "CUTOFF_TRUNCATE_UNIT_HOUR",
+                "CUTOFF_TRUNCATE_UNIT_DAY",
+                "CUTOFF_TRUNCATE_UNIT_WEEK",
+                "CUTOFF_TRUNCATE_UNIT_MONTH",
+                "CUTOFF_TRUNCATE_UNIT_QUARTER",
+                "CUTOFF_TRUNCATE_UNIT_YEAR"
               ],
               "type": "string"
             },
@@ -1189,7 +1189,7 @@
           ],
           "default": 0,
           "description": "Truncate the combined watermark to a time boundary.\n Example: HOUR truncates 08:47:12 to 08:00:00.\n Applied after combining, before offset.",
-          "title": "Cutoff Truncate"
+          "title": "Cutoff Truncate Unit"
         }
       },
       "title": "CutoffConfig defines a dynamic cutoff filter for sync reconciliation.\n It derives a watermark value from the actual data (e.g., MAX(created_at))\n to automatically exclude rows that haven't been synced yet.",
@@ -1237,13 +1237,13 @@
         "aggregate": {
           "anyOf": [
             {
-              "pattern": "^CUTOFF_AGGREGATE_UNSPECIFIED$",
+              "pattern": "^CUTOFF_AGGREGATE_FUNCTION_UNSPECIFIED$",
               "type": "string"
             },
             {
               "enum": [
-                "CUTOFF_AGGREGATE_MAX",
-                "CUTOFF_AGGREGATE_MIN"
+                "CUTOFF_AGGREGATE_FUNCTION_MAX",
+                "CUTOFF_AGGREGATE_FUNCTION_MIN"
               ],
               "type": "string"
             },
@@ -1255,7 +1255,7 @@
           ],
           "default": 0,
           "description": "Aggregate function to derive the watermark. Default: MAX.\n Only used when query is not set.",
-          "title": "Cutoff Aggregate"
+          "title": "Cutoff Aggregate Function"
         },
         "column": {
           "default": "",
@@ -1768,9 +1768,9 @@
           "default": 0,
           "description": "Percentage threshold applied to this measure."
         },
-        "effective_percentage_mode": {
+        "effective_percentage_basis": {
           "default": "",
-          "description": "Percentage mode applied to this measure.",
+          "description": "Percentage basis applied to this measure, as a PercentageBasis value name.",
           "type": "string"
         },
         "exceeded": {
@@ -1829,18 +1829,45 @@
           "$ref": "#/$defs/synq.agent.recon.v1.DiffQueries",
           "description": "Investigation queries to inspect this mismatch."
         },
+        "drill_stop_reason": {
+          "anyOf": [
+            {
+              "pattern": "^DRILL_STOP_REASON_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "DRILL_STOP_REASON_THRESHOLD_REACHED",
+                "DRILL_STOP_REASON_MAX_DEPTH_REACHED",
+                "DRILL_STOP_REASON_EMPTY_SEGMENT",
+                "DRILL_STOP_REASON_CANNOT_SPLIT",
+                "DRILL_STOP_REASON_MATCHED",
+                "DRILL_STOP_REASON_ERROR"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Why bisection stopped at this leaf.",
+          "title": "Drill Stop Reason"
+        },
         "mismatch_types": {
           "description": "Types of mismatch detected.",
           "items": {
             "anyOf": [
               {
                 "enum": [
-                  "MISMATCH_TYPE_UNSPECIFIED",
-                  "MISMATCH_TYPE_MISSING_IN_SOURCE",
-                  "MISMATCH_TYPE_MISSING_IN_TARGET",
-                  "MISMATCH_TYPE_COUNT_MISMATCH",
-                  "MISMATCH_TYPE_DATA_MISMATCH",
-                  "MISMATCH_TYPE_UNKNOWN"
+                  "SEGMENT_MISMATCH_TYPE_UNSPECIFIED",
+                  "SEGMENT_MISMATCH_TYPE_MISSING_IN_SOURCE",
+                  "SEGMENT_MISMATCH_TYPE_MISSING_IN_TARGET",
+                  "SEGMENT_MISMATCH_TYPE_COUNT_MISMATCH",
+                  "SEGMENT_MISMATCH_TYPE_DATA_MISMATCH",
+                  "SEGMENT_MISMATCH_TYPE_UNKNOWN"
                 ],
                 "type": "string"
               },
@@ -1850,7 +1877,7 @@
                 "type": "integer"
               }
             ],
-            "title": "Mismatch Type"
+            "title": "Segment Mismatch Type"
           },
           "type": "array"
         },
@@ -1927,33 +1954,6 @@
             }
           ],
           "default": 0
-        },
-        "termination_reason": {
-          "anyOf": [
-            {
-              "pattern": "^TERMINATION_REASON_UNSPECIFIED$",
-              "type": "string"
-            },
-            {
-              "enum": [
-                "TERMINATION_REASON_THRESHOLD_REACHED",
-                "TERMINATION_REASON_MAX_DEPTH_REACHED",
-                "TERMINATION_REASON_EMPTY_SEGMENT",
-                "TERMINATION_REASON_CANNOT_SPLIT",
-                "TERMINATION_REASON_MATCHED",
-                "TERMINATION_REASON_ERROR"
-              ],
-              "type": "string"
-            },
-            {
-              "maximum": 2147483647,
-              "minimum": -2147483648,
-              "type": "integer"
-            }
-          ],
-          "default": 0,
-          "description": "Why bisection stopped at this leaf.",
-          "title": "Termination Reason"
         }
       },
       "title": "Mismatch Leaf Detail",
@@ -2284,10 +2284,10 @@
       "title": "Quick Check Stage Result",
       "type": "object"
     },
-    "synq.agent.recon.v1.Reconcilation": {
+    "synq.agent.recon.v1.Reconciliation": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
-      "description": "Reconcilation defines a single reconciliation scenario comparing data\n between a source and target dataset. Each reconciliation runs independently\n and produces its own pass/mismatch/fail result.",
+      "description": "Reconciliation defines a single reconciliation scenario comparing data\n between a source and target dataset. Each reconciliation runs independently\n and produces its own pass/mismatch/fail result.",
       "properties": {
         "aggregate": {
           "$ref": "#/$defs/synq.agent.recon.v1.AggregateConfig",
@@ -2366,9 +2366,9 @@
           "anyOf": [
             {
               "enum": [
-                "RECONCILATION_MODE_ROW_COUNT",
-                "RECONCILATION_MODE_ROW_CHECKSUM",
-                "RECONCILATION_MODE_AGGREGATE"
+                "RECONCILIATION_MODE_ROW_COUNT",
+                "RECONCILIATION_MODE_ROW_CHECKSUM",
+                "RECONCILIATION_MODE_AGGREGATE"
               ],
               "type": "string"
             },
@@ -2380,7 +2380,7 @@
           ],
           "default": 0,
           "description": "Comparison mode controlling how source and target are compared.",
-          "title": "Reconcilation Mode"
+          "title": "Reconciliation Mode"
         },
         "name": {
           "description": "Unique machine identifier within the suite. Alphanumerics, hyphens, and underscores. May be a UUID.",
@@ -2432,13 +2432,112 @@
         "source",
         "target"
       ],
-      "title": "Reconcilation",
+      "title": "Reconciliation",
       "type": "object"
     },
-    "synq.agent.recon.v1.ReconcilationSuite": {
+    "synq.agent.recon.v1.ReconciliationAudit": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
-      "description": "ReconcilationSuite is the root configuration for a reconciliation suite.\n It defines template variables and one or more reconciliation scenarios\n that compare data between source and target databases.\n Database connections are configured separately and referenced by name.",
+      "description": "ReconciliationAudit captures the configuration and runtime execution data\n for a single reconciliation.",
+      "properties": {
+        "columns": {
+          "description": "Column names discovered at runtime via QueryShape.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "cutoff_result": {
+          "$ref": "#/$defs/synq.agent.recon.v1.CutoffResult",
+          "description": "Cutoff resolution details (when cutoff was configured).\n Captures the derived watermark values, final cutoff, and WHERE clauses\n so the run can be fully understood and reproduced."
+        },
+        "error": {
+          "default": "",
+          "description": "Error message if the reconciliation failed due to an infrastructure error.",
+          "type": "string"
+        },
+        "normalization": {
+          "$ref": "#/$defs/synq.agent.recon.v1.Normalization",
+          "description": "Column normalization expressions applied after cross-DB type alignment."
+        },
+        "original_source_query": {
+          "default": "",
+          "description": "Source query before variable interpolation (differs from suite query when variables are used).",
+          "type": "string"
+        },
+        "original_target_query": {
+          "default": "",
+          "description": "Target query before variable interpolation.",
+          "type": "string"
+        },
+        "overall_match": {
+          "default": false,
+          "description": "Whether source and target matched overall.\n True when data matched exactly or differences were within configured thresholds.",
+          "type": "boolean"
+        },
+        "reconciliation": {
+          "$ref": "#/$defs/synq.agent.recon.v1.Reconciliation",
+          "description": "The reconciliation configuration as executed."
+        },
+        "source": {
+          "$ref": "#/$defs/synq.agent.recon.v1.DatasetInfo",
+          "description": "Runtime dataset information (resolved queries, detected dialects)."
+        },
+        "stages": {
+          "description": "Execution stages (quick_check, bisection_drill, aggregate_check).",
+          "items": {
+            "$ref": "#/$defs/synq.agent.recon.v1.StageAudit"
+          },
+          "type": "array"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "pattern": "^RECONCILIATION_OUTCOME_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "RECONCILIATION_OUTCOME_PASSED",
+                "RECONCILIATION_OUTCOME_MISMATCHED_WITHIN_THRESHOLD",
+                "RECONCILIATION_OUTCOME_MISMATCHED",
+                "RECONCILIATION_OUTCOME_FAILED"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Outcome status of this reconciliation.\n Distinguishes infrastructure errors from data mismatches and threshold-based outcomes.",
+          "title": "Reconciliation Outcome"
+        },
+        "target": {
+          "$ref": "#/$defs/synq.agent.recon.v1.DatasetInfo"
+        },
+        "warnings": {
+          "description": "Per-reconciliation warnings.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "reconciliation",
+        "source",
+        "target"
+      ],
+      "title": "Reconciliation Audit",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ReconciliationSuite": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ReconciliationSuite is the root configuration for a reconciliation suite.\n It defines template variables and one or more reconciliation scenarios\n that compare data between source and target databases.\n Database connections are configured separately and referenced by name.",
       "properties": {
         "annotations": {
           "description": "Suite-level annotations. Each annotation is a name with zero or more\n string values. Applied to the deployed suite asset and inherited by every\n reconciliation case under the suite. Merged with per-case annotations and\n deployment-level annotations at promote time \u2014 the final, deduplicated\n list is exposed on PromotedReconSuiteMetadata / PromotedReconCaseMetadata\n and surfaced to the rest of the SYNQ platform via EntityAnnotations.",
@@ -2466,7 +2565,7 @@
         "reconciliations": {
           "description": "Reconciliation scenarios to execute.\n Each reconciliation compares data between a source and target dataset.",
           "items": {
-            "$ref": "#/$defs/synq.agent.recon.v1.Reconcilation"
+            "$ref": "#/$defs/synq.agent.recon.v1.Reconciliation"
           },
           "minItems": 1,
           "type": "array"
@@ -2513,106 +2612,7 @@
       "required": [
         "name"
       ],
-      "title": "Reconcilation Suite",
-      "type": "object"
-    },
-    "synq.agent.recon.v1.ReconciliationAudit": {
-      "$schema": "https://json-schema.org/draft/2020-12/schema",
-      "additionalProperties": true,
-      "description": "ReconciliationAudit captures the configuration and runtime execution data\n for a single reconciliation.",
-      "properties": {
-        "columns": {
-          "description": "Column names discovered at runtime via QueryShape.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "cutoff_result": {
-          "$ref": "#/$defs/synq.agent.recon.v1.CutoffResult",
-          "description": "Cutoff resolution details (when cutoff was configured).\n Captures the derived watermark values, final cutoff, and WHERE clauses\n so the run can be fully understood and reproduced."
-        },
-        "error": {
-          "default": "",
-          "description": "Error message if the reconciliation failed due to an infrastructure error.",
-          "type": "string"
-        },
-        "normalization": {
-          "$ref": "#/$defs/synq.agent.recon.v1.Normalization",
-          "description": "Column normalization expressions applied after cross-DB type alignment."
-        },
-        "original_source_query": {
-          "default": "",
-          "description": "Source query before variable interpolation (differs from suite query when variables are used).",
-          "type": "string"
-        },
-        "original_target_query": {
-          "default": "",
-          "description": "Target query before variable interpolation.",
-          "type": "string"
-        },
-        "overall_match": {
-          "default": false,
-          "description": "Whether source and target matched overall.\n True when data matched exactly or differences were within configured thresholds.",
-          "type": "boolean"
-        },
-        "reconcilation": {
-          "$ref": "#/$defs/synq.agent.recon.v1.Reconcilation",
-          "description": "The reconciliation configuration as executed."
-        },
-        "source": {
-          "$ref": "#/$defs/synq.agent.recon.v1.DatasetInfo",
-          "description": "Runtime dataset information (resolved queries, detected dialects)."
-        },
-        "stages": {
-          "description": "Execution stages (quick_check, bisection_drill, aggregate_check).",
-          "items": {
-            "$ref": "#/$defs/synq.agent.recon.v1.StageAudit"
-          },
-          "type": "array"
-        },
-        "status": {
-          "anyOf": [
-            {
-              "pattern": "^RECONCILIATION_STATUS_UNSPECIFIED$",
-              "type": "string"
-            },
-            {
-              "enum": [
-                "RECONCILIATION_STATUS_PASSED",
-                "RECONCILIATION_STATUS_MISMATCHED_WITHIN_THRESHOLD",
-                "RECONCILIATION_STATUS_MISMATCHED",
-                "RECONCILIATION_STATUS_FAILED"
-              ],
-              "type": "string"
-            },
-            {
-              "maximum": 2147483647,
-              "minimum": -2147483648,
-              "type": "integer"
-            }
-          ],
-          "default": 0,
-          "description": "Outcome status of this reconciliation.\n Distinguishes infrastructure errors from data mismatches and threshold-based outcomes.",
-          "title": "Reconciliation Status"
-        },
-        "target": {
-          "$ref": "#/$defs/synq.agent.recon.v1.DatasetInfo"
-        },
-        "warnings": {
-          "description": "Per-reconciliation warnings.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "reconcilation",
-        "source",
-        "target"
-      ],
-      "title": "Reconciliation Audit",
+      "title": "Reconciliation Suite",
       "type": "object"
     },
     "synq.agent.recon.v1.ReportingConfig": {
@@ -2628,14 +2628,14 @@
         "level": {
           "anyOf": [
             {
-              "pattern": "^REPORTING_LEVEL_UNSPECIFIED$",
+              "pattern": "^MISMATCH_DETAIL_LEVEL_UNSPECIFIED$",
               "type": "string"
             },
             {
               "enum": [
-                "REPORTING_LEVEL_COUNT_ONLY",
-                "REPORTING_LEVEL_WITH_KEYS",
-                "REPORTING_LEVEL_DETAILED"
+                "MISMATCH_DETAIL_LEVEL_COUNT_ONLY",
+                "MISMATCH_DETAIL_LEVEL_WITH_KEYS",
+                "MISMATCH_DETAIL_LEVEL_DETAILED"
               ],
               "type": "string"
             },
@@ -2647,7 +2647,7 @@
           ],
           "default": 0,
           "description": "Output detail level for mismatched rows.",
-          "title": "Reporting Level"
+          "title": "Mismatch Detail Level"
         },
         "sample_limit": {
           "anyOf": [
@@ -2728,8 +2728,8 @@
             },
             {
               "enum": [
-                "ROW_MISMATCH_TYPE_MISSING_IN_TARGET",
                 "ROW_MISMATCH_TYPE_MISSING_IN_SOURCE",
+                "ROW_MISMATCH_TYPE_MISSING_IN_TARGET",
                 "ROW_MISMATCH_TYPE_MODIFIED"
               ],
               "type": "string"
@@ -2789,8 +2789,8 @@
             },
             {
               "enum": [
-                "ROW_MISMATCH_TYPE_MISSING_IN_TARGET",
                 "ROW_MISMATCH_TYPE_MISSING_IN_SOURCE",
+                "ROW_MISMATCH_TYPE_MISSING_IN_TARGET",
                 "ROW_MISMATCH_TYPE_MODIFIED"
               ],
               "type": "string"
@@ -2820,6 +2820,33 @@
             "$ref": "#/$defs/synq.agent.recon.v1.SegmentAuditNode"
           },
           "type": "array"
+        },
+        "drill_stop_reason": {
+          "anyOf": [
+            {
+              "pattern": "^DRILL_STOP_REASON_UNSPECIFIED$",
+              "type": "string"
+            },
+            {
+              "enum": [
+                "DRILL_STOP_REASON_THRESHOLD_REACHED",
+                "DRILL_STOP_REASON_MAX_DEPTH_REACHED",
+                "DRILL_STOP_REASON_EMPTY_SEGMENT",
+                "DRILL_STOP_REASON_CANNOT_SPLIT",
+                "DRILL_STOP_REASON_MATCHED",
+                "DRILL_STOP_REASON_ERROR"
+              ],
+              "type": "string"
+            },
+            {
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "Why bisection stopped at this node.",
+          "title": "Drill Stop Reason"
         },
         "is_leaf": {
           "default": false,
@@ -2909,33 +2936,6 @@
             }
           ],
           "default": 0
-        },
-        "termination_reason": {
-          "anyOf": [
-            {
-              "pattern": "^TERMINATION_REASON_UNSPECIFIED$",
-              "type": "string"
-            },
-            {
-              "enum": [
-                "TERMINATION_REASON_THRESHOLD_REACHED",
-                "TERMINATION_REASON_MAX_DEPTH_REACHED",
-                "TERMINATION_REASON_EMPTY_SEGMENT",
-                "TERMINATION_REASON_CANNOT_SPLIT",
-                "TERMINATION_REASON_MATCHED",
-                "TERMINATION_REASON_ERROR"
-              ],
-              "type": "string"
-            },
-            {
-              "maximum": 2147483647,
-              "minimum": -2147483648,
-              "type": "integer"
-            }
-          ],
-          "default": 0,
-          "description": "Why bisection stopped at this node.",
-          "title": "Termination Reason"
         },
         "total_rows_in_subtree": {
           "anyOf": [
@@ -3171,19 +3171,19 @@
               "type": "string"
             }
           ],
-          "description": "Maximum allowed percentage difference per measure.\n Expressed as a decimal fraction: 0.1 = 10%, 0.01 = 1%.\n The formula used depends on percentage_mode.\n When set, differences <= this percentage are considered within tolerance."
+          "description": "Maximum allowed percentage difference per measure.\n Expressed as a decimal fraction: 0.1 = 10%, 0.01 = 1%.\n The formula used depends on percentage_basis.\n When set, differences <= this percentage are considered within tolerance."
         },
-        "percentage_mode": {
+        "percentage_basis": {
           "anyOf": [
             {
-              "pattern": "^PERCENTAGE_MODE_UNSPECIFIED$",
+              "pattern": "^PERCENTAGE_BASIS_UNSPECIFIED$",
               "type": "string"
             },
             {
               "enum": [
-                "PERCENTAGE_MODE_SOURCE",
-                "PERCENTAGE_MODE_TARGET",
-                "PERCENTAGE_MODE_SYMMETRIC"
+                "PERCENTAGE_BASIS_SOURCE",
+                "PERCENTAGE_BASIS_TARGET",
+                "PERCENTAGE_BASIS_SYMMETRIC"
               ],
               "type": "string"
             },
@@ -3195,7 +3195,7 @@
           ],
           "default": 0,
           "description": "Which percentage formula to use for threshold evaluation.\n Only relevant when percentage is set.",
-          "title": "Percentage Mode"
+          "title": "Percentage Basis"
         }
       },
       "title": "ThresholdConfig defines tolerance thresholds for aggregate comparisons.\n A difference is reported as a mismatch only when it exceeds ALL configured\n thresholds (AND logic: both absolute AND percentage must be exceeded).",
@@ -3236,9 +3236,9 @@
           },
           "type": "object"
         },
-        "percentage_mode": {
+        "percentage_basis": {
           "default": "",
-          "description": "Which percentage formula was used.",
+          "description": "Which percentage formula was used, as a PercentageBasis value name.",
           "type": "string"
         },
         "percentage_threshold": {
