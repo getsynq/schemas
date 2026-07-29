@@ -339,7 +339,7 @@
       "type": "object",
       "description": "Connection is a single database connection entry in a connections map."
     },
-    "CutoffAggregate": {
+    "CutoffAggregateFunction": {
       "type": "string",
       "enum": [
         "MAX",
@@ -374,7 +374,7 @@
       "type": "object",
       "description": "CutoffApplySide configures WHERE clause generation for one side."
     },
-    "CutoffCombine": {
+    "CutoffCombineStrategy": {
       "type": "string",
       "enum": [
         "min",
@@ -405,11 +405,11 @@
           "description": "Advanced: full per-side watermark derivation config."
         },
         "combine": {
-          "$ref": "#/$defs/CutoffCombine",
+          "$ref": "#/$defs/CutoffCombineStrategy",
           "description": "How to combine watermarks when both sides are configured: min, max, source, target."
         },
         "truncate": {
-          "$ref": "#/$defs/CutoffTruncate",
+          "$ref": "#/$defs/CutoffTruncateUnit",
           "description": "Truncate the combined watermark to a time boundary before applying."
         },
         "offset": {
@@ -432,7 +432,7 @@
           "description": "Column to derive the watermark from (e.g., \"created_at\", \"synced_at\").\nRequired when query is not set."
         },
         "aggregate": {
-          "$ref": "#/$defs/CutoffAggregate",
+          "$ref": "#/$defs/CutoffAggregateFunction",
           "description": "Aggregate function for watermark derivation: MAX (default) or MIN."
         },
         "query": {
@@ -444,7 +444,7 @@
       "type": "object",
       "description": "CutoffSideConfig configures watermark derivation for one side (source or target)."
     },
-    "CutoffTruncate": {
+    "CutoffTruncateUnit": {
       "type": "string",
       "enum": [
         "HOUR",
@@ -773,6 +773,14 @@
         }
       ]
     },
+    "MismatchDetailLevel": {
+      "type": "string",
+      "enum": [
+        "count_only",
+        "with_keys",
+        "detailed"
+      ]
+    },
     "MySQLConf": {
       "properties": {
         "host": {
@@ -859,7 +867,7 @@
       ],
       "description": "OracleConf contains Oracle Database connection parameters."
     },
-    "PercentageMode": {
+    "PercentageBasis": {
       "type": "string",
       "enum": [
         "source",
@@ -1055,7 +1063,7 @@
     "ReportingConfig": {
       "properties": {
         "level": {
-          "$ref": "#/$defs/ReportingLevel"
+          "$ref": "#/$defs/MismatchDetailLevel"
         },
         "sample_limit": {
           "type": "integer",
@@ -1069,31 +1077,23 @@
       "type": "object",
       "description": "ReportingConfig controls what level of detail is reported."
     },
-    "ReportingLevel": {
-      "type": "string",
-      "enum": [
-        "count_only",
-        "with_keys",
-        "detailed"
-      ]
-    },
     "SYNQConfig": {
       "properties": {
         "client_id": {
           "type": "string",
-          "description": "OAuth client ID for authenticating with the SYNQ platform."
+          "description": "OAuth client ID for authenticating with Coalesce Quality."
         },
         "client_secret": {
           "type": "string",
-          "description": "OAuth client secret for authenticating with the SYNQ platform."
+          "description": "OAuth client secret for authenticating with Coalesce Quality."
         },
         "endpoint": {
           "type": "string",
-          "description": "gRPC endpoint for the SYNQ API (e.g. \"developer.synq.io:443\")."
+          "description": "gRPC endpoint for the Coalesce Quality API (e.g. \"developer.synq.io:443\")."
         },
         "ingest_endpoint": {
           "type": "string",
-          "description": "gRPC endpoint for the SYNQ ingest API. Defaults to Endpoint if empty."
+          "description": "gRPC endpoint for the Coalesce Quality ingest API. Defaults to Endpoint if empty."
         },
         "oauth_url": {
           "type": "string",
@@ -1102,7 +1102,7 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "description": "SYNQConfig holds SYNQ platform connection settings."
+      "description": "SYNQConfig holds Coalesce Quality connection settings."
     },
     "ScopeConf": {
       "properties": {
@@ -1271,7 +1271,7 @@
           "description": "Maximum percentage difference (0.1 = 10%)."
         },
         "percentage_mode": {
-          "$ref": "#/$defs/PercentageMode",
+          "$ref": "#/$defs/PercentageBasis",
           "description": "Percentage formula: source, target, or symmetric."
         },
         "per_column": {
@@ -1460,7 +1460,7 @@
     },
     "synq": {
       "$ref": "#/$defs/SYNQConfig",
-      "description": "SYNQ API credentials for sending audit logs."
+      "description": "Coalesce Quality API credentials for sending audit logs."
     },
     "annotations": {
       "$ref": "#/$defs/Annotations",
