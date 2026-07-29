@@ -822,6 +822,22 @@
       ],
       "description": "MySQLConf contains MySQL connection parameters."
     },
+    "NullableStringOrStrings": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      ]
+    },
     "OracleConf": {
       "properties": {
         "host": {
@@ -976,26 +992,26 @@
         },
         "setup": {
           "additionalProperties": {
-            "$ref": "#/$defs/StringOrStrings"
+            "$ref": "#/$defs/NullableStringOrStrings"
           },
           "type": "object",
           "description": "Per-reconciliation setup/teardown."
         },
         "teardown": {
           "additionalProperties": {
-            "$ref": "#/$defs/StringOrStrings"
+            "$ref": "#/$defs/NullableStringOrStrings"
           },
           "type": "object"
         },
         "setup_file": {
           "additionalProperties": {
-            "$ref": "#/$defs/StringOrStrings"
+            "$ref": "#/$defs/NullableStringOrStrings"
           },
           "type": "object"
         },
         "teardown_file": {
           "additionalProperties": {
-            "$ref": "#/$defs/StringOrStrings"
+            "$ref": "#/$defs/NullableStringOrStrings"
           },
           "type": "object"
         },
@@ -1420,28 +1436,28 @@
     },
     "setup": {
       "additionalProperties": {
-        "$ref": "#/$defs/StringOrStrings"
+        "$ref": "#/$defs/NullableStringOrStrings"
       },
       "type": "object",
       "description": "Setup queries run once before all reconciliations begin."
     },
     "teardown": {
       "additionalProperties": {
-        "$ref": "#/$defs/StringOrStrings"
+        "$ref": "#/$defs/NullableStringOrStrings"
       },
       "type": "object",
       "description": "Teardown queries run once after all reconciliations complete."
     },
     "setup_file": {
       "additionalProperties": {
-        "$ref": "#/$defs/StringOrStrings"
+        "$ref": "#/$defs/NullableStringOrStrings"
       },
       "type": "object",
       "description": "SQL file(s) to load and run as setup queries."
     },
     "teardown_file": {
       "additionalProperties": {
-        "$ref": "#/$defs/StringOrStrings"
+        "$ref": "#/$defs/NullableStringOrStrings"
       },
       "type": "object",
       "description": "SQL file(s) to load and run as teardown queries."
