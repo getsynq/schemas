@@ -25,7 +25,7 @@ https://schemas.synq.io/<tool>/draft/<name>.schema.json
 | [synq-recon/v1/audit-log.schema.json](synq-recon/v1/audit-log.schema.json) | Stable | synq-recon reconciliation-run audit log output |
 | [synq-scout/v1/config.schema.json](synq-scout/v1/config.schema.json) | Stable | Configuration for the synq-scout triage agent |
 | [webhook/v1/event.schema.json](webhook/v1/event.schema.json) | Stable | Webhook event payload sent on issue/incident lifecycle events |
-| [synq-monitors/draft/config.schema.json](synq-monitors/draft/config.schema.json) | Draft | Configuration for synq-monitors (observability as code) |
+| [synq-monitors/v1/config.schema.json](synq-monitors/v1/config.schema.json) | Stable | Configuration for synqcli (monitors and SQL tests as code) |
 
 ## Adding a New Schema
 
