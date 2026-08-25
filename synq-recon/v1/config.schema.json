@@ -213,6 +213,25 @@
       "type": "object",
       "description": "BisectionConfig controls the bisection drill-down behavior."
     },
+    "ClickhouseClusterConf": {
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "How system tables are read. Optional — defaults to \"all_replicas\".\n  - \"all_replicas\": read through clusterAllReplicas(\u003cname\u003e, ...) so metadata\n    covers every replica. Requires GRANT REMOTE ON *.*.\n  - \"single_node\": read on the connected node only. The one setting that\n    works on an install whose remote_servers defines no cluster, and it\n    needs no REMOTE grant — but on an install that does have replicas it\n    reports the metadata of a single node, so choose it deliberately.",
+          "examples": [
+            "all_replicas",
+            "single_node"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Cluster to read through, as named under remote_servers in the ClickHouse\nconfiguration. `SELECT DISTINCT cluster FROM system.clusters` lists what a\nserver has. Empty means \"default\". Ignored when mode is \"single_node\"."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "ClickhouseClusterConf selects how metadata reads address ClickHouse system tables."
+    },
     "ClickhouseConf": {
       "properties": {
         "host": {
@@ -223,9 +242,17 @@
           "maximum": 65535,
           "minimum": 1
         },
+        "instance_name": {
+          "type": "string",
+          "description": "Name this ClickHouse is published under, and the top element of every path\nand breadcrumb its tables appear in — \"prod\", \"staging\", \"eu-analytics\".\n\nClickHouse has no container above a database, so something has to name the\nservice itself. Left empty, that is the host above, which is correct but\nunreadable for a ClickHouse Cloud endpoint; a name given here replaces it.\n\nTwo connections to the same service must give the same name, and the name is\nthe identity of everything scraped through it: changing it republishes those\ntables under new paths, and the old ones stop being produced. Pick one per\nservice and keep it.",
+          "examples": [
+            "prod",
+            "staging"
+          ]
+        },
         "database": {
           "type": "string",
-          "description": "Database to connect to. If empty, all databases are scraped."
+          "description": "Database the connection opens with, so an unqualified table name in a query\nresolves against it. It does not restrict what is scraped: metadata comes\nfrom system tables and covers every database the user can see, whatever this\nsays. Empty opens on \"default\"."
         },
         "username": {
           "type": "string"
@@ -236,6 +263,17 @@
         "allow_insecure": {
           "type": "boolean",
           "description": "Disable SSL certificate verification."
+        },
+        "settings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "ClickHouse server settings applied to every connection, written as they\nwould be in a DSN query string (e.g. max_execution_time: \"300\"). Values are\ntyped the way ClickHouse types them in a connection string: \"true\" and\n\"false\" become 1 and 0, whole numbers become integers, anything else is\npassed through as text. A name given here replaces the value the scrape\nwould otherwise use."
+        },
+        "cluster": {
+          "$ref": "#/$defs/ClickhouseClusterConf",
+          "description": "How ClickHouse system tables are read. Omit to keep reading across a\ncluster named \"default\", which every ClickHouse Cloud service provides."
         }
       },
       "additionalProperties": false,
