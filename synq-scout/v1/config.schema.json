@@ -775,6 +775,10 @@
         "summary_model": {
           "type": "string",
           "description": "Model used for summarization tasks."
+        },
+        "thinking_effort": {
+          "type": "string",
+          "description": "How much the thinking model deliberates before each answer:\nnone, low, medium or high. Defaults to low."
         }
       },
       "additionalProperties": false,
