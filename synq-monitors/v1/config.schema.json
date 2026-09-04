@@ -50,6 +50,10 @@
     },
     "DeploymentExclusion": {
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "The exclusion's address. A UUID is adopted as-is; any other string is a slug the id is derived from. With an id, renaming the exclusion or editing its query updates it; renaming the id replaces it. Without one the name is the address, so a rename replaces the exclusion."
+        },
         "name": {
           "type": "string"
         },
@@ -71,58 +75,118 @@
         "resolver_ql"
       ]
     },
-    "DeploymentRule": {
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "table_stats"
-          ]
-        },
-        "resolver_ql": {
-          "type": "string"
-        },
-        "severity": {
-          "type": "string",
-          "enum": [
-            "INFO",
-            "WARNING",
-            "ERROR"
-          ]
-        },
-        "sensitivity": {
-          "type": "string",
-          "enum": [
-            "PRECISE",
-            "BALANCED",
-            "RELAXED"
-          ]
-        },
-        "metrics": {
-          "items": {
-            "$ref": "#/$defs/MetricOption"
+    "DeploymentRuleEntry": {
+      "anyOf": [
+        {
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The rule's address. A UUID is adopted as-is; any other string is a slug the id is derived from. With an id, renaming the rule or editing its query updates it, and the tests it deployed keep their history; renaming the id replaces the rule, which deletes those tests. Without an id the name is the address, so a rename does the same."
+            },
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "const": "sql_tests"
+            },
+            "resolver_ql": {
+              "type": "string"
+            },
+            "schedule": {
+              "$ref": "#/$defs/SimpleSchedule"
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR"
+              ]
+            },
+            "save_failures": {
+              "type": "boolean"
+            },
+            "keep_removed_tests": {
+              "type": "boolean"
+            },
+            "tests": {
+              "items": {
+                "$ref": "#/$defs/Test"
+              },
+              "type": "array",
+              "minItems": 1
+            }
           },
-          "type": "array",
-          "minItems": 1
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "name",
+            "type",
+            "resolver_ql",
+            "tests"
+          ]
         },
-        "delay_model": {
-          "type": "string",
-          "enum": [
-            "STANDARD",
-            "WEEKLY_PATTERN"
+        {
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The rule's address. A UUID is adopted as-is; any other string is a slug the id is derived from. With an id, renaming the rule or editing its query updates it; renaming the id replaces it. Without one the name is the address, so a rename replaces the rule."
+            },
+            "name": {
+              "type": "string"
+            },
+            "type": {
+              "const": "table_stats"
+            },
+            "resolver_ql": {
+              "type": "string"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR"
+              ]
+            },
+            "sensitivity": {
+              "type": "string",
+              "enum": [
+                "PRECISE",
+                "BALANCED",
+                "RELAXED"
+              ]
+            },
+            "metrics": {
+              "items": {
+                "$ref": "#/$defs/MetricOption"
+              },
+              "type": "array",
+              "minItems": 1
+            },
+            "delay_model": {
+              "type": "string",
+              "enum": [
+                "STANDARD",
+                "WEEKLY_PATTERN"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "name",
+            "type",
+            "resolver_ql",
+            "metrics"
           ]
         }
-      },
-      "additionalProperties": false,
-      "type": "object",
+      ],
       "required": [
-        "name",
-        "type",
-        "resolver_ql",
-        "metrics"
+        "type"
       ]
     },
     "Duration": {
@@ -140,7 +204,8 @@
     "Entity": {
       "properties": {
         "id": {
-          "type": "string"
+          "type": "string",
+          "description": "Path of the table or view the monitors and tests below are anchored to, either a simple name or a full path. It is part of every check's address here, and a monitor cannot be moved to another asset: editing it replaces every check under this entity."
         },
         "time_partitioning_column": {
           "type": "string"
@@ -269,7 +334,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The monitor's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so every other field can be edited without replacing the monitor. Renaming the id, moving the monitor to another entity or changing its type replaces it, discarding the learned baseline, the check entity and its issue history. Without an id the monitor is identified by its content, and editing a field of that content replaces it."
             },
             "type": {
               "const": "category_distribution"
@@ -333,7 +399,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The monitor's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so every other field can be edited without replacing the monitor. Renaming the id, moving the monitor to another entity or changing its type replaces it, discarding the learned baseline, the check entity and its issue history. Without an id the monitor is identified by its content, and editing a field of that content replaces it."
             },
             "type": {
               "const": "custom_numeric"
@@ -393,7 +460,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The monitor's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so every other field can be edited without replacing the monitor. Renaming the id, moving the monitor to another entity or changing its type replaces it, discarding the learned baseline, the check entity and its issue history. Without an id the monitor is identified by its content, and editing a field of that content replaces it."
             },
             "type": {
               "const": "custom_table_stats"
@@ -461,7 +529,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The monitor's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so every other field can be edited without replacing the monitor. Renaming the id, moving the monitor to another entity or changing its type replaces it, discarding the learned baseline, the check entity and its issue history. Without an id the monitor is identified by its content, and editing a field of that content replaces it."
             },
             "type": {
               "const": "field_stats"
@@ -525,7 +594,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The monitor's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so every other field can be edited without replacing the monitor. Renaming the id, moving the monitor to another entity or changing its type replaces it, discarding the learned baseline, the check entity and its issue history. Without an id the monitor is identified by its content, and editing a field of that content replaces it."
             },
             "type": {
               "const": "freshness"
@@ -585,7 +655,9 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of an existing table stats rule on this asset, adopted as-is. Written by export; a redeploy then updates that rule instead of creating a second one. A non-UUID is rejected — a static rule is addressed by its asset path, so there is nothing for a slug to name."
             },
             "type": {
               "const": "table_stats"
@@ -631,7 +703,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The monitor's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so every other field can be edited without replacing the monitor. Renaming the id, moving the monitor to another entity or changing its type replaces it, discarding the learned baseline, the check entity and its issue history. Without an id the monitor is identified by its content, and editing a field of that content replaces it."
             },
             "type": {
               "const": "volume"
@@ -885,7 +958,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "accepted_values"
@@ -944,7 +1018,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "business_query"
@@ -999,7 +1074,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "business_rule"
@@ -1054,7 +1130,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "empty"
@@ -1113,7 +1190,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "freshness"
@@ -1170,7 +1248,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "max_value"
@@ -1232,7 +1311,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "min_max"
@@ -1298,7 +1378,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "min_value"
@@ -1360,7 +1441,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "not_null"
@@ -1419,7 +1501,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "rejected_values"
@@ -1478,7 +1561,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "relationships"
@@ -1545,7 +1629,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "relative_time"
@@ -1604,7 +1689,8 @@
         {
           "properties": {
             "id": {
-              "type": "string"
+              "type": "string",
+              "description": "The test's address within its entity and namespace. A UUID is adopted as-is; any other string is a slug the id is derived from, so the columns, the SQL and the evaluators can be edited without replacing the test. Renaming the id, moving the test to another entity or changing its type replaces it, and the check entity, its issues and its error runs are discarded. Without an id the test is identified by its content, and editing a column or the SQL replaces it."
             },
             "type": {
               "const": "unique"
@@ -1904,12 +1990,11 @@
           "items": {
             "$ref": "#/$defs/Entity"
           },
-          "type": "array",
-          "minItems": 1
+          "type": "array"
         },
         "deployment_rules": {
           "items": {
-            "$ref": "#/$defs/DeploymentRule"
+            "$ref": "#/$defs/DeploymentRuleEntry"
           },
           "type": "array"
         },
@@ -1923,7 +2008,6 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "entities",
         "version"
       ]
     }
