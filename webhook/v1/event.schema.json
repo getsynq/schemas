@@ -282,7 +282,7 @@
     "synq.entities.v1.Identifier": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "additionalProperties": true,
-      "description": "Identifier is a unique reference to an entity in Coalesce Quality system. Entity identifiers\n are designed to closely mimic identifiers used by data platforms and tools. To construct\n an identifier, you need to know the kind of the entity and the ids that you would normally\n use to identify it in the data platform or tool. For example, to identify a table in BigQuery,\n you would need to know the project, dataset, and table names.",
+      "description": "Every identifier the API RETURNS also carries `entity_id`, the entity's opaque\n id. Read it when you just need to name the entity again \u2014 it is one string for\n every platform, where the structured variants below only cover the platforms\n that have one.",
       "properties": {
         "airflow_dag": {
           "$ref": "#/$defs/synq.entities.v1.AirflowDagIdentifier",
@@ -323,6 +323,13 @@
         "dbt_core_node": {
           "$ref": "#/$defs/synq.entities.v1.DbtCoreNodeIdentifier",
           "description": "Dbt node that identifies one of dbt DAG nodes (model, test, etc) in dbt Core project"
+        },
+        "entity_id": {
+          "default": "",
+          "description": "OUTPUT ONLY. On a request this field is ignored \u2014 the structured variant is\n what resolves. That is what lets you hand an identifier straight back\n unchanged, or edit its structured fields, without the two disagreeing about\n which entity you meant. To name an entity BY opaque id on a request, set the\n `synq_path` variant to that id: it carries exactly this string, and it is\n also how an entity whose platform has no structured variant is named.",
+          "maxLength": 1024,
+          "title": "Opaque id of the entity, set on every identifier the API returns. Round-trip\n it verbatim; the format is not part of this contract and may change, and it\n is never constructed by hand.",
+          "type": "string"
         },
         "fabric_table": {
           "$ref": "#/$defs/synq.entities.v1.FabricTableIdentifier",
@@ -377,7 +384,7 @@
           "description": "Trino table identifier"
         }
       },
-      "title": "Identifier",
+      "title": "Identifier is a unique reference to an entity in Coalesce Quality system. Entity identifiers\n are designed to closely mimic identifiers used by data platforms and tools. To construct\n an identifier, you need to know the kind of the entity and the ids that you would normally\n use to identify it in the data platform or tool. For example, to identify a table in BigQuery,\n you would need to know the project, dataset, and table names.",
       "type": "object"
     },
     "synq.entities.v1.MonitorIdentifier": {
