@@ -371,6 +371,9 @@
         },
         "fabric": {
           "$ref": "#/$defs/FabricConf"
+        },
+        "db2": {
+          "$ref": "#/$defs/Db2Conf"
         }
       },
       "additionalProperties": false,
@@ -452,7 +455,7 @@
         },
         "offset": {
           "type": "string",
-          "description": "Time offset applied after truncation. Negative durations create a safety buffer (e.g., '-30m')."
+          "description": "Time offset applied after truncation. Negative durations create a safety buffer (e.g., '-30m', '-900s'). A whole number followed by s, m, h, d or w, or a Go duration such as '1h30m'."
         },
         "apply": {
           "$ref": "#/$defs/CutoffApply",
@@ -579,6 +582,80 @@
       ],
       "description": "Dataset defines a data source for reconciliation."
     },
+    "Db2Conf": {
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "description": "Host name or IP address of the Db2 server (HOSTNAME).",
+          "examples": [
+            "db2.example.com"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1,
+          "description": "TCP/IP port of the instance (PORT): the SVCENAME database manager\nconfiguration parameter, or SSL_SVCENAME when security is SSL. Optional,\ndefaults to 50000, or 50001 with SSL."
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name or alias (DATABASE), as in CONNECT TO \u003cdatabase\u003e.",
+          "examples": [
+            "SAMPLE"
+          ]
+        },
+        "user": {
+          "type": "string",
+          "description": "Authorization ID to connect with (UID). Db2 checks it against the\nserver's operating system, or LDAP when an LDAP plugin is configured.",
+          "examples": [
+            "db2inst1"
+          ]
+        },
+        "password": {
+          "type": "string",
+          "description": "Password of the authorization ID (PWD). Supply it through an environment\nvariable (e.g. ${DB2_PASSWORD}) rather than committing it in plain text.",
+          "examples": [
+            "${DB2_PASSWORD}"
+          ]
+        },
+        "security": {
+          "type": "string",
+          "enum": [
+            "SSL",
+            "ssl"
+          ],
+          "description": "Set to SSL to connect over SSL/TLS (SECURITY=SSL). Leave it out for a\nplain TCP/IP connection."
+        },
+        "ssl_server_certificate_file": {
+          "type": "string",
+          "description": "Path to the server's certificate, or the certificate of the CA that\nsigned it, in PEM format (SSLServerCertificate), such as the .arm file\nextracted from the instance's keystore with gsk8capicmd_64. Needs\nsecurity set to SSL. Leave it and ssl_server_certificate_pem out to check\nthe server against the system trust store.",
+          "examples": [
+            "/opt/certs/db2server.arm"
+          ]
+        },
+        "ssl_server_certificate_pem": {
+          "type": "string",
+          "description": "Content of the same certificate, starting with\n-----BEGIN CERTIFICATE-----, for when you can't point to a file. Needs\nsecurity set to SSL."
+        },
+        "authentication": {
+          "type": "string",
+          "enum": [
+            "SERVER",
+            "SERVER_ENCRYPT"
+          ],
+          "description": "How the authorization ID and password travel to the server\n(AUTHENTICATION). SERVER (default) sends them unencrypted, so use it with\nSSL on an untrusted network. SERVER_ENCRYPT encrypts them and needs the\ninstance's AUTHENTICATION to accept encrypted credentials."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "hostname",
+        "database",
+        "user",
+        "password"
+      ],
+      "description": "Db2Conf contains the connection settings for IBM Db2 for Linux, UNIX and Windows (Db2 LUW)."
+    },
     "DuckDBConf": {
       "properties": {
         "database": {
@@ -602,13 +679,13 @@
       "properties": {
         "query_timeout": {
           "type": "string",
-          "description": "Per-query timeout as a Go duration string (e.g., '30s', '5m')."
+          "description": "Per-query timeout as a Go duration string (e.g., '30s', '5m'). A query that runs past it fails with a timeout and is not retried. Covers setup and teardown statements too; to bound the whole reconciliation, use its timeout."
         },
         "max_retries": {
           "type": "integer",
           "maximum": 10,
           "minimum": 0,
-          "description": "Maximum retry attempts for transient query failures."
+          "description": "Maximum retry attempts for transient query failures. Setup and teardown statements are never retried."
         },
         "retry_initial_delay": {
           "type": "string",
@@ -623,6 +700,27 @@
       "additionalProperties": false,
       "type": "object",
       "description": "ErrorHandlingConfig controls retry behavior for query failures."
+    },
+    "ExecutionConfig": {
+      "properties": {
+        "timeout": {
+          "type": "string",
+          "description": "Maximum wall-clock time for a single run of the suite (e.g. \"30m\", \"1h\"). Overridden by --timeout on local runs, and by a deployment's or a trigger's execution timeout on server-side runs, which clamp it to a supported range."
+        },
+        "concurrency": {
+          "type": "integer",
+          "maximum": 64,
+          "minimum": 1,
+          "description": "Maximum number of reconciliations run in parallel. 1 runs them one after another. Multiplies the query load on both warehouses. Overridden by --concurrency on local runs; server-side runs clamp it to a supported maximum."
+        },
+        "reconciliation_timeout": {
+          "type": "string",
+          "description": "Maximum wall-clock time for each reconciliation of the suite (e.g. \"5m\"): its setup, quick check and any drill. A reconciliation that runs past it is recorded as failed with a timeout error and the run moves on to the next one, so one slow query cannot use up the whole run. It never extends the run's timeout. A reconciliation's own timeout takes precedence."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "ExecutionConfig holds the suite's execution settings."
     },
     "FabricConf": {
       "properties": {
@@ -1020,6 +1118,10 @@
         "window": {
           "$ref": "#/$defs/WindowConfig"
         },
+        "timeout": {
+          "type": "string",
+          "description": "Maximum wall-clock time for this reconciliation (e.g. \"5m\"): its setup, quick check and any drill. Overrides the suite's execution.reconciliation_timeout. It never extends the run's timeout; for a bound on each query, use error_handling.query_timeout."
+        },
         "cutoff": {
           "$ref": "#/$defs/CutoffConfig",
           "description": "Dynamic cutoff filter. Derives a watermark value from actual data to exclude rows not yet synced."
@@ -1413,7 +1515,7 @@
         },
         "lookback": {
           "type": "string",
-          "description": "How far back to look from the current time (e.g., '14d', '2h')."
+          "description": "How far back to look from the current time (e.g., '14d', '2h', '90s'). A whole number followed by s, m, h, d or w, or a Go duration such as '1h30m'."
         },
         "strategy": {
           "$ref": "#/$defs/WindowStrategy",
@@ -1519,6 +1621,10 @@
     "annotations": {
       "$ref": "#/$defs/Annotations",
       "description": "Suite-level annotations."
+    },
+    "execution": {
+      "$ref": "#/$defs/ExecutionConfig",
+      "description": "How runs of this suite execute: the run's wall-clock budget, each reconciliation's, and how many reconciliations run in parallel."
     }
   },
   "additionalProperties": false,
