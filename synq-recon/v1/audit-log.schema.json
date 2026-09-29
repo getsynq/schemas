@@ -31,7 +31,7 @@
           "items": {
             "type": "string"
           },
-          "title": "Columns defining the drill-down hierarchy for aggregate comparison.\n Falls back to key_column if not set.",
+          "title": "Columns defining the drill-down hierarchy for aggregate comparison.\n Falls back to the key columns if not set. With no key columns either, the\n whole dataset is compared as a single group, with no GROUP BY.",
           "type": "array"
         },
         "measures": {
@@ -1422,11 +1422,11 @@
               "type": "string"
             }
           ],
-          "description": "Maximum retry attempts for transient query failures.\n The total number of attempts is max_retries + 1 (initial + retries).\n Default: 2."
+          "description": "Maximum retry attempts for transient query failures. Setup and teardown\n statements are never retried, since they need not be safe to run twice.\n The total number of attempts is max_retries + 1 (initial + retries).\n Default: 2."
         },
         "query_timeout": {
           "$ref": "#/$defs/google.protobuf.Duration",
-          "description": "Per-query timeout. When a query exceeds this duration, it is cancelled.\n Default: no per-query limit (only the global run timeout applies)."
+          "description": "Per-query timeout. When a query exceeds this duration, it is cancelled\n and fails with a timeout error. It is not retried, since a query that took\n this long will usually take it again. Covers setup and teardown statements\n too. To bound the whole reconciliation rather than each query, use its\n timeout or the suite's execution.reconciliation_timeout.\n Default: no per-query limit."
         },
         "retry_backoff_factor": {
           "anyOf": [
@@ -1452,6 +1452,39 @@
         }
       },
       "title": "Error Handling Config",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.ExecutionConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "ExecutionConfig holds the suite's execution settings. Every field is\n optional, and an absent field leaves the runner's default in place.",
+      "properties": {
+        "concurrency": {
+          "anyOf": [
+            {
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "pattern": "^-?[0-9]+$",
+              "type": "string"
+            }
+          ],
+          "description": "Maximum number of reconciliations run in parallel. 1 (the default) runs\n them one after another. Each parallel reconciliation issues its own\n queries, so this multiplies the load on the source and target\n warehouses. Server-side runs clamp the value to a supported maximum."
+        },
+        "reconciliation_timeout": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "A reconciliation's own timeout takes precedence. Unset means only the\n run's timeout bounds a reconciliation.",
+          "title": "Maximum wall-clock time for a single reconciliation of the suite: its\n setup, quick check and any drill. A reconciliation that exceeds it is\n stopped and recorded as failed with a timeout error, and the run moves on\n to the next one, so one slow query cannot use up the whole run's timeout.\n It never extends the run: whichever of the two runs out first applies."
+        },
+        "timeout": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Precedence, most specific first: the per-run override, the deployment's\n execution_timeout, this field, the runner default.",
+          "title": "Maximum wall-clock time for a single run of the suite (the quick check\n plus any bisection drill). A run that exceeds it is cancelled and the\n reconciliations still running are reported as failed. Server-side runs\n clamp the value to a supported range."
+        }
+      },
+      "title": "Execution Config",
       "type": "object"
     },
     "synq.agent.recon.v1.InvestigationQuery": {
@@ -2279,6 +2312,10 @@
             }
           ],
           "default": 0
+        },
+        "threshold_evaluation": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ThresholdEvaluation",
+          "description": "Threshold evaluation of the row count difference, keyed by the measure\n \"COUNT(*)\". Set only in ROW_COUNT mode with row_count.thresholds\n configured. A difference that is not exceeded is within tolerance."
         }
       },
       "title": "Quick Check Stage Result",
@@ -2356,7 +2393,7 @@
           "type": "string"
         },
         "key_columns": {
-          "description": "Ordered list of key columns used for ordering and segmentation during\n bisection. Supports composite (multi-column) keys; the bisection orders and\n range-filters on the column tuple so the engine can prune via a matching\n primary key / index. A single-element list is equivalent to setting\n key_column. Required for ROW_CHECKSUM and ROW_COUNT modes (this or the\n deprecated key_column). Optional in AGGREGATE mode when group_columns\n provides the grouping key.",
+          "description": "Ordered list of key columns used for ordering and segmentation during\n bisection. Supports composite (multi-column) keys; the bisection orders and\n range-filters on the column tuple so the engine can prune via a matching\n primary key / index. A single-element list is equivalent to setting\n key_column. Required for ROW_CHECKSUM and ROW_COUNT modes (this or the\n deprecated key_column). Optional in AGGREGATE mode, where it only stands in\n for group_columns when those are unset.",
           "items": {
             "type": "string"
           },
@@ -2392,6 +2429,10 @@
           "$ref": "#/$defs/synq.agent.recon.v1.ReportingConfig",
           "description": "Reporting output configuration controlling how much detail is included\n in the audit log for mismatched rows."
         },
+        "row_count": {
+          "$ref": "#/$defs/synq.agent.recon.v1.RowCountConfig",
+          "description": "Row count comparison settings. Only used when mode is ROW_COUNT.\n Sets the tolerance a difference in row counts may stay within."
+        },
         "setup": {
           "description": "Setup queries run before this specific reconciliation.\n Executes after suite-level setup but before data comparison.",
           "items": {
@@ -2417,6 +2458,10 @@
         "teardown_on_failure": {
           "description": "Whether teardown runs on failure for this reconciliation.\n When not set, inherits from suite-level teardown_on_failure.",
           "type": "boolean"
+        },
+        "timeout": {
+          "$ref": "#/$defs/google.protobuf.Duration",
+          "description": "Maximum wall-clock time for this reconciliation: its setup, quick check\n and any drill. Overrides the suite's execution.reconciliation_timeout.\n A reconciliation that exceeds it is recorded as failed with a timeout\n error and the run moves on to the next one. It never extends the run's\n own timeout. For a bound on each individual query, use\n error_handling.query_timeout."
         },
         "title": {
           "description": "Human-readable title. Displayed in reports. Defaults to name when not set.",
@@ -2550,6 +2595,10 @@
           "description": "Optional longer description of the suite's purpose.",
           "type": "string"
         },
+        "execution": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ExecutionConfig",
+          "description": "How runs of this suite execute: the wall-clock budget of a run and how\n many reconciliations run at the same time. Read by every run of the\n suite, local or server-side; a run-level override (a CLI flag, the\n execution_timeout on a trigger or on a deployment) takes precedence."
+        },
         "ignore_setup_errors": {
           "default": false,
           "description": "When true, logs setup query errors as warnings and continues execution\n instead of aborting the run. Useful when setup creates IF NOT EXISTS objects.",
@@ -2665,6 +2714,19 @@
         }
       },
       "title": "Reporting Config",
+      "type": "object"
+    },
+    "synq.agent.recon.v1.RowCountConfig": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": true,
+      "description": "RowCountConfig defines row count comparison settings.\n Used when mode is ROW_COUNT.",
+      "properties": {
+        "thresholds": {
+          "$ref": "#/$defs/synq.agent.recon.v1.ThresholdConfig",
+          "description": "Tolerance for the difference between the source and target row counts.\n A difference within it reports MISMATCHED_WITHIN_THRESHOLD instead of\n MISMATCHED, and no drill runs for it. Same semantics as aggregate\n thresholds, applied to COUNT(*): a difference is accepted when it is within\n absolute or within percentage, computed against percentage_basis.\n When not set, the counts must be equal."
+        }
+      },
+      "title": "Row Count Config",
       "type": "object"
     },
     "synq.agent.recon.v1.RowMismatchAudit": {
@@ -3198,7 +3260,7 @@
           "title": "Percentage Basis"
         }
       },
-      "title": "ThresholdConfig defines tolerance thresholds for aggregate comparisons.\n A difference is reported as a mismatch only when it exceeds ALL configured\n thresholds (AND logic: both absolute AND percentage must be exceeded).",
+      "title": "ThresholdConfig defines tolerance thresholds for aggregate and row count comparisons.\n A difference is reported as a mismatch only when it exceeds ALL configured\n thresholds (AND logic: both absolute AND percentage must be exceeded).",
       "type": "object"
     },
     "synq.agent.recon.v1.ThresholdEvaluation": {
@@ -3320,14 +3382,15 @@
           "type": "string"
         },
         "values": {
-          "description": "Optional list of values that the annotation can carry.",
+          "description": "A value is something entities are filtered and searched by, not free-form\n metadata, so keep it to a label a person would pick out of a list. The limit\n is set to hold an identifier or a link the annotated system generated \u2014\n truncating one of those produces a value that no longer resolves, and no\n longer matches the filter it exists for. Put prose in the entity\n description instead.",
           "items": {
-            "maxLength": 50,
+            "maxLength": 100,
             "minLength": 1,
             "type": "string"
           },
           "maxItems": 20,
           "minItems": 0,
+          "title": "Optional list of values that the annotation can carry.",
           "type": "array"
         }
       },
