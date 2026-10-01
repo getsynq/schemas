@@ -371,6 +371,9 @@
         },
         "fabric": {
           "$ref": "#/$defs/FabricConf"
+        },
+        "db2": {
+          "$ref": "#/$defs/Db2Conf"
         }
       },
       "additionalProperties": false,
@@ -451,8 +454,8 @@
           "description": "Truncate the combined watermark to a time boundary before applying."
         },
         "offset": {
-          "type": "string",
-          "description": "Time offset applied after truncation. Negative durations create a safety buffer (e.g., '-30m')."
+          "$ref": "#/$defs/Duration",
+          "description": "Time offset applied after truncation. Negative durations create a safety buffer (e.g., '-30m', '-PT30M', '-30 minutes', {count: -30, period: minute})."
         },
         "apply": {
           "$ref": "#/$defs/CutoffApply",
@@ -579,6 +582,80 @@
       ],
       "description": "Dataset defines a data source for reconciliation."
     },
+    "Db2Conf": {
+      "properties": {
+        "hostname": {
+          "type": "string",
+          "description": "Host name or IP address of the Db2 server (HOSTNAME).",
+          "examples": [
+            "db2.example.com"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "maximum": 65535,
+          "minimum": 1,
+          "description": "TCP/IP port of the instance (PORT): the SVCENAME database manager\nconfiguration parameter, or SSL_SVCENAME when security is SSL. Optional,\ndefaults to 50000, or 50001 with SSL."
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name or alias (DATABASE), as in CONNECT TO \u003cdatabase\u003e.",
+          "examples": [
+            "SAMPLE"
+          ]
+        },
+        "user": {
+          "type": "string",
+          "description": "Authorization ID to connect with (UID). Db2 checks it against the\nserver's operating system, or LDAP when an LDAP plugin is configured.",
+          "examples": [
+            "db2inst1"
+          ]
+        },
+        "password": {
+          "type": "string",
+          "description": "Password of the authorization ID (PWD). Supply it through an environment\nvariable (e.g. ${DB2_PASSWORD}) rather than committing it in plain text.",
+          "examples": [
+            "${DB2_PASSWORD}"
+          ]
+        },
+        "security": {
+          "type": "string",
+          "enum": [
+            "SSL",
+            "ssl"
+          ],
+          "description": "Set to SSL to connect over SSL/TLS (SECURITY=SSL). Leave it out for a\nplain TCP/IP connection."
+        },
+        "ssl_server_certificate_file": {
+          "type": "string",
+          "description": "Path to the server's certificate, or the certificate of the CA that\nsigned it, in PEM format (SSLServerCertificate), such as the .arm file\nextracted from the instance's keystore with gsk8capicmd_64. Needs\nsecurity set to SSL. Leave it and ssl_server_certificate_pem out to check\nthe server against the system trust store.",
+          "examples": [
+            "/opt/certs/db2server.arm"
+          ]
+        },
+        "ssl_server_certificate_pem": {
+          "type": "string",
+          "description": "Content of the same certificate, starting with\n-----BEGIN CERTIFICATE-----, for when you can't point to a file. Needs\nsecurity set to SSL."
+        },
+        "authentication": {
+          "type": "string",
+          "enum": [
+            "SERVER",
+            "SERVER_ENCRYPT"
+          ],
+          "description": "How the authorization ID and password travel to the server\n(AUTHENTICATION). SERVER (default) sends them unencrypted, so use it with\nSSL on an untrusted network. SERVER_ENCRYPT encrypts them and needs the\ninstance's AUTHENTICATION to accept encrypted credentials."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "hostname",
+        "database",
+        "user",
+        "password"
+      ],
+      "description": "Db2Conf contains the connection settings for IBM Db2 for Linux, UNIX and Windows (Db2 LUW)."
+    },
     "DuckDBConf": {
       "properties": {
         "database": {
@@ -598,20 +675,77 @@
       "type": "object",
       "description": "DuckDBConf contains DuckDB / MotherDuck connection parameters."
     },
+    "Duration": {
+      "oneOf": [
+        {
+          "type": "string",
+          "title": "Text",
+          "description": "14d, -30m, 1h30m, P14D, PT6H, -PT30M, 14 days, 1 hour 30 minutes.",
+          "examples": [
+            "14d",
+            "-30m",
+            "1h30m",
+            "P14D",
+            "PT6H",
+            "-PT30M",
+            "14 days",
+            "1 hour 30 minutes"
+          ]
+        },
+        {
+          "properties": {
+            "count": {
+              "type": "integer",
+              "description": "How many periods. Negative for an offset back in time."
+            },
+            "period": {
+              "type": "string",
+              "enum": [
+                "second",
+                "minute",
+                "hour",
+                "day",
+                "week"
+              ],
+              "description": "The unit, as dbt spells a source's warn_after period. The canonical singular is listed; the loader also takes plurals and any casing."
+            }
+          },
+          "additionalProperties": false,
+          "type": "object",
+          "required": [
+            "count",
+            "period"
+          ],
+          "title": "dbt {count, period}",
+          "description": "dbt's duration shape, as in a source's warn_after.",
+          "examples": [
+            {
+              "count": 14,
+              "period": "day"
+            },
+            {
+              "count": -30,
+              "period": "minute"
+            }
+          ]
+        }
+      ],
+      "description": "A length of time. Text in any of: a whole number and a unit letter s, m, h, d or w (14d, -30m, 90s, 2w); a Go duration (1h30m, 250ms); ISO 8601 with weeks, days, hours, minutes and seconds (P14D, PT6H, P1DT12H, -PT30M — years and months are refused, they are not a fixed length); or words (14 days, -2 hours, 1 hour 30 minutes). Or dbt's mapping {count: 14, period: day}. A leading - makes it negative."
+    },
     "ErrorHandlingConfig": {
       "properties": {
         "query_timeout": {
-          "type": "string",
-          "description": "Per-query timeout as a Go duration string (e.g., '30s', '5m')."
+          "$ref": "#/$defs/Duration",
+          "description": "Per-query timeout (e.g., '30s', '5m'). A query that runs past it fails with a timeout and is not retried. Covers setup and teardown statements too; to bound the whole reconciliation, use its timeout."
         },
         "max_retries": {
           "type": "integer",
           "maximum": 10,
           "minimum": 0,
-          "description": "Maximum retry attempts for transient query failures."
+          "description": "Maximum retry attempts for transient query failures. Setup and teardown statements are never retried."
         },
         "retry_initial_delay": {
-          "type": "string",
+          "$ref": "#/$defs/Duration",
           "description": "Initial backoff delay before the first retry."
         },
         "retry_backoff_factor": {
@@ -623,6 +757,27 @@
       "additionalProperties": false,
       "type": "object",
       "description": "ErrorHandlingConfig controls retry behavior for query failures."
+    },
+    "ExecutionConfig": {
+      "properties": {
+        "timeout": {
+          "$ref": "#/$defs/Duration",
+          "description": "Maximum wall-clock time for a single run of the suite (e.g. \"30m\", \"1h\"). Overridden by --timeout on local runs, and by a deployment's or a trigger's execution timeout on server-side runs, which clamp it to a supported range."
+        },
+        "concurrency": {
+          "type": "integer",
+          "maximum": 64,
+          "minimum": 1,
+          "description": "Maximum number of reconciliations run in parallel. 1 runs them one after another. Multiplies the query load on both warehouses. Overridden by --concurrency on local runs; server-side runs clamp it to a supported maximum."
+        },
+        "reconciliation_timeout": {
+          "$ref": "#/$defs/Duration",
+          "description": "Maximum wall-clock time for each reconciliation of the suite (e.g. \"5m\"): its setup, quick check and any drill. A reconciliation that runs past it is recorded as failed with a timeout error and the run moves on to the next one, so one slow query cannot use up the whole run. It never extends the run's timeout. A reconciliation's own timeout takes precedence."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "ExecutionConfig holds the suite's execution settings."
     },
     "FabricConf": {
       "properties": {
@@ -753,6 +908,10 @@
         "application_client_id": {
           "type": "string",
           "description": "Azure AD application client ID for service principal auth."
+        },
+        "integrated_auth": {
+          "type": "boolean",
+          "description": "Sign in as the user running the agent or CLI instead of a SQL Server login,\nthe same as `sqlcmd -E` (Windows Authentication). On Windows this uses the\nlogged-in user (SSPI); on macOS and Linux the Kerberos ticket from `kinit`,\nread from the file cache named by KRB5CCNAME or /tmp/krb5cc_\u003cuid\u003e. Leave\nusername, password, access_token and fed_auth empty."
         }
       },
       "additionalProperties": false,
@@ -767,7 +926,8 @@
       "properties": {
         "column": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Column to aggregate, or \"*\" with COUNT to count each group's rows. No\nother function takes \"*\"."
         },
         "function": {
           "$ref": "#/$defs/MeasureFunction"
@@ -1014,11 +1174,19 @@
         "aggregate": {
           "$ref": "#/$defs/AggregateConfig"
         },
+        "row_count": {
+          "$ref": "#/$defs/RowCountConfig",
+          "description": "Row count comparison settings. Only used when mode is row_count."
+        },
         "error_handling": {
           "$ref": "#/$defs/ErrorHandlingConfig"
         },
         "window": {
           "$ref": "#/$defs/WindowConfig"
+        },
+        "timeout": {
+          "$ref": "#/$defs/Duration",
+          "description": "Maximum wall-clock time for this reconciliation (e.g. \"5m\"): its setup, quick check and any drill. Overrides the suite's execution.reconciliation_timeout. It never extends the run's timeout; for a bound on each query, use error_handling.query_timeout."
         },
         "cutoff": {
           "$ref": "#/$defs/CutoffConfig",
@@ -1130,6 +1298,38 @@
       "additionalProperties": false,
       "type": "object",
       "description": "ReportingConfig controls what level of detail is reported."
+    },
+    "RowCountConfig": {
+      "properties": {
+        "thresholds": {
+          "$ref": "#/$defs/RowCountThresholdConfig",
+          "description": "Tolerance for the difference between the source and target row counts. A difference within it reports mismatched within threshold instead of mismatched, and no drill runs. When not set, the counts must be equal."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RowCountConfig defines row count comparison settings."
+    },
+    "RowCountThresholdConfig": {
+      "properties": {
+        "absolute": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum absolute difference in rows."
+        },
+        "percentage": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum percentage difference (0.001 = 0.1%)."
+        },
+        "percentage_mode": {
+          "$ref": "#/$defs/PercentageBasis",
+          "description": "Percentage formula: source, target, or symmetric."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RowCountThresholdConfig defines tolerance for a row count difference."
     },
     "SYNQConfig": {
       "properties": {
@@ -1409,15 +1609,15 @@
       "properties": {
         "column": {
           "type": "string",
-          "description": "Column being windowed."
+          "description": "Timestamp or date column the window filters each table side on, with no hand-written predicate. A query side, or a table 'where' that already references {{window_start}} or {{window_end}}, is filtered only by what its SQL says."
         },
         "lookback": {
-          "type": "string",
-          "description": "How far back to look from the current time (e.g., '14d', '2h')."
+          "$ref": "#/$defs/Duration",
+          "description": "How far back to look from the run's reference time, and so positive (e.g., '14d', 'P14D', '14 days', {count: 14, period: day}). A zero or negative lookback is ignored."
         },
         "strategy": {
           "$ref": "#/$defs/WindowStrategy",
-          "description": "Windowing strategy: 'sliding' or 'fixed'."
+          "description": "'sliding' (default) ends the window at the run's reference time. 'fixed' ends it at the last period boundary in UTC (midnight for a whole number of days, the hour for whole hours, otherwise the minute), so every run inside one period compares the same rows."
         }
       },
       "additionalProperties": false,
@@ -1425,13 +1625,18 @@
       "required": [
         "lookback"
       ],
-      "description": "WindowConfig defines time-windowed reconciliation settings."
+      "description": "WindowConfig restricts a reconciliation to a recent time range, and defines {{window_start}} and {{window_end}} for its queries."
     },
     "WindowStrategy": {
       "type": "string",
       "enum": [
         "sliding",
         "fixed"
+      ],
+      "description": "sliding (default): the window ends at the run's reference time, so each run compares a moving range. fixed: the window ends at the last period boundary in UTC — midnight for a whole number of days, the hour for whole hours, otherwise the minute — so every run inside one period compares the same rows.",
+      "enumDescriptions": [
+        "Ends at the run's reference time; each run compares a moving range. The default.",
+        "Ends at the last period boundary in UTC; every run inside one period compares the same rows."
       ]
     }
   },
@@ -1519,6 +1724,10 @@
     "annotations": {
       "$ref": "#/$defs/Annotations",
       "description": "Suite-level annotations."
+    },
+    "execution": {
+      "$ref": "#/$defs/ExecutionConfig",
+      "description": "How runs of this suite execute: the run's wall-clock budget, each reconciliation's, and how many reconciliations run in parallel."
     }
   },
   "additionalProperties": false,
