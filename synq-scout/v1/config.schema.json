@@ -90,7 +90,11 @@
             "type": "string"
           },
           "type": "array",
-          "description": "Explicit list of dataset names to scrape. When set, only these datasets are queried\nand project-level bigquery.datasets.list permission is not required."
+          "description": "Explicit list of dataset names to scrape. When set, only these datasets are queried\nand bigquery.datasets.get on the project, which listing the datasets needs, is not required."
+        },
+        "fetch_policy_tags": {
+          "type": "boolean",
+          "description": "Resolve column policy tags to their taxonomy and tag names through the Data Catalog API.\nNeeds the API enabled in the taxonomy's project and datacatalog.taxonomies.get; without it\na policy tag keeps its resource name."
         }
       },
       "additionalProperties": false,
@@ -631,6 +635,10 @@
         "freshness_from_query_logs": {
           "type": "boolean",
           "description": "Estimate table freshness from Redshift query logs instead of metadata."
+        },
+        "use_show_create_table": {
+          "type": "boolean",
+          "description": "Read each table's DDL with SHOW TABLE, one statement per table."
         }
       },
       "additionalProperties": false,
