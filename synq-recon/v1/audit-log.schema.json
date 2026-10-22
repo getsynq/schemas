@@ -1380,10 +1380,24 @@
           "description": "Time-travel timestamp for snapshot queries (e.g., \"2026-02-01 00:00:00\").\n When set, wraps the query with database-specific time-travel syntax:\n   - Snowflake: AT(TIMESTAMP => '<as_of>')\n   - BigQuery: FOR SYSTEM_TIME AS OF TIMESTAMP '<as_of>'\n   - Databricks: TIMESTAMP AS OF '<as_of>'\n Has no effect on databases that don't support time-travel.",
           "type": "string"
         },
+        "columns": {
+          "description": "Columns of the query's result to compare. When set, only these columns\n are read from the query; the rest of its SELECT list is ignored.\n Only with query \u2014 a table takes its columns inside table.\n Mutually exclusive with exclude_columns.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "connection": {
           "description": "Name of the connection to use. Must reference a connection configured\n in the runner's connection map.",
           "minLength": 1,
           "type": "string"
+        },
+        "exclude_columns": {
+          "description": "Columns of the query's result to leave out of the comparison. Every other\n column is read (resolved at runtime from the query's result shape).\n Only with query \u2014 a table takes its exclusions inside table.\n Mutually exclusive with columns.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "query": {
           "description": "Raw SQL query returning the dataset.\n Should be a SELECT or WITH (CTE) statement.\n Supports template variable interpolation via {{variable_name}} syntax.",
