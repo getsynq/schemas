@@ -164,12 +164,23 @@
           "type": "string",
           "description": "Path to the service account key JSON file."
         },
+        "impersonate_service_accounts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Service account emails to impersonate, in order, instead of a key. The host's Application\nDefault Credentials get a token for the first one, each one gets a token for the next, and\nBigQuery sees the last. Each one must grant roles/iam.serviceAccountTokenCreator to the\nidentity before it."
+        },
         "datasets": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "Explicit list of dataset names to scrape. When set, only these datasets are queried\nand project-level bigquery.datasets.list permission is not required."
+          "description": "Explicit list of dataset names to scrape. When set, only these datasets are queried\nand bigquery.datasets.get on the project, which listing the datasets needs, is not required."
+        },
+        "fetch_policy_tags": {
+          "type": "boolean",
+          "description": "Resolve column policy tags to their taxonomy and tag names through the Data Catalog API.\nNeeds the API enabled in the taxonomy's project and datacatalog.taxonomies.get; without it\na policy tag keeps its resource name."
         }
       },
       "additionalProperties": false,
@@ -937,6 +948,45 @@
         "xxhash64"
       ]
     },
+    "LocalConfig": {
+      "properties": {
+        "setup": {
+          "additionalProperties": {
+            "$ref": "#/$defs/NullableStringOrStrings"
+          },
+          "type": "object",
+          "description": "Setup queries for local runs, keyed by connection."
+        },
+        "teardown": {
+          "additionalProperties": {
+            "$ref": "#/$defs/NullableStringOrStrings"
+          },
+          "type": "object",
+          "description": "Teardown queries for local runs, keyed by connection."
+        },
+        "setup_file": {
+          "additionalProperties": {
+            "$ref": "#/$defs/NullableStringOrStrings"
+          },
+          "type": "object",
+          "description": "SQL file(s) to load and run as setup queries in local runs. They run before the setup queries of the same connection."
+        },
+        "teardown_file": {
+          "additionalProperties": {
+            "$ref": "#/$defs/NullableStringOrStrings"
+          },
+          "type": "object",
+          "description": "SQL file(s) to load and run as teardown queries in local runs. They run before the teardown queries of the same connection."
+        },
+        "reporting": {
+          "$ref": "#/$defs/ReportingConfig",
+          "description": "Reporting for local runs, such as level: detailed, which Coalesce Quality refuses."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "LocalConfig holds settings that only local runs (run, run-check, run-drill, check-config, plan) use."
+    },
     "MSSQLConf": {
       "properties": {
         "host": {
@@ -1314,6 +1364,10 @@
         "ignore_setup_errors": {
           "type": "boolean",
           "description": "When true, logs setup errors as warnings. Inherits from suite level when not set."
+        },
+        "local": {
+          "$ref": "#/$defs/LocalConfig",
+          "description": "Settings for runs on the computer that runs synq-recon only. upload-config does not send them."
         }
       },
       "additionalProperties": false,
@@ -1355,6 +1409,10 @@
         "freshness_from_query_logs": {
           "type": "boolean",
           "description": "Estimate table freshness from Redshift query logs instead of metadata."
+        },
+        "use_show_create_table": {
+          "type": "boolean",
+          "description": "Read each table's DDL with SHOW TABLE, one statement per table."
         }
       },
       "additionalProperties": false,
@@ -1540,6 +1598,14 @@
         "account_usage_db": {
           "type": "string",
           "description": "Database containing the ACCOUNT_USAGE schema. Defaults to SNOWFLAKE."
+        },
+        "catalog_from_account_usage": {
+          "type": "boolean",
+          "description": "Read databases, schemas, tables, columns and view definitions from ACCOUNT_USAGE, for a role\nwith only IMPORTED PRIVILEGES on the SNOWFLAKE database. ACCOUNT_USAGE lags behind by up to three hours."
+        },
+        "table_metrics_from_account_usage": {
+          "type": "boolean",
+          "description": "Read row counts, sizes and last change times from ACCOUNT_USAGE. They lag behind by up to three hours."
         },
         "auth_type": {
           "type": "string",
@@ -1835,6 +1901,10 @@
     "comparison": {
       "$ref": "#/$defs/ComparisonConfig",
       "description": "Default comparison settings for every reconciliation. A reconciliation's own comparison settings take precedence."
+    },
+    "local": {
+      "$ref": "#/$defs/LocalConfig",
+      "description": "Settings for runs on the computer that runs synq-recon only. upload-config does not send them."
     }
   },
   "additionalProperties": false,
