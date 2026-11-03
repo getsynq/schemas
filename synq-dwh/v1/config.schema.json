@@ -139,7 +139,8 @@
         "port": {
           "type": "integer",
           "maximum": 65535,
-          "minimum": 1
+          "minimum": 1,
+          "description": "Defaults to 9440, the native TLS port, or to 9000 with allow_insecure."
         },
         "instance_name": {
           "type": "string",
@@ -161,7 +162,7 @@
         },
         "allow_insecure": {
           "type": "boolean",
-          "description": "Disable SSL certificate verification."
+          "description": "Connect in plain text, without TLS."
         },
         "settings": {
           "additionalProperties": {
@@ -643,7 +644,8 @@
         "port": {
           "type": "integer",
           "maximum": 65535,
-          "minimum": 1
+          "minimum": 1,
+          "description": "Defaults to 5439."
         },
         "database": {
           "type": "string"
@@ -667,7 +669,6 @@
       "type": "object",
       "required": [
         "host",
-        "port",
         "database",
         "username",
         "password"
@@ -787,6 +788,14 @@
         "account_usage_db": {
           "type": "string",
           "description": "Database containing the ACCOUNT_USAGE schema. Defaults to SNOWFLAKE."
+        },
+        "catalog_from_account_usage": {
+          "type": "boolean",
+          "description": "Read databases, schemas, tables, columns and view definitions from ACCOUNT_USAGE, for a role\nwith only IMPORTED PRIVILEGES on the SNOWFLAKE database. ACCOUNT_USAGE lags behind by up to three hours."
+        },
+        "table_metrics_from_account_usage": {
+          "type": "boolean",
+          "description": "Read row counts, sizes and last change times from ACCOUNT_USAGE. They lag behind by up to three hours."
         },
         "auth_type": {
           "type": "string",
