@@ -139,7 +139,8 @@
         "port": {
           "type": "integer",
           "maximum": 65535,
-          "minimum": 1
+          "minimum": 1,
+          "description": "Defaults to 9440, the native TLS port, or to 9000 with allow_insecure."
         },
         "instance_name": {
           "type": "string",
@@ -161,7 +162,7 @@
         },
         "allow_insecure": {
           "type": "boolean",
-          "description": "Disable SSL certificate verification."
+          "description": "Connect in plain text, without TLS."
         },
         "settings": {
           "additionalProperties": {
@@ -628,7 +629,8 @@
         "port": {
           "type": "integer",
           "maximum": 65535,
-          "minimum": 1
+          "minimum": 1,
+          "description": "Defaults to 5439."
         },
         "database": {
           "type": "string"
@@ -652,7 +654,6 @@
       "type": "object",
       "required": [
         "host",
-        "port",
         "database",
         "username",
         "password"
