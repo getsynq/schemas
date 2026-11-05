@@ -2792,7 +2792,7 @@
       "description": "ReconciliationSuite is the root configuration for a reconciliation suite.\n It defines template variables and one or more reconciliation scenarios\n that compare data between source and target databases.\n Database connections are configured separately and referenced by name.",
       "properties": {
         "annotations": {
-          "description": "Suite-level annotations. Each annotation is a name with zero or more\n string values. Applied to the deployed suite asset and inherited by every\n reconciliation case under the suite. Merged with per-case annotations and\n deployment-level annotations at promote time \u2014 the final, deduplicated\n list is exposed on PromotedReconSuiteMetadata / PromotedReconCaseMetadata\n and surfaced to the rest of the SYNQ platform via EntityAnnotations.",
+          "description": "Suite-level annotations. Each annotation is a name with zero or more\n string values. Applied to the deployed suite asset and inherited by every\n reconciliation case under the suite. Merged with per-case annotations and\n deployment-level annotations at promote time \u2014 the final, deduplicated\n list is exposed on PromotedReconSuiteMetadata / PromotedReconCaseMetadata\n and surfaced to the rest of the Coalesce Quality platform via EntityAnnotations.",
           "items": {
             "$ref": "#/$defs/synq.entities.v1.Annotation"
           },
