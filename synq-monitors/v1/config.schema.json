@@ -1075,6 +1075,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "select_columns": {
               "items": {
                 "type": "string"
@@ -1135,6 +1139,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "sql_query": {
               "type": "string"
             },
@@ -1191,6 +1199,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "select_columns": {
               "items": {
                 "type": "string"
@@ -1246,6 +1258,10 @@
             },
             "governance_category": {
               "type": "string"
+            },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
             },
             "columns": {
               "items": {
@@ -1307,6 +1323,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "time_partition_column": {
               "type": "string"
             },
@@ -1364,6 +1384,10 @@
             },
             "governance_category": {
               "type": "string"
+            },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
             },
             "select_columns": {
               "items": {
@@ -1427,6 +1451,10 @@
             },
             "governance_category": {
               "type": "string"
+            },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
             },
             "select_columns": {
               "items": {
@@ -1495,6 +1523,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "select_columns": {
               "items": {
                 "type": "string"
@@ -1558,6 +1590,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "columns": {
               "items": {
                 "type": "string",
@@ -1618,6 +1654,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "select_columns": {
               "items": {
                 "type": "string"
@@ -1677,6 +1717,10 @@
             },
             "governance_category": {
               "type": "string"
+            },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
             },
             "time_partition_column": {
               "type": "string"
@@ -1746,6 +1790,10 @@
             "governance_category": {
               "type": "string"
             },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
+            },
             "select_columns": {
               "items": {
                 "type": "string"
@@ -1805,6 +1853,10 @@
             },
             "governance_category": {
               "type": "string"
+            },
+            "lookback": {
+              "type": "string",
+              "description": "How far back the time placeholders {{ last_executed_at }} and {{ last_passed_at }} may reach, for example 6h or 1d. A placeholder with no earlier run starts this far back, and no placeholder starts earlier. Leave it out for one schedule interval on the first run and a limit of seven intervals, at least 7 days."
             },
             "columns": {
               "items": {
